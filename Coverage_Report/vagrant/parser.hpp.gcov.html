@@ -1,0 +1,232 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - Coverage.combined.cleaned - /vagrant/parser.hpp</title>
+  <link rel="stylesheet" type="text/css" href="../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../index.html">top level</a> - <a href="index.html">vagrant</a> - parser.hpp<span style="font-size: 80%;"> (source / <a href="parser.hpp.func-sort-c.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">Coverage.combined.cleaned</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">10</td>
+            <td class="headerCovTableEntry">10</td>
+            <td class="headerCovTableEntryHi">100.0 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2018-04-25 07:19:55</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">14</td>
+            <td class="headerCovTableEntry">14</td>
+            <td class="headerCovTableEntryHi">100.0 %</td>
+          </tr>
+          <tr><td><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : // define the parser module here. This parser is specific for MIPS Assembly Architecture</a>
+<span class="lineNum">       2 </span>            : #ifndef PARSER_HPP
+<span class="lineNum">       3 </span>            : #define PARSER_HPP
+<span class="lineNum">       4 </span>            : 
+<span class="lineNum">       5 </span>            : #include &lt;istream&gt;
+<span class="lineNum">       6 </span>            : #include &lt;iostream&gt;
+<span class="lineNum">       7 </span>            : #include &lt;algorithm&gt;
+<span class="lineNum">       8 </span>            : #include &lt;unordered_map&gt;
+<span class="lineNum">       9 </span>            : #include &lt;bitset&gt;
+<span class="lineNum">      10 </span>            : #include &quot;token.hpp&quot;
+<span class="lineNum">      11 </span>            : #include &quot;lexer.hpp&quot;
+<span class="lineNum">      12 </span>            : 
+<span class="lineNum">      13 </span>            : using namespace std;
+<span class="lineNum">      14 </span>            : 
+<span class="lineNum">      15 </span>            : struct LabelInfo {  
+<span class="lineNum">      16 </span>            :         bool isInstructionIndex; // The &quot;variant type&quot; from the project discription will be either the firstMemAddress of the label or the instructionIndex(the index from the program instructions vector)
+<span class="lineNum">      17 </span>            :         size_t instructionIndexOrFirstMemAddress; // If It is an instruction index then this value represents exactly that. If it is false then this value represents the first memory address for the label
+<span class="lineNum">      18 </span>            : };
+<span class="lineNum">      19 </span>            : 
+<span class="lineNum">      20 </span>            :                                 // EOT = end of tokens
+<span class="lineNum">      21 </span>            : enum inputValue { EOT, EOL_IN, SEP_IN, EQUAL_IN, OPENP_IN, CLOSEP_IN, STRING_DELIM_IN, DECLARATION_MODE_IN,
+<span class="lineNum">      22 </span>            :                                   INT_LAYOUT_IN, STRING_LAYOUT_IN, INTEGER_IN, CHARS_IN, CONSTANT_FIRST_PART_IN, INITALIZED_CONSTANT_IN, LABEL_IN, ERROR_IN,
+<a name="23"><span class="lineNum">      23 </span>            :                                  /*Instruction specfic inputValues*/ TEXT_MODE_IN, NOP_IN, OPCODE_IN, REGISTER_IN};</a>
+<span class="lineNum">      24 </span>            : 
+<span class="lineNum">      25 </span><span class="lineCov">      89698 : struct argument {</span>
+<span class="lineNum">      26 </span>            :         string inString; // This is the string that contains the register, immediate, constant etc.
+<span class="lineNum">      27 </span>            :         inputValue inValue; // Has the type of value. So either INTEGER_IN, CONSTANT, etc.
+<a name="28"><span class="lineNum">      28 </span>            : };</a>
+<span class="lineNum">      29 </span>            : 
+<span class="lineNum">      30 </span><span class="lineCov">      28005 : struct instructionType {</span>
+<span class="lineNum">      31 </span>            :         string opcode;
+<span class="lineNum">      32 </span>            :         vector&lt;argument&gt; instructionArgs;
+<span class="lineNum">      33 </span>            : };
+<span class="lineNum">      34 </span>            : 
+<span class="lineNum">      35 </span>            : class Parser 
+<span class="lineNum">      36 </span>            : {
+<span class="lineNum">      37 </span>            : private:
+<span class="lineNum">      38 </span>            :         //Initial state is the default state and will stay until it hits either a .data or .word 
+<span class="lineNum">      39 </span>            :         enum States{INITIAL_STATE, DECLARATION_MODE_STATE, LABEL_STATE_S0, 
+<span class="lineNum">      40 </span>            :                                  CONSTANT_STATE_S0, CONSTANT_STATE_S1, CONSTANT_STATE_S2, LAYOUT_STATE_INT_S0, LAYOUT_STATE_INT_S1,
+<span class="lineNum">      41 </span>            :                                  SEP_STATE, LAYOUT_STATE_STR_S0, STRING_DELIM_STATE1, STRING_DELIM_STATE2, LAYOUT_STATE_STR_S2,
+<span class="lineNum">      42 </span>            :                                  EOL_STATE, ERROR_STATE, /*Instruction specfic states*/
+<span class="lineNum">      43 </span>            :                                  TEXT_MODE_STATE, text_EOL_STATE, NOP_STATE, OPCODE_STATE, ARG1_STATE, ARG2_REG_STATE, ARG2_IMMEDIATE_STATE,
+<span class="lineNum">      44 </span>            :                                  ARG_SOURCE_STATE, ARG2_MEMREF_STATE, OPENP_STATE, CLOSEP_STATE, OFFSET_STATE} systemState;
+<span class="lineNum">      45 </span>            : 
+<span class="lineNum">      46 </span>            :         TokenList assemblyTokenList; // This is the list of tokens that were generated from the lexer 
+<span class="lineNum">      47 </span>            :         bool correctGrammer; // This is a boolean variable that shows if there was an error parsing the assembly file
+<span class="lineNum">      48 </span>            :         
+<span class="lineNum">      49 </span>            :         unsigned int lineOfError; // keeps track of the current tokens line number to see if there was an error on that tokens line
+<span class="lineNum">      50 </span>            :         string errorMessage; // wherever I get an error I can just add the, it-&gt;line , to my errorMessage variable
+<span class="lineNum">      51 </span>            : 
+<span class="lineNum">      52 </span>            :         string constantName; // This is for saving the name of the constant
+<span class="lineNum">      53 </span>            :         unordered_map&lt;string, string&gt; constantsMap; // This is a map to store the constants and its corresponding integer values as strings
+<span class="lineNum">      54 </span>            :         
+<span class="lineNum">      55 </span>            :         string layoutKey; // This will store the value of either: &quot;.word&quot;, &quot;.half&quot;, &quot;.byte&quot;, &quot;.space&quot;, &quot;.ascii&quot;, or &quot;asciiz&quot;
+<span class="lineNum">      56 </span>            :         string mode; // This variable is to keep track of which mode I am in, more importantly which state machine I am in(.text or .data)
+<span class="lineNum">      57 </span>            :         string opcode; // Saves the opcode name to be used later throughout the program
+<span class="lineNum">      58 </span>            :         vector&lt;argument&gt; opcodeArguments; // This is a vector of opcode arguments and everytime I get a new argument I push that string argument and its inputValue in this vector 
+<span class="lineNum">      59 </span>            : 
+<span class="lineNum">      60 </span>            :         string labelName; // Saves the labels name
+<span class="lineNum">      61 </span>            :         unordered_map&lt;string, LabelInfo&gt; labelsMap; // This is a map which uses the label as the key and stores its value(s). Ex. aye: .byte 1,2,3,4,5 #aye = {1,2,3,4,5}
+<span class="lineNum">      62 </span>            : 
+<span class="lineNum">      63 </span>            :         unordered_map&lt;string, int32_t&gt; registersMap; // This map contains all the available registers that can be used
+<span class="lineNum">      64 </span>            : 
+<span class="lineNum">      65 </span>            :                                                                                                   //Milestone2 specific Uses:
+<span class="lineNum">      66 </span>            :         size_t lastAvailableAddress = 0x00000000; // Used for memory storage. 
+<span class="lineNum">      67 </span>            :         vector&lt;string&gt; memoryLayout; // After the parser is finished this variable will contain the initial memory. The initial memory will contain hex values of the bytes but in string format
+<span class="lineNum">      68 </span>            :         string determineHexValue(size_t integer); // When I send a 4 bit integer(1-15) this function will determine its hex value
+<span class="lineNum">      69 </span>            :         void helpIntMemAllocation(string inputString, const string layoutKey); // Helper function for each case of the integer memory allocation
+<span class="lineNum">      70 </span>            :         void asciiMemAllocation(string inputString); // Does both .ascii and .asciiz memory allocation
+<span class="lineNum">      71 </span>            :         void intLayoutMemAllocation(size_t start, string inputString, const string layoutKey); // Does .word, .half, and .byte memory allocation
+<span class="lineNum">      72 </span>            :         vector&lt;instructionType&gt; programInstructions; // Container for all the .text program instructions
+<span class="lineNum">      73 </span>            :         void incrementVectorOfProgramInstructions(const string opcode, const vector&lt;argument&gt; opcodeArgs);
+<span class="lineNum">      74 </span>            :         
+<span class="lineNum">      75 </span>            : 
+<span class="lineNum">      76 </span>            :                                                                         //** Helper functions **//
+<span class="lineNum">      77 </span>            :         inputValue classify(TokenList::const_iterator it, TokenList::const_iterator end, string&amp; inputString); 
+<span class="lineNum">      78 </span>            :         bool fitsBits(const string layoutKey, const string inputInteger, const inputValue input); // function for bounds checking, if an integer starts with '+' or '-' then it should be treated as a signed type, otherwise it should be treated as unsigned
+<span class="lineNum">      79 </span>            :         void intLayout_IntOrConstantCheck(States&amp; systemState, inputValue input, string inputString);
+<span class="lineNum">      80 </span>            :         void stringTokenDeclarationClassify(string&amp; inputString, char firstChar, char lastChar, inputValue&amp; input);
+<span class="lineNum">      81 </span>            :         void checkandUpdateDataLabelsMap(States&amp; systemState); // This function is purely for checking labels in the .data section
+<span class="lineNum">      82 </span>            :         void checkIfLabel(States&amp; systemState, inputValue&amp; input, string inputString);
+<span class="lineNum">      83 </span>            :         void checkIfConstant(States&amp; systemState, inputValue&amp; input, string inputString);
+<span class="lineNum">      84 </span>            :         void checkIfInteger(States&amp; systemState, inputValue&amp; input, string inputString, char firstChar);
+<span class="lineNum">      85 </span>            :         bool isOpcode(string inputString);
+<span class="lineNum">      86 </span>            :         bool isRegister(string inputString, unordered_map&lt;string, int32_t&gt; registersMap); 
+<span class="lineNum">      87 </span>            :         void initializeRegisters(); // Sets all the possible registers in the variable registersMap, that can be used(based on the table of milestone 1 discription) and value is 0(For now might need to change based on MILESTONE 2)
+<span class="lineNum">      88 </span>            :         void incrementVectorOfOpcodeArguments(const string inputString, const inputValue input);
+<span class="lineNum">      89 </span>            : 
+<span class="lineNum">      90 </span>            : 
+<span class="lineNum">      91 </span>            :                                                                         //** Update systemState functions **//
+<span class="lineNum">      92 </span>            :         void update_mode(States&amp; systemState, inputValue input, TokenList::const_iterator it); 
+<span class="lineNum">      93 </span>            :         void update_declaration(States&amp; systemState, inputValue input); 
+<span class="lineNum">      94 </span>            :         void update_eol(States&amp; systemState, inputValue input); // in addition here if the input=LABEL_IN :I update the &lt;label&gt; and I basically say LABEL_data_STATE = DECLARATION_MODE_STATE
+<span class="lineNum">      95 </span>            :         void update_constant1(States&amp; systemState, inputValue input);
+<span class="lineNum">      96 </span>            :         void update_constant2(States&amp; systemState, inputValue input);
+<span class="lineNum">      97 </span>            :         void update_constant3(States&amp; systemState, inputValue input, string inputString);
+<span class="lineNum">      98 </span>            :         void update_intLayout1(States&amp; systemState, inputValue input, string inputString);
+<span class="lineNum">      99 </span>            :         void update_intLayout2(States&amp; systemState, inputValue input);
+<span class="lineNum">     100 </span>            :         void update_sep(States&amp; systemState, inputValue input, string inputString);
+<span class="lineNum">     101 </span>            :         void update_strLayout1(States&amp; systemState, inputValue input);
+<span class="lineNum">     102 </span>            :         void update_strLayout2(States&amp; systemState, inputValue input);
+<span class="lineNum">     103 </span>            :         void update_strLayout3(States&amp; systemState, inputValue input);
+<span class="lineNum">     104 </span>            :         void update_strLayout4(States&amp; systemState, inputValue input, string inputString);
+<span class="lineNum">     105 </span>            :         
+<span class="lineNum">     106 </span>            :         //***** .text mode specific functions below
+<span class="lineNum">     107 </span>            :         void update_instruction(States&amp; systemState, inputValue input);
+<span class="lineNum">     108 </span>            :         void update_text_label(States&amp; systemState, inputValue input);
+<span class="lineNum">     109 </span>            :         void update_text_eol(States&amp; systemState, inputValue input);
+<span class="lineNum">     110 </span>            :         void update_nop(States&amp; systemState, inputValue input);
+<span class="lineNum">     111 </span>            :         void update_opcode(States&amp; systemState, inputValue input, string inputString);
+<span class="lineNum">     112 </span>            :         void update_arg1(States&amp; systemState, inputValue input);
+<span class="lineNum">     113 </span>            :         void update_arg2Reg(States&amp; systemState, inputValue input);
+<span class="lineNum">     114 </span>            :         void update_arg2Immediate(States&amp; systemState, inputValue input);
+<span class="lineNum">     115 </span>            :         void update_arg2and3Source(States&amp; systemState, inputValue input);
+<span class="lineNum">     116 </span>            :         void update_arg2Memref(States&amp; systemState, inputValue input);
+<span class="lineNum">     117 </span>            :         void update_openP(States&amp; systemState, inputValue input, string inputString);
+<span class="lineNum">     118 </span>            :         void update_closeP(States&amp; systemState, inputValue input);
+<span class="lineNum">     119 </span>            :         void update_offsetOrImmediate(States&amp; systemState, inputValue input);
+<span class="lineNum">     120 </span>            : 
+<span class="lineNum">     121 </span>            : public:
+<span class="lineNum">     122 </span>            :         Parser(const TokenList&amp; tokenList); // constructor that recieves a token list and sets the list equal to the private variable assemblyTokens. note: can not parse without something to parse(tokenList)
+<span class="lineNum">     123 </span>            :         ~Parser(); // Deconstructor
+<span class="lineNum">     124 </span>            : 
+<span class="lineNum">     125 </span>            :         void parseFile(); // A function to return true or false based on if the assembly file has correct grammer. Also within this function store information in a data structure
+<span class="lineNum">     126 </span>            : 
+<span class="lineNum">     127 </span>            :         string errorMsg(); // If there is a parsing error, I will take the line number from the token, and display a specific error message. Use variables lineNumberError and errorMessage
+<span class="lineNum">     128 </span>            : 
+<a name="129"><span class="lineNum">     129 </span>            :         bool successfullyParsed(); // This returns a boolean based on the assembly file parsed</a>
+<span class="lineNum">     130 </span>            : 
+<span class="lineNum">     131 </span><span class="lineCov">        173 :         unordered_map&lt;string, int32_t&gt; getInitialRegisterContents()</span>
+<span class="lineNum">     132 </span>            :         {
+<span class="lineNum">     133 </span><span class="lineCov">        173 :                 return registersMap; // Allows the virtual machine to gain access to the intial contents in each register(will be initialized to 0)</span>
+<a name="134"><span class="lineNum">     134 </span>            :         }</a>
+<span class="lineNum">     135 </span>            : 
+<span class="lineNum">     136 </span><span class="lineCov">        173 :         vector&lt;string&gt; getInitialMemoryLayout()</span>
+<span class="lineNum">     137 </span>            :         {
+<span class="lineNum">     138 </span><span class="lineCov">        173 :                 return memoryLayout; // Allows the virtual machine to gain access to the memory layout created in the .data section and in the VM will allocate more memory until I reach 512 bytes</span>
+<a name="139"><span class="lineNum">     139 </span>            :         }</a>
+<span class="lineNum">     140 </span>            : 
+<span class="lineNum">     141 </span><span class="lineCov">        173 :         vector&lt;instructionType&gt; getProgramInstructions()</span>
+<span class="lineNum">     142 </span>            :         {
+<span class="lineNum">     143 </span><span class="lineCov">        173 :                 return programInstructions; // Allows the virtual machine to gain access to the program instructions that were in the .text section of the file. Simulator program couter will go off this vector</span>
+<a name="144"><span class="lineNum">     144 </span>            :         }</a>
+<span class="lineNum">     145 </span>            : 
+<span class="lineNum">     146 </span><span class="lineCov">        185 :         unordered_map&lt;string, LabelInfo&gt; getLabelsMap() </span>
+<span class="lineNum">     147 </span>            :         {
+<span class="lineNum">     148 </span><span class="lineCov">        185 :                 return labelsMap; // Allows the virtual machine to gain access to the labels map that contains if a label is mapped to a memorylayout(.data) or if it is mapped to an instruction index(.text) from the programInstructions vector</span>
+<span class="lineNum">     149 </span>            :         }
+<span class="lineNum">     150 </span>            : 
+<span class="lineNum">     151 </span>            :         string determineRegister(string inputStringRegister); // Given an input string(register like $t0) will determine what register is being used. Need this Public function because there are aliases for registers as well in the simulator.
+<span class="lineNum">     152 </span>            : 
+<span class="lineNum">     153 </span>            : };
+<span class="lineNum">     154 </span>            : 
+<span class="lineNum">     155 </span>            : #endif // !PARSER_HPP
+<span class="lineNum">     156 </span>            : 
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.12</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

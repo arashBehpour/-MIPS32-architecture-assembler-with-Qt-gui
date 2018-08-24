@@ -1,0 +1,902 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - Coverage.combined.cleaned - /vagrant/virtual_machine_gui.cpp</title>
+  <link rel="stylesheet" type="text/css" href="../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../index.html">top level</a> - <a href="index.html">vagrant</a> - virtual_machine_gui.cpp<span style="font-size: 80%;"> (source / <a href="virtual_machine_gui.cpp.func-sort-c.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">Coverage.combined.cleaned</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">392</td>
+            <td class="headerCovTableEntry">530</td>
+            <td class="headerCovTableEntryLo">74.0 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2018-04-25 07:19:55</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">19</td>
+            <td class="headerCovTableEntry">28</td>
+            <td class="headerCovTableEntryLo">67.9 %</td>
+          </tr>
+          <tr><td><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : #include &quot;virtual_machine_gui.hpp&quot;</a>
+<span class="lineNum">       2 </span>            : 
+<span class="lineNum">       3 </span>            : //**********************************************Implementation of class myQtTableModel : public QAbstractTableModel********************************//
+<span class="lineNum">       4 </span>            : //*************************************************************************************************************************************************//
+<a name="5"><span class="lineNum">       5 </span>            : // IF I HAVE TIME ADD INDEX ACCESS SAFTEY MEASURES!!!!!!!</a>
+<span class="lineNum">       6 </span>            : 
+<span class="lineNum">       7 </span><span class="lineCov">          6 : myQtTableModel::myQtTableModel(string memOrReg)</span>
+<span class="lineNum">       8 </span>            : {
+<span class="lineNum">       9 </span><span class="lineCov">          6 :         memOrRg = memOrReg;</span>
+<span class="lineNum">      10 </span><span class="lineCov">          6 :         if (memOrReg == &quot;regLayout&quot;) {</span>
+<span class="lineNum">      11 </span><span class="lineCov">          6 :                 QVector&lt;QString&gt; column1;</span>
+<span class="lineNum">      12 </span><span class="lineCov">          3 :                 column1.push_back(&quot;&quot;);</span>
+<span class="lineNum">      13 </span><span class="lineCov">          3 :                 column1.push_back(&quot;&quot;);</span>
+<span class="lineNum">      14 </span><span class="lineCov">          3 :                 column1.push_back(&quot;&quot;);</span>
+<span class="lineNum">      15 </span>            : 
+<span class="lineNum">      16 </span><span class="lineCov">         99 :                 for (size_t i = 0; i &lt; 32; i++) {</span>
+<span class="lineNum">      17 </span><span class="lineCov">        192 :                         QString moneySign = QString(&quot;$&quot;); // column for Actual Register numbers</span>
+<span class="lineNum">      18 </span><span class="lineCov">        192 :                         string tempStr = std::to_string(i);</span>
+<span class="lineNum">      19 </span><span class="lineCov">        192 :                         QString temp = QString::fromStdString(tempStr);</span>
+<span class="lineNum">      20 </span><span class="lineCov">         96 :                         column1.push_back(moneySign.append(temp));</span>
+<span class="lineNum">      21 </span>            :                 }
+<span class="lineNum">      22 </span><span class="lineCov">          3 :                 COLumns.push_back(column1);</span>
+<span class="lineNum">      23 </span>            : 
+<span class="lineNum">      24 </span><span class="lineCov">          6 :                 QVector&lt;QString&gt; column2; // column for Aliases</span>
+<span class="lineNum">      25 </span><span class="lineCov">          3 :                 column2.push_back(&quot;$pc&quot;);</span>
+<span class="lineNum">      26 </span><span class="lineCov">          3 :                 column2.push_back(&quot;$hi&quot;);</span>
+<span class="lineNum">      27 </span><span class="lineCov">          3 :                 column2.push_back(&quot;$lo&quot;);</span>
+<span class="lineNum">      28 </span>            : 
+<span class="lineNum">      29 </span><span class="lineCov">          3 :                 column2.push_back(&quot;$zero&quot;);</span>
+<span class="lineNum">      30 </span><span class="lineCov">          3 :                 column2.push_back(&quot;$at&quot;);</span>
+<span class="lineNum">      31 </span><span class="lineCov">          3 :                 column2.push_back(&quot;$v0&quot;);</span>
+<span class="lineNum">      32 </span><span class="lineCov">          3 :                 column2.push_back(&quot;$v1&quot;);</span>
+<span class="lineNum">      33 </span><span class="lineCov">          3 :                 column2.push_back(&quot;$a0&quot;);</span>
+<span class="lineNum">      34 </span><span class="lineCov">          3 :                 column2.push_back(&quot;$a1&quot;);</span>
+<span class="lineNum">      35 </span><span class="lineCov">          3 :                 column2.push_back(&quot;$a2&quot;);</span>
+<span class="lineNum">      36 </span><span class="lineCov">          3 :                 column2.push_back(&quot;$a3&quot;);</span>
+<span class="lineNum">      37 </span>            : 
+<span class="lineNum">      38 </span>            : 
+<span class="lineNum">      39 </span><span class="lineCov">         27 :                 for (size_t i = 0; i &lt; 8; i++) {</span>
+<span class="lineNum">      40 </span><span class="lineCov">         48 :                         QString tSign = QString(&quot;$t&quot;);</span>
+<span class="lineNum">      41 </span><span class="lineCov">         48 :                         string tempStr = std::to_string(i);</span>
+<span class="lineNum">      42 </span><span class="lineCov">         48 :                         QString temp = QString::fromStdString(tempStr);</span>
+<span class="lineNum">      43 </span><span class="lineCov">         24 :                         column2.push_back(tSign.append(temp));</span>
+<span class="lineNum">      44 </span>            :                 }
+<span class="lineNum">      45 </span><span class="lineCov">         27 :                 for (size_t i = 0; i &lt; 8; i++) {</span>
+<span class="lineNum">      46 </span><span class="lineCov">         48 :                         QString sSign = QString(&quot;$s&quot;);</span>
+<span class="lineNum">      47 </span><span class="lineCov">         48 :                         string tempStr = std::to_string(i);</span>
+<span class="lineNum">      48 </span><span class="lineCov">         48 :                         QString temp = QString::fromStdString(tempStr);</span>
+<span class="lineNum">      49 </span><span class="lineCov">         24 :                         column2.push_back(sSign.append(temp));</span>
+<span class="lineNum">      50 </span>            :                 }
+<span class="lineNum">      51 </span><span class="lineCov">          3 :                 column2.push_back(&quot;$t8&quot;);</span>
+<span class="lineNum">      52 </span><span class="lineCov">          3 :                 column2.push_back(&quot;$t9&quot;);</span>
+<span class="lineNum">      53 </span><span class="lineCov">          3 :                 column2.push_back(&quot;$k0&quot;);</span>
+<span class="lineNum">      54 </span><span class="lineCov">          3 :                 column2.push_back(&quot;$k1&quot;);</span>
+<span class="lineNum">      55 </span><span class="lineCov">          3 :                 column2.push_back(&quot;$gp&quot;);</span>
+<span class="lineNum">      56 </span><span class="lineCov">          3 :                 column2.push_back(&quot;$sp&quot;);</span>
+<span class="lineNum">      57 </span><span class="lineCov">          3 :                 column2.push_back(&quot;$fp&quot;);</span>
+<span class="lineNum">      58 </span><span class="lineCov">          3 :                 column2.push_back(&quot;$ra&quot;);</span>
+<span class="lineNum">      59 </span><span class="lineCov">          3 :                 COLumns.push_back(column2);</span>
+<span class="lineNum">      60 </span>            : 
+<span class="lineNum">      61 </span><span class="lineCov">          6 :                 QVector&lt;QString&gt; column3; // column for Register contents</span>
+<span class="lineNum">      62 </span>            : 
+<span class="lineNum">      63 </span><span class="lineCov">        108 :                 for (size_t i = 0; i &lt; 35; i++) {</span>
+<span class="lineNum">      64 </span><span class="lineCov">        105 :                         column3.push_back(QString(&quot;0x00000000&quot;));</span>
+<span class="lineNum">      65 </span>            :                 }
+<span class="lineNum">      66 </span>            : 
+<span class="lineNum">      67 </span><span class="lineCov">          3 :                 COLumns.push_back(column3);</span>
+<span class="lineNum">      68 </span>            : 
+<span class="lineNum">      69 </span>            :         }
+<span class="lineNum">      70 </span><span class="lineCov">          3 :         else if (memOrReg == &quot;memLayout&quot;) {</span>
+<span class="lineNum">      71 </span><span class="lineCov">          6 :                 QVector&lt;QString&gt; column1; // Column</span>
+<span class="lineNum">      72 </span><span class="lineCov">       1539 :                 for (size_t i = 0; i &lt; 512; i++) {</span>
+<span class="lineNum">      73 </span><span class="lineCov">       1536 :                         int temp = (int)i;</span>
+<span class="lineNum">      74 </span><span class="lineCov">       3072 :                         QString initMemAddress = QString(&quot;0x%1&quot;).arg(temp, 8, 16, QLatin1Char('0'));</span>
+<span class="lineNum">      75 </span><span class="lineCov">       1536 :                         column1.push_back(initMemAddress);</span>
+<span class="lineNum">      76 </span>            :                 }
+<span class="lineNum">      77 </span><span class="lineCov">          3 :                 COLumns.push_back(column1);</span>
+<span class="lineNum">      78 </span>            : 
+<span class="lineNum">      79 </span>            : 
+<span class="lineNum">      80 </span><span class="lineCov">          6 :                 QVector&lt;QString&gt; column2;</span>
+<span class="lineNum">      81 </span><span class="lineCov">       1539 :                 for (size_t i = 0; i &lt; 512; i++) {</span>
+<span class="lineNum">      82 </span><span class="lineCov">       1536 :                         column2.push_back(QString(&quot;0x00&quot;));</span>
+<span class="lineNum">      83 </span>            :                 }
+<span class="lineNum">      84 </span><span class="lineCov">          3 :                 COLumns.push_back(column2);</span>
+<span class="lineNum">      85 </span>            :         }
+<span class="lineNum">      86 </span>            :         else {
+<span class="lineNum">      87 </span>            :                 //default empty columns
+<span class="lineNum">      88 </span>            :                 //qDebug() &lt;&lt; &quot;Error: Only set up to create a table model for reg/mem&quot; &lt;&lt; endl;
+<span class="lineNum">      89 </span>            :         }
+<span class="lineNum">      90 </span><span class="lineCov">          6 : }</span>
+<a name="91"><span class="lineNum">      91 </span>            : </a>
+<span class="lineNum">      92 </span>            : 
+<span class="lineNum">      93 </span><span class="lineCov">         24 : myQtTableModel::myQtTableModel(string memOrReg, unordered_map&lt;string, int32_t&gt; regLayout, vector&lt;string&gt; memLayout) //: QAbstractTableModel()</span>
+<span class="lineNum">      94 </span>            : {
+<span class="lineNum">      95 </span><span class="lineCov">         24 :         memOrRg = memOrReg; // Saves if it was a register or memory model table constructed</span>
+<span class="lineNum">      96 </span><span class="lineCov">         24 :         if (memOrReg == &quot;regLayout&quot;) {</span>
+<span class="lineNum">      97 </span><span class="lineCov">         24 :                 QVector&lt;QString&gt; column1;</span>
+<span class="lineNum">      98 </span><span class="lineCov">         12 :                 column1.push_back(&quot;&quot;);</span>
+<span class="lineNum">      99 </span><span class="lineCov">         12 :                 column1.push_back(&quot;&quot;);</span>
+<span class="lineNum">     100 </span><span class="lineCov">         12 :                 column1.push_back(&quot;&quot;);</span>
+<span class="lineNum">     101 </span>            : 
+<span class="lineNum">     102 </span><span class="lineCov">        396 :                 for (size_t i = 0; i &lt; 32; i++) {</span>
+<span class="lineNum">     103 </span><span class="lineCov">        768 :                         QString moneySign = QString(&quot;$&quot;); // column for Actual Register numbers</span>
+<span class="lineNum">     104 </span><span class="lineCov">        768 :                         string tempStr = std::to_string(i);</span>
+<span class="lineNum">     105 </span><span class="lineCov">        768 :                         QString temp = QString::fromStdString(tempStr);</span>
+<span class="lineNum">     106 </span><span class="lineCov">        384 :                         column1.push_back(moneySign.append(temp));</span>
+<span class="lineNum">     107 </span>            :                 }
+<span class="lineNum">     108 </span><span class="lineCov">         12 :                 COLumns.push_back(column1);</span>
+<span class="lineNum">     109 </span>            : 
+<span class="lineNum">     110 </span><span class="lineCov">         24 :                 QVector&lt;QString&gt; column2; // column for Aliases</span>
+<span class="lineNum">     111 </span><span class="lineCov">         12 :                 column2.push_back(&quot;$pc&quot;);</span>
+<span class="lineNum">     112 </span><span class="lineCov">         12 :                 column2.push_back(&quot;$hi&quot;);</span>
+<span class="lineNum">     113 </span><span class="lineCov">         12 :                 column2.push_back(&quot;$lo&quot;);</span>
+<span class="lineNum">     114 </span>            : 
+<span class="lineNum">     115 </span><span class="lineCov">         12 :                 column2.push_back(&quot;$zero&quot;);</span>
+<span class="lineNum">     116 </span><span class="lineCov">         12 :                 column2.push_back(&quot;$at&quot;);</span>
+<span class="lineNum">     117 </span><span class="lineCov">         12 :                 column2.push_back(&quot;$v0&quot;);</span>
+<span class="lineNum">     118 </span><span class="lineCov">         12 :                 column2.push_back(&quot;$v1&quot;);</span>
+<span class="lineNum">     119 </span><span class="lineCov">         12 :                 column2.push_back(&quot;$a0&quot;);</span>
+<span class="lineNum">     120 </span><span class="lineCov">         12 :                 column2.push_back(&quot;$a1&quot;);</span>
+<span class="lineNum">     121 </span><span class="lineCov">         12 :                 column2.push_back(&quot;$a2&quot;);</span>
+<span class="lineNum">     122 </span><span class="lineCov">         12 :                 column2.push_back(&quot;$a3&quot;);</span>
+<span class="lineNum">     123 </span>            : 
+<span class="lineNum">     124 </span>            :                 
+<span class="lineNum">     125 </span><span class="lineCov">        108 :                 for (size_t i = 0; i &lt; 8; i++) {</span>
+<span class="lineNum">     126 </span><span class="lineCov">        192 :                         QString tSign = QString(&quot;$t&quot;);</span>
+<span class="lineNum">     127 </span><span class="lineCov">        192 :                         string tempStr = std::to_string(i);</span>
+<span class="lineNum">     128 </span><span class="lineCov">        192 :                         QString temp = QString::fromStdString(tempStr);</span>
+<span class="lineNum">     129 </span><span class="lineCov">         96 :                         column2.push_back(tSign.append(temp));</span>
+<span class="lineNum">     130 </span>            :                 }
+<span class="lineNum">     131 </span><span class="lineCov">        108 :                 for (size_t i = 0; i &lt; 8; i++) {</span>
+<span class="lineNum">     132 </span><span class="lineCov">        192 :                         QString sSign = QString(&quot;$s&quot;);</span>
+<span class="lineNum">     133 </span><span class="lineCov">        192 :                         string tempStr = std::to_string(i);</span>
+<span class="lineNum">     134 </span><span class="lineCov">        192 :                         QString temp = QString::fromStdString(tempStr);</span>
+<span class="lineNum">     135 </span><span class="lineCov">         96 :                         column2.push_back(sSign.append(temp));</span>
+<span class="lineNum">     136 </span>            :                 }
+<span class="lineNum">     137 </span><span class="lineCov">         12 :                 column2.push_back(&quot;$t8&quot;);</span>
+<span class="lineNum">     138 </span><span class="lineCov">         12 :                 column2.push_back(&quot;$t9&quot;);</span>
+<span class="lineNum">     139 </span><span class="lineCov">         12 :                 column2.push_back(&quot;$k0&quot;);</span>
+<span class="lineNum">     140 </span><span class="lineCov">         12 :                 column2.push_back(&quot;$k1&quot;);</span>
+<span class="lineNum">     141 </span><span class="lineCov">         12 :                 column2.push_back(&quot;$gp&quot;);</span>
+<span class="lineNum">     142 </span><span class="lineCov">         12 :                 column2.push_back(&quot;$sp&quot;);</span>
+<span class="lineNum">     143 </span><span class="lineCov">         12 :                 column2.push_back(&quot;$fp&quot;);</span>
+<span class="lineNum">     144 </span><span class="lineCov">         12 :                 column2.push_back(&quot;$ra&quot;);</span>
+<span class="lineNum">     145 </span><span class="lineCov">         12 :                 COLumns.push_back(column2);</span>
+<span class="lineNum">     146 </span>            : 
+<span class="lineNum">     147 </span><span class="lineCov">         24 :                 QVector&lt;QString&gt; column3; // column for Register contents</span>
+<span class="lineNum">     148 </span>            :                 
+<span class="lineNum">     149 </span><span class="lineCov">         12 :                 helper_loadRegValues(regLayout, column3); </span>
+<span class="lineNum">     150 </span>            : 
+<span class="lineNum">     151 </span><span class="lineCov">         12 :                 COLumns.push_back(column3);</span>
+<span class="lineNum">     152 </span>            : 
+<span class="lineNum">     153 </span>            :         }
+<span class="lineNum">     154 </span><span class="lineCov">         12 :         else if (memOrReg == &quot;memLayout&quot;) {</span>
+<span class="lineNum">     155 </span><span class="lineCov">         24 :                 QVector&lt;QString&gt; column1; // Column</span>
+<span class="lineNum">     156 </span><span class="lineCov">       6156 :                 for (size_t i = 0; i &lt; memLayout.size(); i++) {</span>
+<span class="lineNum">     157 </span><span class="lineCov">       6144 :                         int temp = (int)i;</span>
+<span class="lineNum">     158 </span><span class="lineCov">      12288 :                         QString initMemAddress = QString(&quot;0x%1&quot;).arg(temp, 8, 16, QLatin1Char('0'));</span>
+<span class="lineNum">     159 </span><span class="lineCov">       6144 :                         column1.push_back(initMemAddress);</span>
+<span class="lineNum">     160 </span>            :                 }
+<span class="lineNum">     161 </span><span class="lineCov">         12 :                 COLumns.push_back(column1);</span>
+<span class="lineNum">     162 </span>            : 
+<span class="lineNum">     163 </span>            : 
+<span class="lineNum">     164 </span><span class="lineCov">         24 :                 QVector&lt;QString&gt; column2;</span>
+<span class="lineNum">     165 </span><span class="lineCov">       6156 :                 for (size_t i = 0; i &lt; memLayout.size(); i++) { </span>
+<span class="lineNum">     166 </span><span class="lineCov">      12288 :                         QString temp = QString::fromStdString((&quot;0x&quot; + memLayout[i]));</span>
+<span class="lineNum">     167 </span><span class="lineCov">       6144 :                         column2.push_back(temp);</span>
+<span class="lineNum">     168 </span>            :                 }
+<span class="lineNum">     169 </span>            : 
+<span class="lineNum">     170 </span><span class="lineCov">         12 :                 COLumns.push_back(column2);</span>
+<span class="lineNum">     171 </span>            :         }
+<span class="lineNum">     172 </span>            :         else {
+<span class="lineNum">     173 </span>            :                 //default empty columns
+<span class="lineNum">     174 </span><span class="lineNoCov">          0 :                 qDebug() &lt;&lt; &quot;Error: Only set up to create a table model for reg/mem&quot; &lt;&lt; endl;</span>
+<span class="lineNum">     175 </span>            :         }
+<span class="lineNum">     176 </span>            : 
+<a name="177"><span class="lineNum">     177 </span><span class="lineCov">         24 : }</span></a>
+<span class="lineNum">     178 </span>            : 
+<span class="lineNum">     179 </span><span class="lineCov">         66 : int myQtTableModel::rowCount(const QModelIndex &amp; parent) const</span>
+<span class="lineNum">     180 </span>            : {
+<span class="lineNum">     181 </span><span class="lineCov">         66 :         return COLumns[0].size();</span>
+<a name="182"><span class="lineNum">     182 </span>            : }</a>
+<span class="lineNum">     183 </span>            : 
+<span class="lineNum">     184 </span><span class="lineCov">         90 : int myQtTableModel::columnCount(const QModelIndex &amp; parent) const</span>
+<span class="lineNum">     185 </span>            : {
+<span class="lineNum">     186 </span><span class="lineCov">         90 :         return COLumns.size();;</span>
+<a name="187"><span class="lineNum">     187 </span>            : }</a>
+<span class="lineNum">     188 </span>            : 
+<span class="lineNum">     189 </span><span class="lineNoCov">          0 : QVariant myQtTableModel::data(const QModelIndex&amp; index, int role) const // Value of int role = 0, for The key data to be rendered in the form of text(QString)</span>
+<span class="lineNum">     190 </span>            : {
+<span class="lineNum">     191 </span><span class="lineNoCov">          0 :         if (role == Qt::DisplayRole) // Returns the data stored under the given role for the item referred to by the index.</span>
+<span class="lineNum">     192 </span>            :         {
+<span class="lineNum">     193 </span><span class="lineNoCov">          0 :                 return COLumns[index.column()][index.row()];</span>
+<span class="lineNum">     194 </span>            :         }
+<span class="lineNum">     195 </span><span class="lineNoCov">          0 :         return QVariant::Invalid; // If you do not have a value to return, return an invalid QVariant instead of returning 0.</span>
+<a name="196"><span class="lineNum">     196 </span>            : }</a>
+<span class="lineNum">     197 </span>            : 
+<span class="lineNum">     198 </span><span class="lineNoCov">          0 : bool myQtTableModel::setData(const QModelIndex&amp; index, const QVariant&amp; value, int role)</span>
+<span class="lineNum">     199 </span>            : {
+<span class="lineNum">     200 </span><span class="lineNoCov">          0 :         if (role == Qt::EditRole) {</span>
+<span class="lineNum">     201 </span><span class="lineNoCov">          0 :                 emit dataChanged(index, index);</span>
+<span class="lineNum">     202 </span><span class="lineNoCov">          0 :                 return true;</span>
+<span class="lineNum">     203 </span>            :         }
+<span class="lineNum">     204 </span><span class="lineNoCov">          0 :         return false;</span>
+<a name="205"><span class="lineNum">     205 </span>            : }</a>
+<span class="lineNum">     206 </span>            : 
+<span class="lineNum">     207 </span><span class="lineNoCov">          0 : void myQtTableModel::updateModel(unordered_map&lt;string, int32_t&gt; regLayout, vector&lt;string&gt; memLayout, string regOrMemModel)</span>
+<span class="lineNum">     208 </span>            : {
+<span class="lineNum">     209 </span><span class="lineNoCov">          0 :         QVector&lt;QString&gt; lastColumnEdit;</span>
+<span class="lineNum">     210 </span><span class="lineNoCov">          0 :         if (regOrMemModel == &quot;memoryModel&quot;) {</span>
+<span class="lineNum">     211 </span>            : 
+<span class="lineNum">     212 </span><span class="lineNoCov">          0 :                 for (size_t i = 0; i &lt; memLayout.size(); i++) { // This for loop will be used in the detData() function as well</span>
+<span class="lineNum">     213 </span><span class="lineNoCov">          0 :                         QString temp = QString::fromStdString((&quot;0x&quot; + memLayout[i]));</span>
+<span class="lineNum">     214 </span><span class="lineNoCov">          0 :                         lastColumnEdit.push_back(temp);</span>
+<span class="lineNum">     215 </span>            :                 }
+<span class="lineNum">     216 </span><span class="lineNoCov">          0 :                 COLumns[1] = lastColumnEdit; // for memoryModel</span>
+<span class="lineNum">     217 </span>            :         }
+<span class="lineNum">     218 </span><span class="lineNoCov">          0 :         else if (regOrMemModel == &quot;registerModel&quot;) {</span>
+<span class="lineNum">     219 </span>            : 
+<span class="lineNum">     220 </span><span class="lineNoCov">          0 :                 helper_loadRegValues(regLayout, lastColumnEdit);</span>
+<span class="lineNum">     221 </span><span class="lineNoCov">          0 :                 COLumns[2] = lastColumnEdit; // for registerModel</span>
+<span class="lineNum">     222 </span>            :         }
+<a name="223"><span class="lineNum">     223 </span><span class="lineNoCov">          0 : }</span></a>
+<span class="lineNum">     224 </span>            : 
+<span class="lineNum">     225 </span><span class="lineCov">       2880 : QVariant myQtTableModel::headerData(int section, Qt::Orientation orientation, int role) const</span>
+<span class="lineNum">     226 </span>            : {
+<span class="lineNum">     227 </span>            :         // Returns the data for the given role and section in the header with the specified orientation.
+<span class="lineNum">     228 </span>            :         // For horizontal headers, the section number corresponds to the column number
+<span class="lineNum">     229 </span><span class="lineCov">       2880 :         if (role == Qt::DisplayRole &amp;&amp; orientation == Qt::Horizontal) {</span>
+<span class="lineNum">     230 </span>            : 
+<span class="lineNum">     231 </span><span class="lineCov">         15 :                 if (section == 0) {</span>
+<span class="lineNum">     232 </span><span class="lineCov">          6 :                         if (memOrRg == &quot;regLayout&quot;)</span>
+<span class="lineNum">     233 </span><span class="lineCov">          3 :                                 return QString(&quot;Number&quot;);</span>
+<span class="lineNum">     234 </span><span class="lineCov">          3 :                         else if (memOrRg == &quot;memLayout&quot;)</span>
+<span class="lineNum">     235 </span><span class="lineCov">          3 :                                 return QString(&quot;Address (Hex)&quot;);</span>
+<span class="lineNum">     236 </span>            :                 }
+<span class="lineNum">     237 </span><span class="lineCov">          9 :                 else if (section == 1) {</span>
+<span class="lineNum">     238 </span><span class="lineCov">          6 :                         if (memOrRg == &quot;regLayout&quot;)</span>
+<span class="lineNum">     239 </span><span class="lineCov">          3 :                                 return QString(&quot;Alias&quot;);</span>
+<span class="lineNum">     240 </span><span class="lineCov">          3 :                         else if (memOrRg == &quot;memLayout&quot;)</span>
+<span class="lineNum">     241 </span><span class="lineCov">          3 :                                 return QString(&quot;Value (Hex)&quot;);</span>
+<span class="lineNum">     242 </span>            :                 }
+<span class="lineNum">     243 </span><span class="lineCov">          3 :                 else if (section == 2) {</span>
+<span class="lineNum">     244 </span><span class="lineCov">          3 :                         if (memOrRg == &quot;regLayout&quot;)</span>
+<span class="lineNum">     245 </span><span class="lineCov">          3 :                                 return QString(&quot;Value (Hex)&quot;);</span>
+<span class="lineNum">     246 </span>            :                 }
+<span class="lineNum">     247 </span>            :         }
+<span class="lineNum">     248 </span><span class="lineCov">       2865 :         return QVariant::Invalid;</span>
+<a name="249"><span class="lineNum">     249 </span>            : }</a>
+<span class="lineNum">     250 </span>            : 
+<span class="lineNum">     251 </span><span class="lineCov">         12 : void myQtTableModel::helper_loadRegValues(unordered_map&lt;string, int32_t&gt; regLayout, QVector&lt;QString&gt;&amp; column3)</span>
+<span class="lineNum">     252 </span>            : {
+<span class="lineNum">     253 </span><span class="lineCov">         24 :         QString initRegContents;</span>
+<span class="lineNum">     254 </span>            : 
+<span class="lineNum">     255 </span><span class="lineCov">         12 :         auto itPc = regLayout.find(&quot;$pc&quot;);</span>
+<span class="lineNum">     256 </span><span class="lineCov">         12 :         initRegContents = QString(&quot;0x%1&quot;).arg((int)(itPc-&gt;second), 8, 16, QLatin1Char('0'));</span>
+<span class="lineNum">     257 </span><span class="lineCov">         12 :         column3.push_back(initRegContents);</span>
+<span class="lineNum">     258 </span><span class="lineCov">         12 :         auto itHi = regLayout.find(&quot;$hi&quot;);</span>
+<span class="lineNum">     259 </span><span class="lineCov">         12 :         initRegContents = QString(&quot;0x%1&quot;).arg((int)(itHi-&gt;second), 8, 16, QLatin1Char('0'));</span>
+<span class="lineNum">     260 </span><span class="lineCov">         12 :         column3.push_back(initRegContents);</span>
+<span class="lineNum">     261 </span><span class="lineCov">         12 :         auto itLo = regLayout.find(&quot;$lo&quot;);</span>
+<span class="lineNum">     262 </span><span class="lineCov">         12 :         initRegContents = QString(&quot;0x%1&quot;).arg((int)(itLo-&gt;second), 8, 16, QLatin1Char('0'));</span>
+<span class="lineNum">     263 </span><span class="lineCov">         12 :         column3.push_back(initRegContents);</span>
+<span class="lineNum">     264 </span><span class="lineCov">         12 :         auto itR0 = regLayout.find(&quot;$0&quot;);</span>
+<span class="lineNum">     265 </span><span class="lineCov">         12 :         initRegContents = QString(&quot;0x%1&quot;).arg((int)(itR0-&gt;second), 8, 16, QLatin1Char('0'));</span>
+<span class="lineNum">     266 </span><span class="lineCov">         12 :         column3.push_back(initRegContents);</span>
+<span class="lineNum">     267 </span><span class="lineCov">         12 :         auto itR1 = regLayout.find(&quot;$1&quot;);</span>
+<span class="lineNum">     268 </span><span class="lineCov">         12 :         initRegContents = QString(&quot;0x%1&quot;).arg((int)(itR1-&gt;second), 8, 16, QLatin1Char('0'));</span>
+<span class="lineNum">     269 </span><span class="lineCov">         12 :         column3.push_back(initRegContents);</span>
+<span class="lineNum">     270 </span><span class="lineCov">         12 :         auto itR2 = regLayout.find(&quot;$2&quot;);</span>
+<span class="lineNum">     271 </span><span class="lineCov">         12 :         initRegContents = QString(&quot;0x%1&quot;).arg((int)(itR2-&gt;second), 8, 16, QLatin1Char('0'));</span>
+<span class="lineNum">     272 </span><span class="lineCov">         12 :         column3.push_back(initRegContents);</span>
+<span class="lineNum">     273 </span><span class="lineCov">         12 :         auto itR3 = regLayout.find(&quot;$3&quot;);</span>
+<span class="lineNum">     274 </span><span class="lineCov">         12 :         initRegContents = QString(&quot;0x%1&quot;).arg((int)(itR3-&gt;second), 8, 16, QLatin1Char('0'));</span>
+<span class="lineNum">     275 </span><span class="lineCov">         12 :         column3.push_back(initRegContents);</span>
+<span class="lineNum">     276 </span><span class="lineCov">         12 :         auto itR4 = regLayout.find(&quot;$4&quot;);</span>
+<span class="lineNum">     277 </span><span class="lineCov">         12 :         initRegContents = QString(&quot;0x%1&quot;).arg((int)(itR4-&gt;second), 8, 16, QLatin1Char('0'));</span>
+<span class="lineNum">     278 </span><span class="lineCov">         12 :         column3.push_back(initRegContents);</span>
+<span class="lineNum">     279 </span><span class="lineCov">         12 :         auto itR5 = regLayout.find(&quot;$5&quot;);</span>
+<span class="lineNum">     280 </span><span class="lineCov">         12 :         initRegContents = QString(&quot;0x%1&quot;).arg((int)(itR5-&gt;second), 8, 16, QLatin1Char('0'));</span>
+<span class="lineNum">     281 </span><span class="lineCov">         12 :         column3.push_back(initRegContents);</span>
+<span class="lineNum">     282 </span><span class="lineCov">         12 :         auto itR6 = regLayout.find(&quot;$6&quot;);</span>
+<span class="lineNum">     283 </span><span class="lineCov">         12 :         initRegContents = QString(&quot;0x%1&quot;).arg((int)(itR6-&gt;second), 8, 16, QLatin1Char('0'));</span>
+<span class="lineNum">     284 </span><span class="lineCov">         12 :         column3.push_back(initRegContents);</span>
+<span class="lineNum">     285 </span><span class="lineCov">         12 :         auto itR7 = regLayout.find(&quot;$7&quot;);</span>
+<span class="lineNum">     286 </span><span class="lineCov">         12 :         initRegContents = QString(&quot;0x%1&quot;).arg((int)(itR7-&gt;second), 8, 16, QLatin1Char('0'));</span>
+<span class="lineNum">     287 </span><span class="lineCov">         12 :         column3.push_back(initRegContents);</span>
+<span class="lineNum">     288 </span><span class="lineCov">         12 :         auto itR8 = regLayout.find(&quot;$8&quot;);</span>
+<span class="lineNum">     289 </span><span class="lineCov">         12 :         initRegContents = QString(&quot;0x%1&quot;).arg((int)(itR8-&gt;second), 8, 16, QLatin1Char('0'));</span>
+<span class="lineNum">     290 </span><span class="lineCov">         12 :         column3.push_back(initRegContents);</span>
+<span class="lineNum">     291 </span><span class="lineCov">         12 :         auto itR9 = regLayout.find(&quot;$9&quot;);</span>
+<span class="lineNum">     292 </span><span class="lineCov">         12 :         initRegContents = QString(&quot;0x%1&quot;).arg((int)(itR9-&gt;second), 8, 16, QLatin1Char('0'));</span>
+<span class="lineNum">     293 </span><span class="lineCov">         12 :         column3.push_back(initRegContents);</span>
+<span class="lineNum">     294 </span><span class="lineCov">         12 :         auto itR10 = regLayout.find(&quot;$10&quot;);</span>
+<span class="lineNum">     295 </span><span class="lineCov">         12 :         initRegContents = QString(&quot;0x%1&quot;).arg((int)(itR10-&gt;second), 8, 16, QLatin1Char('0'));</span>
+<span class="lineNum">     296 </span><span class="lineCov">         12 :         column3.push_back(initRegContents);</span>
+<span class="lineNum">     297 </span><span class="lineCov">         12 :         auto itR11 = regLayout.find(&quot;$11&quot;);</span>
+<span class="lineNum">     298 </span><span class="lineCov">         12 :         initRegContents = QString(&quot;0x%1&quot;).arg((int)(itR11-&gt;second), 8, 16, QLatin1Char('0'));</span>
+<span class="lineNum">     299 </span><span class="lineCov">         12 :         column3.push_back(initRegContents);</span>
+<span class="lineNum">     300 </span><span class="lineCov">         12 :         auto itR12 = regLayout.find(&quot;$12&quot;);</span>
+<span class="lineNum">     301 </span><span class="lineCov">         12 :         initRegContents = QString(&quot;0x%1&quot;).arg((int)(itR12-&gt;second), 8, 16, QLatin1Char('0'));</span>
+<span class="lineNum">     302 </span><span class="lineCov">         12 :         column3.push_back(initRegContents);</span>
+<span class="lineNum">     303 </span><span class="lineCov">         12 :         auto itR13 = regLayout.find(&quot;$13&quot;);</span>
+<span class="lineNum">     304 </span><span class="lineCov">         12 :         initRegContents = QString(&quot;0x%1&quot;).arg((int)(itR13-&gt;second), 8, 16, QLatin1Char('0'));</span>
+<span class="lineNum">     305 </span><span class="lineCov">         12 :         column3.push_back(initRegContents);</span>
+<span class="lineNum">     306 </span><span class="lineCov">         12 :         auto itR14 = regLayout.find(&quot;$14&quot;);</span>
+<span class="lineNum">     307 </span><span class="lineCov">         12 :         initRegContents = QString(&quot;0x%1&quot;).arg((int)(itR14-&gt;second), 8, 16, QLatin1Char('0'));</span>
+<span class="lineNum">     308 </span><span class="lineCov">         12 :         column3.push_back(initRegContents);</span>
+<span class="lineNum">     309 </span><span class="lineCov">         12 :         auto itR15 = regLayout.find(&quot;$15&quot;);</span>
+<span class="lineNum">     310 </span><span class="lineCov">         12 :         initRegContents = QString(&quot;0x%1&quot;).arg((int)(itR15-&gt;second), 8, 16, QLatin1Char('0'));</span>
+<span class="lineNum">     311 </span><span class="lineCov">         12 :         column3.push_back(initRegContents);</span>
+<span class="lineNum">     312 </span><span class="lineCov">         12 :         auto itR16 = regLayout.find(&quot;$16&quot;);</span>
+<span class="lineNum">     313 </span><span class="lineCov">         12 :         initRegContents = QString(&quot;0x%1&quot;).arg((int)(itR16-&gt;second), 8, 16, QLatin1Char('0'));</span>
+<span class="lineNum">     314 </span><span class="lineCov">         12 :         column3.push_back(initRegContents);</span>
+<span class="lineNum">     315 </span><span class="lineCov">         12 :         auto itR17 = regLayout.find(&quot;$17&quot;);</span>
+<span class="lineNum">     316 </span><span class="lineCov">         12 :         initRegContents = QString(&quot;0x%1&quot;).arg((int)(itR17-&gt;second), 8, 16, QLatin1Char('0'));</span>
+<span class="lineNum">     317 </span><span class="lineCov">         12 :         column3.push_back(initRegContents);</span>
+<span class="lineNum">     318 </span><span class="lineCov">         12 :         auto itR18 = regLayout.find(&quot;$18&quot;);</span>
+<span class="lineNum">     319 </span><span class="lineCov">         12 :         initRegContents = QString(&quot;0x%1&quot;).arg((int)(itR18-&gt;second), 8, 16, QLatin1Char('0'));</span>
+<span class="lineNum">     320 </span><span class="lineCov">         12 :         column3.push_back(initRegContents);</span>
+<span class="lineNum">     321 </span><span class="lineCov">         12 :         auto itR19 = regLayout.find(&quot;$19&quot;);</span>
+<span class="lineNum">     322 </span><span class="lineCov">         12 :         initRegContents = QString(&quot;0x%1&quot;).arg((int)(itR19-&gt;second), 8, 16, QLatin1Char('0'));</span>
+<span class="lineNum">     323 </span><span class="lineCov">         12 :         column3.push_back(initRegContents);</span>
+<span class="lineNum">     324 </span><span class="lineCov">         12 :         auto itR20 = regLayout.find(&quot;$20&quot;);</span>
+<span class="lineNum">     325 </span><span class="lineCov">         12 :         initRegContents = QString(&quot;0x%1&quot;).arg((int)(itR20-&gt;second), 8, 16, QLatin1Char('0'));</span>
+<span class="lineNum">     326 </span><span class="lineCov">         12 :         column3.push_back(initRegContents);</span>
+<span class="lineNum">     327 </span><span class="lineCov">         12 :         auto itR21 = regLayout.find(&quot;$21&quot;);</span>
+<span class="lineNum">     328 </span><span class="lineCov">         12 :         initRegContents = QString(&quot;0x%1&quot;).arg((int)(itR21-&gt;second), 8, 16, QLatin1Char('0'));</span>
+<span class="lineNum">     329 </span><span class="lineCov">         12 :         column3.push_back(initRegContents);</span>
+<span class="lineNum">     330 </span><span class="lineCov">         12 :         auto itR22 = regLayout.find(&quot;$22&quot;);</span>
+<span class="lineNum">     331 </span><span class="lineCov">         12 :         initRegContents = QString(&quot;0x%1&quot;).arg((int)(itR22-&gt;second), 8, 16, QLatin1Char('0'));</span>
+<span class="lineNum">     332 </span><span class="lineCov">         12 :         column3.push_back(initRegContents);</span>
+<span class="lineNum">     333 </span><span class="lineCov">         12 :         auto itR23 = regLayout.find(&quot;$23&quot;);</span>
+<span class="lineNum">     334 </span><span class="lineCov">         12 :         initRegContents = QString(&quot;0x%1&quot;).arg((int)(itR23-&gt;second), 8, 16, QLatin1Char('0'));</span>
+<span class="lineNum">     335 </span><span class="lineCov">         12 :         column3.push_back(initRegContents);</span>
+<span class="lineNum">     336 </span><span class="lineCov">         12 :         auto itR24 = regLayout.find(&quot;$24&quot;);</span>
+<span class="lineNum">     337 </span><span class="lineCov">         12 :         initRegContents = QString(&quot;0x%1&quot;).arg((int)(itR24-&gt;second), 8, 16, QLatin1Char('0'));</span>
+<span class="lineNum">     338 </span><span class="lineCov">         12 :         column3.push_back(initRegContents);</span>
+<span class="lineNum">     339 </span><span class="lineCov">         12 :         auto itR25 = regLayout.find(&quot;$25&quot;);</span>
+<span class="lineNum">     340 </span><span class="lineCov">         12 :         initRegContents = QString(&quot;0x%1&quot;).arg((int)(itR25-&gt;second), 8, 16, QLatin1Char('0'));</span>
+<span class="lineNum">     341 </span><span class="lineCov">         12 :         column3.push_back(initRegContents);</span>
+<span class="lineNum">     342 </span><span class="lineCov">         12 :         auto itR26 = regLayout.find(&quot;$26&quot;);</span>
+<span class="lineNum">     343 </span><span class="lineCov">         12 :         initRegContents = QString(&quot;0x%1&quot;).arg((int)(itR26-&gt;second), 8, 16, QLatin1Char('0'));</span>
+<span class="lineNum">     344 </span><span class="lineCov">         12 :         column3.push_back(initRegContents);</span>
+<span class="lineNum">     345 </span><span class="lineCov">         12 :         auto itR27 = regLayout.find(&quot;$27&quot;);</span>
+<span class="lineNum">     346 </span><span class="lineCov">         12 :         initRegContents = QString(&quot;0x%1&quot;).arg((int)(itR27-&gt;second), 8, 16, QLatin1Char('0'));</span>
+<span class="lineNum">     347 </span><span class="lineCov">         12 :         column3.push_back(initRegContents);</span>
+<span class="lineNum">     348 </span><span class="lineCov">         12 :         auto itR28 = regLayout.find(&quot;$28&quot;);</span>
+<span class="lineNum">     349 </span><span class="lineCov">         12 :         initRegContents = QString(&quot;0x%1&quot;).arg((int)(itR28-&gt;second), 8, 16, QLatin1Char('0'));</span>
+<span class="lineNum">     350 </span><span class="lineCov">         12 :         column3.push_back(initRegContents);</span>
+<span class="lineNum">     351 </span><span class="lineCov">         12 :         auto itR29 = regLayout.find(&quot;$29&quot;);</span>
+<span class="lineNum">     352 </span><span class="lineCov">         12 :         initRegContents = QString(&quot;0x%1&quot;).arg((int)(itR29-&gt;second), 8, 16, QLatin1Char('0'));</span>
+<span class="lineNum">     353 </span><span class="lineCov">         12 :         column3.push_back(initRegContents);</span>
+<span class="lineNum">     354 </span><span class="lineCov">         12 :         auto itR30 = regLayout.find(&quot;$30&quot;);</span>
+<span class="lineNum">     355 </span><span class="lineCov">         12 :         initRegContents = QString(&quot;0x%1&quot;).arg((int)(itR30-&gt;second), 8, 16, QLatin1Char('0'));</span>
+<span class="lineNum">     356 </span><span class="lineCov">         12 :         column3.push_back(initRegContents);</span>
+<span class="lineNum">     357 </span><span class="lineCov">         12 :         auto itR31 = regLayout.find(&quot;$31&quot;);</span>
+<span class="lineNum">     358 </span><span class="lineCov">         12 :         initRegContents = QString(&quot;0x%1&quot;).arg((int)(itR31-&gt;second), 8, 16, QLatin1Char('0'));</span>
+<span class="lineNum">     359 </span><span class="lineCov">         12 :         column3.push_back(initRegContents);</span>
+<span class="lineNum">     360 </span><span class="lineCov">         12 : }</span>
+<span class="lineNum">     361 </span>            : 
+<span class="lineNum">     362 </span>            : 
+<span class="lineNum">     363 </span>            : //***************************************************************************************************************************************\\
+<span class="lineNum">     364 </span>            : //***************************************************************************************************************************************\\
+<span class="lineNum">     365 </span>            : //***************************************************************************************************************************************\\
+<span class="lineNum">     366 </span>            : //***************************************************************************************************************************************\\
+<span class="lineNum">     367 </span>            : //***************************************************************************************************************************************\\
+<span class="lineNum">     368 </span>            : //***************************************************************************************************************************************\\
+<span class="lineNum">     369 </span>            : //***************************************************************************************************************************************\\
+<span class="lineNum">     370 </span>            : 
+<span class="lineNum">     371 </span>            : 
+<span class="lineNum">     372 </span>            : 
+<a name="373"><span class="lineNum">     373 </span>            : ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////</a>
+<span class="lineNum">     374 </span>            : //----------------------------------------------------------Helper Functions--------------------------------------------------------------//
+<span class="lineNum">     375 </span><span class="lineCov">          3 : void VirtualMachineGUI::colorWhite()</span>
+<span class="lineNum">     376 </span>            : {
+<span class="lineNum">     377 </span><span class="lineCov">          6 :         QTextBlockFormat preExecLineBlock;</span>
+<span class="lineNum">     378 </span><span class="lineCov">          3 :         preExecLineBlock.setBackground(Qt::white);</span>
+<span class="lineNum">     379 </span>            : 
+<span class="lineNum">     380 </span><span class="lineCov">          3 :         cursor.select(QTextCursor::LineUnderCursor);</span>
+<span class="lineNum">     381 </span><span class="lineCov">          3 :         cursor.setBlockFormat(preExecLineBlock);</span>
+<span class="lineNum">     382 </span><span class="lineCov">          3 :         text-&gt;setTextCursor(cursor);</span>
+<a name="383"><span class="lineNum">     383 </span><span class="lineCov">          3 : }</span></a>
+<span class="lineNum">     384 </span>            : 
+<span class="lineNum">     385 </span><span class="lineCov">         15 : void VirtualMachineGUI::colorYellow()</span>
+<span class="lineNum">     386 </span>            : {
+<span class="lineNum">     387 </span><span class="lineCov">         30 :         QTextBlockFormat execLineBlock;</span>
+<span class="lineNum">     388 </span><span class="lineCov">         15 :         execLineBlock.setBackground(Qt::yellow);</span>
+<span class="lineNum">     389 </span>            : 
+<span class="lineNum">     390 </span><span class="lineCov">         15 :         cursor.select(QTextCursor::LineUnderCursor);</span>
+<span class="lineNum">     391 </span><span class="lineCov">         15 :         cursor.setBlockFormat(execLineBlock);</span>
+<span class="lineNum">     392 </span><span class="lineCov">         15 :         cursor.clearSelection();</span>
+<span class="lineNum">     393 </span><span class="lineCov">         15 :         text-&gt;setTextCursor(cursor);</span>
+<span class="lineNum">     394 </span><span class="lineCov">         15 : }</span>
+<span class="lineNum">     395 </span>            : 
+<span class="lineNum">     396 </span>            : 
+<a name="397"><span class="lineNum">     397 </span>            : // TODO implement the GUI class</a>
+<span class="lineNum">     398 </span>            : 
+<span class="lineNum">     399 </span><span class="lineCov">          3 : VirtualMachineGUI::VirtualMachineGUI()</span>
+<span class="lineNum">     400 </span>            : {
+<span class="lineNum">     401 </span><span class="lineCov">          3 :         errorOpeningFile = false;</span>
+<span class="lineNum">     402 </span><span class="lineCov">          3 :         hasBreaked = false;</span>
+<span class="lineNum">     403 </span>            : 
+<span class="lineNum">     404 </span><span class="lineCov">          3 :         mainWindow = new QMainWindow(this); // Creates the main window that will contain all the Gui widgets</span>
+<span class="lineNum">     405 </span><span class="lineCov">          3 :         containerWidget = new QWidget();</span>
+<span class="lineNum">     406 </span><span class="lineCov">          3 :         vlayout = new QVBoxLayout();</span>
+<span class="lineNum">     407 </span><span class="lineCov">          3 :         hlayoutForTable = new QHBoxLayout();</span>
+<span class="lineNum">     408 </span><span class="lineCov">          3 :         hlayoutForStatus = new QHBoxLayout();</span>
+<span class="lineNum">     409 </span><span class="lineCov">          3 :         hlayoutForButtons = new QHBoxLayout();</span>
+<span class="lineNum">     410 </span>            : 
+<span class="lineNum">     411 </span>            : 
+<span class="lineNum">     412 </span><span class="lineCov">          3 :         text = new QPlainTextEdit(); // This is a widget for the plain text assembly file</span>
+<span class="lineNum">     413 </span><span class="lineCov">          3 :         text-&gt;setObjectName(&quot;text&quot;);</span>
+<span class="lineNum">     414 </span><span class="lineCov">          3 :         text-&gt;setReadOnly(true);</span>
+<span class="lineNum">     415 </span>            : 
+<span class="lineNum">     416 </span><span class="lineCov">          3 :         registers = new QTableView();</span>
+<span class="lineNum">     417 </span><span class="lineCov">          3 :         registers-&gt;setObjectName(&quot;registers&quot;);</span>
+<span class="lineNum">     418 </span><span class="lineCov">          3 :         registers-&gt;setStyleSheet(&quot;QHeaderView::section { background-color:lightgray }&quot;);</span>
+<span class="lineNum">     419 </span>            : 
+<span class="lineNum">     420 </span><span class="lineCov">          3 :         memory = new QTableView();</span>
+<span class="lineNum">     421 </span><span class="lineCov">          3 :         memory-&gt;setObjectName(&quot;memory&quot;);</span>
+<span class="lineNum">     422 </span><span class="lineCov">          3 :         memory-&gt;setStyleSheet(&quot;QHeaderView::section { background-color:lightgray }&quot;);</span>
+<span class="lineNum">     423 </span>            : 
+<span class="lineNum">     424 </span><span class="lineCov">          3 :         statusLabel = new QLabel(&quot;Status:&quot;);</span>
+<span class="lineNum">     425 </span><span class="lineCov">          3 :         status = new QLineEdit();</span>
+<span class="lineNum">     426 </span><span class="lineCov">          3 :         status-&gt;setReadOnly(true);</span>
+<span class="lineNum">     427 </span><span class="lineCov">          3 :         status-&gt;setObjectName(&quot;status&quot;);</span>
+<span class="lineNum">     428 </span>            : 
+<span class="lineNum">     429 </span><span class="lineCov">          3 :         step = new QPushButton(&quot;Step&quot;);</span>
+<span class="lineNum">     430 </span><span class="lineCov">          3 :         step-&gt;setObjectName(&quot;step&quot;);</span>
+<span class="lineNum">     431 </span>            : 
+<span class="lineNum">     432 </span><span class="lineCov">          3 :         run = new QPushButton(&quot;Run&quot;);</span>
+<span class="lineNum">     433 </span><span class="lineCov">          3 :         run-&gt;setObjectName(&quot;run&quot;);</span>
+<span class="lineNum">     434 </span>            : 
+<span class="lineNum">     435 </span><span class="lineCov">          3 :         breakRun = new QPushButton(&quot;Break&quot;);</span>
+<span class="lineNum">     436 </span><span class="lineCov">          3 :         breakRun-&gt;setObjectName(&quot;break&quot;);</span>
+<span class="lineNum">     437 </span><span class="lineCov">          3 :         breakRun-&gt;setEnabled(false); // Initially disabled until run is pressed</span>
+<span class="lineNum">     438 </span>            : 
+<span class="lineNum">     439 </span><span class="lineCov">          3 :         mainWindow-&gt;setCentralWidget(containerWidget);</span>
+<span class="lineNum">     440 </span><span class="lineCov">          3 :         containerWidget-&gt;setLayout(vlayout);</span>
+<span class="lineNum">     441 </span>            :                 
+<span class="lineNum">     442 </span><span class="lineCov">          3 :         vlayout-&gt;addLayout(hlayoutForTable);</span>
+<span class="lineNum">     443 </span>            : 
+<span class="lineNum">     444 </span><span class="lineCov">          3 :         hlayoutForTable-&gt;addWidget(text);</span>
+<span class="lineNum">     445 </span><span class="lineCov">          3 :         hlayoutForTable-&gt;addWidget(registers);</span>
+<span class="lineNum">     446 </span><span class="lineCov">          3 :         hlayoutForTable-&gt;addWidget(memory);</span>
+<span class="lineNum">     447 </span>            : 
+<span class="lineNum">     448 </span><span class="lineCov">          3 :         vlayout-&gt;addLayout(hlayoutForStatus);</span>
+<span class="lineNum">     449 </span>            : 
+<span class="lineNum">     450 </span><span class="lineCov">          3 :         hlayoutForStatus-&gt;addWidget(statusLabel);</span>
+<span class="lineNum">     451 </span><span class="lineCov">          3 :         hlayoutForStatus-&gt;addWidget(status);</span>
+<span class="lineNum">     452 </span>            : 
+<span class="lineNum">     453 </span><span class="lineCov">          3 :         vlayout-&gt;addLayout(hlayoutForButtons);</span>
+<span class="lineNum">     454 </span>            :         
+<span class="lineNum">     455 </span><span class="lineCov">          3 :         hlayoutForButtons-&gt;addWidget(step);</span>
+<span class="lineNum">     456 </span><span class="lineCov">          3 :         hlayoutForButtons-&gt;addWidget(run);</span>
+<span class="lineNum">     457 </span><span class="lineCov">          3 :         hlayoutForButtons-&gt;addWidget(breakRun);</span>
+<span class="lineNum">     458 </span>            :         
+<span class="lineNum">     459 </span><span class="lineCov">          3 :         connect(step, SIGNAL(clicked()), this, SLOT(stepSlot()));       // Everytime I step will call the slot function stepSlot() to update_simulation()</span>
+<span class="lineNum">     460 </span><span class="lineCov">          3 :         connect(run, SIGNAL(clicked()), this, SLOT(runSlot()));</span>
+<span class="lineNum">     461 </span><span class="lineCov">          3 :         connect(breakRun, SIGNAL(clicked()), this, SLOT(breakSlot()));</span>
+<a name="462"><span class="lineNum">     462 </span><span class="lineCov">          3 : }</span></a>
+<span class="lineNum">     463 </span>            : 
+<span class="lineNum">     464 </span><span class="lineCov">          3 : VirtualMachineGUI::~VirtualMachineGUI()</span>
+<span class="lineNum">     465 </span>            : {
+<span class="lineNum">     466 </span>            :         /*if (errorOpeningFile == false) {
+<span class="lineNum">     467 </span>            : 
+<span class="lineNum">     468 </span>            :                 vmpointer-&gt;clearDataStruct();
+<span class="lineNum">     469 </span>            :                 delete vmpointer;
+<span class="lineNum">     470 </span>            :                 vmpointer = nullptr;
+<span class="lineNum">     471 </span>            :         }*/
+<a name="472"><span class="lineNum">     472 </span><span class="lineCov">          3 : }</span></a>
+<span class="lineNum">     473 </span>            : 
+<span class="lineNum">     474 </span><span class="lineCov">         12 : void VirtualMachineGUI::createPlainTextWidget()</span>
+<span class="lineNum">     475 </span>            : {
+<span class="lineNum">     476 </span><span class="lineCov">         24 :         QFile qFileName(fileName);</span>
+<span class="lineNum">     477 </span><span class="lineCov">         12 :         qFileName.open(QFile::ReadOnly | QFile::Text);</span>
+<span class="lineNum">     478 </span><span class="lineCov">         24 :         QTextStream qFileNameStream(&amp;qFileName);</span>
+<span class="lineNum">     479 </span><span class="lineCov">         12 :         text-&gt;setPlainText(qFileNameStream.readAll());</span>
+<span class="lineNum">     480 </span>            : 
+<span class="lineNum">     481 </span>            :         
+<span class="lineNum">     482 </span><span class="lineCov">         12 :         cursor = text-&gt;textCursor(); // Sets the cursor to be in the beginning of the file</span>
+<span class="lineNum">     483 </span><span class="lineCov">         75 :         for (size_t i = 0; i &lt; initMainLine; i++) { </span>
+<span class="lineNum">     484 </span><span class="lineCov">         63 :                 cursor.movePosition(QTextCursor::NextBlock); </span>
+<span class="lineNum">     485 </span>            :         }
+<span class="lineNum">     486 </span>            :         
+<span class="lineNum">     487 </span>            :         // This is the initial highlight
+<span class="lineNum">     488 </span><span class="lineCov">         12 :         colorYellow();</span>
+<a name="489"><span class="lineNum">     489 </span><span class="lineCov">         12 : }</span></a>
+<span class="lineNum">     490 </span>            : 
+<span class="lineNum">     491 </span><span class="lineCov">          3 : void VirtualMachineGUI::testingHighlight_public()</span>
+<span class="lineNum">     492 </span>            : {
+<span class="lineNum">     493 </span>            :         //vmpointer-&gt;update_simulation_public();
+<span class="lineNum">     494 </span><span class="lineCov">          3 :         highlightText();</span>
+<a name="495"><span class="lineNum">     495 </span><span class="lineCov">          3 : }</span></a>
+<span class="lineNum">     496 </span>            : 
+<span class="lineNum">     497 </span><span class="lineCov">          3 : void VirtualMachineGUI::highlightText()</span>
+<span class="lineNum">     498 </span>            : {
+<span class="lineNum">     499 </span><span class="lineCov">          3 :         if ((vmpointer-&gt;isEndOfFileCheck() == false) || ((vmpointer-&gt;isEndOfFileCheck() == true) &amp;&amp; hasBreaked == true) ) {</span>
+<span class="lineNum">     500 </span>            : 
+<span class="lineNum">     501 </span><span class="lineCov">          3 :                 colorWhite();</span>
+<span class="lineNum">     502 </span>            : 
+<span class="lineNum">     503 </span>            :                 //Highlight algorithim for branching: depending on the difference from previous line and current line will determine if the
+<span class="lineNum">     504 </span>            :                 //                                                                       highlighter will move upward or downward. Also depending on which direction I am moving
+<span class="lineNum">     505 </span>            :                 //                                                                       I will skip the empty lines accordingly
+<span class="lineNum">     506 </span><span class="lineCov">          3 :                 int32_t curSumOfInitMain_pcReg = (int32_t)initMainLine + (vmpointer-&gt;getPcValue()); // This is the line I need to get too</span>
+<span class="lineNum">     507 </span><span class="lineCov">          3 :                 int32_t lineDifference = curSumOfInitMain_pcReg - prevSumOfInitMain__pcReg;</span>
+<span class="lineNum">     508 </span>            :                 //cout &lt;&lt; &quot;difference&quot; &lt;&lt; lineDifference &lt;&lt; endl;
+<span class="lineNum">     509 </span>            : 
+<span class="lineNum">     510 </span><span class="lineCov">          3 :                 if (lineDifference &gt; 0) {</span>
+<span class="lineNum">     511 </span>            : 
+<span class="lineNum">     512 </span><span class="lineNoCov">          0 :                         if ((vmpointer-&gt;isEndOfFileCheck() == true) &amp;&amp; hasBreaked == true) // FOR THE RUN CASE!</span>
+<span class="lineNum">     513 </span><span class="lineNoCov">          0 :                                 lineDifference = lineDifference - 1; // This is (-1) in the run case because when i run I will be already at the endOFFIle=true but in any NON-run case I would not have reached endOfFile=false</span>
+<span class="lineNum">     514 </span>            : 
+<span class="lineNum">     515 </span><span class="lineNoCov">          0 :                         for (int32_t i = 0; i &lt; lineDifference; i++) {</span>
+<span class="lineNum">     516 </span><span class="lineNoCov">          0 :                                 cursor.movePosition(QTextCursor::NextBlock); // Moves the cursor to the next block(line)</span>
+<span class="lineNum">     517 </span>            : 
+<span class="lineNum">     518 </span>            :                                 // Begin: This is to skip empty lines,&lt;labels:&gt;, and comments, in the plain text file &lt;labels:&gt;
+<span class="lineNum">     519 </span><span class="lineNoCov">          0 :                                 QTextCursor beginCursor = cursor;</span>
+<span class="lineNum">     520 </span><span class="lineNoCov">          0 :                                 QTextCursor endCursor = cursor;</span>
+<span class="lineNum">     521 </span><span class="lineNoCov">          0 :                                 beginCursor.movePosition(QTextCursor::StartOfLine);</span>
+<span class="lineNum">     522 </span><span class="lineNoCov">          0 :                                 endCursor.movePosition(QTextCursor::EndOfLine);</span>
+<span class="lineNum">     523 </span>            : 
+<span class="lineNum">     524 </span>            : 
+<span class="lineNum">     525 </span><span class="lineNoCov">          0 :                                 QTextCursor labelCheckCursor = cursor;</span>
+<span class="lineNum">     526 </span><span class="lineNoCov">          0 :                                 labelCheckCursor.setPosition(beginCursor.position(), QTextCursor::MoveAnchor);</span>
+<span class="lineNum">     527 </span><span class="lineNoCov">          0 :                                 labelCheckCursor.setPosition(endCursor.position(), QTextCursor::KeepAnchor);</span>
+<span class="lineNum">     528 </span><span class="lineNoCov">          0 :                                 QString cursorString = labelCheckCursor.selectedText();</span>
+<span class="lineNum">     529 </span><span class="lineNoCov">          0 :                                 QChar lastCursorStringChar = 'X'; // This can be any character except ':' because this is a dummy character used to nullify last case in while loop</span>
+<span class="lineNum">     530 </span><span class="lineNoCov">          0 :                                 QChar firstCursorStringChar = 'X';</span>
+<span class="lineNum">     531 </span>            : 
+<span class="lineNum">     532 </span><span class="lineNoCov">          0 :                                 if (cursorString.length() &gt; 0) {</span>
+<span class="lineNum">     533 </span><span class="lineNoCov">          0 :                                         lastCursorStringChar = cursorString[cursorString.length() - 1];</span>
+<span class="lineNum">     534 </span><span class="lineNoCov">          0 :                                         cursorString.remove(' ');</span>
+<span class="lineNum">     535 </span><span class="lineNoCov">          0 :                                         firstCursorStringChar = cursorString[0];</span>
+<span class="lineNum">     536 </span>            :                                 }
+<span class="lineNum">     537 </span>            : 
+<span class="lineNum">     538 </span><span class="lineNoCov">          0 :                                 while (beginCursor.position() == endCursor.position() || lastCursorStringChar == ':' || firstCursorStringChar == '#') {</span>
+<span class="lineNum">     539 </span><span class="lineNoCov">          0 :                                         cursor.movePosition(QTextCursor::NextBlock); // Highlights the next line yellow</span>
+<span class="lineNum">     540 </span>            : 
+<span class="lineNum">     541 </span><span class="lineNoCov">          0 :                                         beginCursor.movePosition(QTextCursor::NextBlock);</span>
+<span class="lineNum">     542 </span><span class="lineNoCov">          0 :                                         endCursor.movePosition(QTextCursor::NextBlock);</span>
+<span class="lineNum">     543 </span>            : 
+<span class="lineNum">     544 </span><span class="lineNoCov">          0 :                                         beginCursor.movePosition(QTextCursor::StartOfLine);</span>
+<span class="lineNum">     545 </span><span class="lineNoCov">          0 :                                         endCursor.movePosition(QTextCursor::EndOfLine);</span>
+<span class="lineNum">     546 </span>            : 
+<span class="lineNum">     547 </span>            : 
+<span class="lineNum">     548 </span><span class="lineNoCov">          0 :                                         labelCheckCursor.setPosition(beginCursor.position(), QTextCursor::MoveAnchor);</span>
+<span class="lineNum">     549 </span><span class="lineNoCov">          0 :                                         labelCheckCursor.setPosition(endCursor.position(), QTextCursor::KeepAnchor);</span>
+<span class="lineNum">     550 </span><span class="lineNoCov">          0 :                                         cursorString = labelCheckCursor.selectedText();</span>
+<span class="lineNum">     551 </span><span class="lineNoCov">          0 :                                         if (cursorString.length() &gt; 0) {</span>
+<span class="lineNum">     552 </span><span class="lineNoCov">          0 :                                                 lastCursorStringChar = cursorString[cursorString.length() - 1];</span>
+<span class="lineNum">     553 </span><span class="lineNoCov">          0 :                                                 cursorString.remove(' ');</span>
+<span class="lineNum">     554 </span><span class="lineNoCov">          0 :                                                 firstCursorStringChar = cursorString[0];</span>
+<span class="lineNum">     555 </span>            :                                         }
+<span class="lineNum">     556 </span>            :                                         else {
+<span class="lineNum">     557 </span><span class="lineNoCov">          0 :                                                 lastCursorStringChar = 'X';</span>
+<span class="lineNum">     558 </span><span class="lineNoCov">          0 :                                                 firstCursorStringChar = 'X';</span>
+<span class="lineNum">     559 </span>            :                                         }
+<span class="lineNum">     560 </span>            :                                 } // End: algorithim to skip empty lines,labels and comments(#)
+<span class="lineNum">     561 </span>            : 
+<span class="lineNum">     562 </span>            : 
+<span class="lineNum">     563 </span>            :                         }
+<span class="lineNum">     564 </span>            :                 }
+<span class="lineNum">     565 </span><span class="lineCov">          3 :                 else if (lineDifference &lt; 0) {</span>
+<span class="lineNum">     566 </span>            : 
+<span class="lineNum">     567 </span><span class="lineNoCov">          0 :                         lineDifference = lineDifference * (-1);</span>
+<span class="lineNum">     568 </span><span class="lineNoCov">          0 :                         for (int32_t i = 0; i &lt; lineDifference; i++) {</span>
+<span class="lineNum">     569 </span><span class="lineNoCov">          0 :                                 cursor.movePosition(QTextCursor::PreviousBlock); // Moves the cursor to the previous block(line)</span>
+<span class="lineNum">     570 </span>            : 
+<span class="lineNum">     571 </span>            :                                 // Begin: This is to skip empty lines, &lt;Labels:&gt;, comments in the plain text file 
+<span class="lineNum">     572 </span><span class="lineNoCov">          0 :                                 QTextCursor beginCursor = cursor;</span>
+<span class="lineNum">     573 </span><span class="lineNoCov">          0 :                                 QTextCursor endCursor = cursor;</span>
+<span class="lineNum">     574 </span><span class="lineNoCov">          0 :                                 beginCursor.movePosition(QTextCursor::StartOfLine);</span>
+<span class="lineNum">     575 </span><span class="lineNoCov">          0 :                                 endCursor.movePosition(QTextCursor::EndOfLine);</span>
+<span class="lineNum">     576 </span>            : 
+<span class="lineNum">     577 </span><span class="lineNoCov">          0 :                                 QTextCursor labelCheckCursor = cursor;</span>
+<span class="lineNum">     578 </span><span class="lineNoCov">          0 :                                 labelCheckCursor.setPosition(beginCursor.position(), QTextCursor::MoveAnchor);</span>
+<span class="lineNum">     579 </span><span class="lineNoCov">          0 :                                 labelCheckCursor.setPosition(endCursor.position(), QTextCursor::KeepAnchor);</span>
+<span class="lineNum">     580 </span><span class="lineNoCov">          0 :                                 QString cursorString = labelCheckCursor.selectedText();</span>
+<span class="lineNum">     581 </span><span class="lineNoCov">          0 :                                 QChar lastCursorStringChar = 'X'; // a Dummy character used to nullify the last case in the while loop</span>
+<span class="lineNum">     582 </span><span class="lineNoCov">          0 :                                 QChar firstCursorStringChar = 'X';</span>
+<span class="lineNum">     583 </span>            : 
+<span class="lineNum">     584 </span><span class="lineNoCov">          0 :                                 if (cursorString.length() &gt; 0) {</span>
+<span class="lineNum">     585 </span><span class="lineNoCov">          0 :                                         lastCursorStringChar = cursorString[cursorString.length() - 1]; // Assigning the last character of the</span>
+<span class="lineNum">     586 </span><span class="lineNoCov">          0 :                                         cursorString.remove(' ');</span>
+<span class="lineNum">     587 </span><span class="lineNoCov">          0 :                                         firstCursorStringChar = cursorString[0];</span>
+<span class="lineNum">     588 </span>            :                                 }
+<span class="lineNum">     589 </span>            : 
+<span class="lineNum">     590 </span><span class="lineNoCov">          0 :                                 while (beginCursor.position() == endCursor.position() || lastCursorStringChar == ':' || firstCursorStringChar == '#') {</span>
+<span class="lineNum">     591 </span><span class="lineNoCov">          0 :                                         cursor.movePosition(QTextCursor::PreviousBlock);</span>
+<span class="lineNum">     592 </span>            : 
+<span class="lineNum">     593 </span><span class="lineNoCov">          0 :                                         beginCursor.movePosition(QTextCursor::PreviousBlock);</span>
+<span class="lineNum">     594 </span><span class="lineNoCov">          0 :                                         endCursor.movePosition(QTextCursor::PreviousBlock);</span>
+<span class="lineNum">     595 </span>            : 
+<span class="lineNum">     596 </span><span class="lineNoCov">          0 :                                         beginCursor.movePosition(QTextCursor::StartOfLine);</span>
+<span class="lineNum">     597 </span><span class="lineNoCov">          0 :                                         endCursor.movePosition(QTextCursor::EndOfLine);</span>
+<span class="lineNum">     598 </span>            : 
+<span class="lineNum">     599 </span><span class="lineNoCov">          0 :                                         labelCheckCursor.setPosition(beginCursor.position(), QTextCursor::MoveAnchor);</span>
+<span class="lineNum">     600 </span><span class="lineNoCov">          0 :                                         labelCheckCursor.setPosition(endCursor.position(), QTextCursor::KeepAnchor);</span>
+<span class="lineNum">     601 </span><span class="lineNoCov">          0 :                                         cursorString = labelCheckCursor.selectedText();</span>
+<span class="lineNum">     602 </span><span class="lineNoCov">          0 :                                         if (cursorString.length() &gt; 0) {</span>
+<span class="lineNum">     603 </span><span class="lineNoCov">          0 :                                                 lastCursorStringChar = cursorString[cursorString.length() - 1];</span>
+<span class="lineNum">     604 </span><span class="lineNoCov">          0 :                                                 cursorString.remove(' ');</span>
+<span class="lineNum">     605 </span><span class="lineNoCov">          0 :                                                 firstCursorStringChar = cursorString[0];</span>
+<span class="lineNum">     606 </span>            :                                         }
+<span class="lineNum">     607 </span>            :                                         else {
+<span class="lineNum">     608 </span><span class="lineNoCov">          0 :                                                 lastCursorStringChar = 'X';</span>
+<span class="lineNum">     609 </span><span class="lineNoCov">          0 :                                                 firstCursorStringChar = 'X';</span>
+<span class="lineNum">     610 </span>            :                                         }
+<span class="lineNum">     611 </span>            :                                 } // End: algorithim to skip empty lines, &lt;labels:&gt; and comments(#)
+<span class="lineNum">     612 </span>            :                         } // End: for loop for moving the cursor to the corresponding line
+<span class="lineNum">     613 </span>            :                 }// End: of if statement to move cursor upwards
+<span class="lineNum">     614 </span>            : 
+<span class="lineNum">     615 </span>            :         
+<span class="lineNum">     616 </span><span class="lineCov">          3 :                 prevSumOfInitMain__pcReg = curSumOfInitMain_pcReg; // This saves the sum of (where the main starts) and the (location of the next instruction or pcReg value)</span>
+<span class="lineNum">     617 </span>            :         
+<span class="lineNum">     618 </span><span class="lineCov">          3 :                 colorYellow();</span>
+<span class="lineNum">     619 </span>            :         }
+<span class="lineNum">     620 </span>            :         //else if ((vmpointer-&gt;isEndOfFileCheck() == true) &amp;&amp; hasBreaked == true) {
+<span class="lineNum">     621 </span>            :         //      
+<span class="lineNum">     622 </span>            :         //      colorWhite();
+<span class="lineNum">     623 </span>            : 
+<span class="lineNum">     624 </span>            :         //      int32_t curSumOfInitMain_pcReg = (int32_t)initMainLine + (vmpointer-&gt;getPcValue()); // This is the line I need to get too
+<span class="lineNum">     625 </span>            :         //      cout &lt;&lt; &quot;initial main line#: &quot; &lt;&lt; initMainLine &lt;&lt; endl;
+<span class="lineNum">     626 </span>            :         //      cout &lt;&lt; &quot;pc reg: &quot; &lt;&lt; (vmpointer-&gt;getPcValue()) &lt;&lt; endl;
+<span class="lineNum">     627 </span>            :         //      
+<span class="lineNum">     628 </span>            :         //      for (int32_t i = prevSumOfInitMain__pcReg; i &lt; curSumOfInitMain_pcReg - 1; i++)
+<span class="lineNum">     629 </span>            :         //              cursor.movePosition(QTextCursor::NextBlock);
+<span class="lineNum">     630 </span>            :         //      
+<span class="lineNum">     631 </span>            : 
+<span class="lineNum">     632 </span>            :         //      prevSumOfInitMain__pcReg = curSumOfInitMain_pcReg; // This saves the sum of (where the main starts) and the (location of the next instruction or pcReg value)
+<span class="lineNum">     633 </span>            : 
+<span class="lineNum">     634 </span>            :         //      colorYellow();
+<span class="lineNum">     635 </span>            :         //}
+<span class="lineNum">     636 </span>            : 
+<span class="lineNum">     637 </span><span class="lineCov">          3 :         text-&gt;setTextCursor(cursor);</span>
+<span class="lineNum">     638 </span><span class="lineCov">          3 : }</span>
+<a name="639"><span class="lineNum">     639 </span>            : </a>
+<span class="lineNum">     640 </span>            : 
+<span class="lineNum">     641 </span><span class="lineCov">         15 : void VirtualMachineGUI::load(QString filename)</span>
+<span class="lineNum">     642 </span>            : {
+<span class="lineNum">     643 </span><span class="lineCov">         15 :         fileName = filename; // This assigns the filename path to the private Qstring variable  </span>
+<span class="lineNum">     644 </span><span class="lineCov">         30 :         string filenameStr = filename.toStdString(); </span>
+<span class="lineNum">     645 </span><span class="lineCov">         30 :         ifstream assemblyFile(filenameStr); // constructs an ifstream object using the file path </span>
+<span class="lineNum">     646 </span>            :         
+<span class="lineNum">     647 </span><span class="lineCov">         15 :         if (!assemblyFile.fail()) {</span>
+<span class="lineNum">     648 </span>            : 
+<span class="lineNum">     649 </span><span class="lineCov">         24 :                 TokenList assemblyTokenList = tokenize(assemblyFile);</span>
+<span class="lineNum">     650 </span>            : 
+<span class="lineNum">     651 </span><span class="lineCov">         12 :                 if (assemblyTokenList.back().type() == ERROR) {</span>
+<span class="lineNum">     652 </span><span class="lineNoCov">          0 :                         status-&gt;setText(&quot;Error: Failed to Tokenize .asm file&quot;);</span>
+<span class="lineNum">     653 </span>            :                 }
+<span class="lineNum">     654 </span>            :                 else {
+<span class="lineNum">     655 </span>            : 
+<span class="lineNum">     656 </span><span class="lineCov">         24 :                         Parser mipsParser(assemblyTokenList); // This constructs a parser called mipsParser that takes the token list generated by the lexer</span>
+<span class="lineNum">     657 </span><span class="lineCov">         12 :                         mipsParser.parseFile();</span>
+<span class="lineNum">     658 </span>            : 
+<span class="lineNum">     659 </span><span class="lineCov">         12 :                         if (mipsParser.successfullyParsed() == false) {</span>
+<span class="lineNum">     660 </span><span class="lineNoCov">          0 :                                 status-&gt;setText(&quot;Error: Failed to Parse .asm file&quot;);</span>
+<span class="lineNum">     661 </span>            :                         }
+<span class="lineNum">     662 </span>            :                         else {
+<span class="lineNum">     663 </span><span class="lineCov">         12 :                                 vmpointer = new Simulator(mipsParser.getInitialRegisterContents(), mipsParser.getInitialMemoryLayout(), mipsParser.getProgramInstructions(), mipsParser.getLabelsMap()); // Constructs the basic simulator parameters</span>
+<span class="lineNum">     664 </span>            :                                 
+<span class="lineNum">     665 </span><span class="lineCov">         24 :                                 unordered_map&lt;string, LabelInfo&gt; labelMap = mipsParser.getLabelsMap(); // This is to make sure there is a main in the labels map</span>
+<span class="lineNum">     666 </span><span class="lineCov">         12 :                                 unordered_map&lt;string, LabelInfo&gt;::iterator findMain = labelMap.find(&quot;main&quot;); // The program counter starts at the main label, so want to find the label name &quot;main&quot;</span>
+<span class="lineNum">     667 </span>            : 
+<span class="lineNum">     668 </span><span class="lineCov">         12 :                                 if (findMain == labelMap.end())</span>
+<span class="lineNum">     669 </span><span class="lineNoCov">          0 :                                         status-&gt;setText(&quot;Error: Failed to find a main: label in the .asm file&quot;);</span>
+<span class="lineNum">     670 </span>            :                                 else {
+<span class="lineNum">     671 </span>            :                                         // I need to find what line number does main appear in the .asm file and assign it to my private variable initMainLine
+<span class="lineNum">     672 </span><span class="lineCov">        141 :                                         for (auto itMain = assemblyTokenList.begin(); itMain != assemblyTokenList.end(); ++itMain) {</span>
+<span class="lineNum">     673 </span><span class="lineCov">        141 :                                                 if ((itMain-&gt;value()) == &quot;main:&quot;) {</span>
+<span class="lineNum">     674 </span><span class="lineCov">         12 :                                                         initMainLine = (itMain-&gt;line());</span>
+<span class="lineNum">     675 </span><span class="lineCov">         12 :                                                         prevSumOfInitMain__pcReg = initMainLine; // Initially PcReg = 0 so the sum is equal to the initial line number in main</span>
+<span class="lineNum">     676 </span><span class="lineCov">         12 :                                                         break;</span>
+<span class="lineNum">     677 </span>            :                                                 }
+<span class="lineNum">     678 </span>            :                                         }
+<span class="lineNum">     679 </span>            : 
+<span class="lineNum">     680 </span><span class="lineCov">         12 :                                         vmpointer-&gt;setStartInstrIndex();</span>
+<span class="lineNum">     681 </span><span class="lineCov">         12 :                                         createPlainTextWidget(); </span>
+<span class="lineNum">     682 </span><span class="lineCov">         12 :                                         status-&gt;setText(&quot;Ok&quot;);</span>
+<span class="lineNum">     683 </span>            :                                         
+<span class="lineNum">     684 </span><span class="lineCov">         12 :                                         constructModel();</span>
+<span class="lineNum">     685 </span>            :                                 }
+<span class="lineNum">     686 </span>            :                         }
+<span class="lineNum">     687 </span>            :                 }
+<span class="lineNum">     688 </span>            :         }
+<span class="lineNum">     689 </span>            :         else {
+<span class="lineNum">     690 </span>            :                 // Here I would create the error model to be displayed, EDIT model to fit an error case
+<span class="lineNum">     691 </span><span class="lineCov">          3 :                 errorOpeningFile = true;</span>
+<span class="lineNum">     692 </span><span class="lineCov">          3 :                 errorModel();</span>
+<span class="lineNum">     693 </span><span class="lineCov">          3 :                 status-&gt;setText(&quot;Error: Failed to open file&quot;);</span>
+<span class="lineNum">     694 </span>            :         }
+<span class="lineNum">     695 </span><span class="lineCov">         15 : }</span>
+<a name="696"><span class="lineNum">     696 </span>            : </a>
+<span class="lineNum">     697 </span>            : 
+<span class="lineNum">     698 </span><span class="lineCov">         12 : void VirtualMachineGUI::constructModel()</span>
+<span class="lineNum">     699 </span>            : {
+<span class="lineNum">     700 </span><span class="lineCov">         12 :         registersModel = new myQtTableModel(&quot;regLayout&quot;, (vmpointer-&gt;getRegisterMap()), (vmpointer-&gt;getMemoryLayout()) );</span>
+<span class="lineNum">     701 </span><span class="lineCov">         12 :         registersModel-&gt;setObjectName(&quot;regModel&quot;);</span>
+<span class="lineNum">     702 </span><span class="lineCov">         12 :         memoryModel = new myQtTableModel(&quot;memLayout&quot;, (vmpointer-&gt;getRegisterMap()), (vmpointer-&gt;getMemoryLayout()) );</span>
+<span class="lineNum">     703 </span><span class="lineCov">         12 :         memoryModel-&gt;setObjectName(&quot;memModel&quot;);</span>
+<span class="lineNum">     704 </span>            : 
+<span class="lineNum">     705 </span><span class="lineCov">         12 :         registers-&gt;setModel(registersModel);</span>
+<span class="lineNum">     706 </span><span class="lineCov">         12 :         registers-&gt;setColumnWidth(0, 140); // 140 is the best number to fit all three columns from the registerModel</span>
+<span class="lineNum">     707 </span><span class="lineCov">         12 :         registers-&gt;setColumnWidth(1, 140);</span>
+<span class="lineNum">     708 </span><span class="lineCov">         12 :         registers-&gt;setColumnWidth(2, 140);</span>
+<span class="lineNum">     709 </span>            : 
+<span class="lineNum">     710 </span><span class="lineCov">         12 :         memory-&gt;setModel(memoryModel);</span>
+<span class="lineNum">     711 </span><span class="lineCov">         12 :         memory-&gt;setColumnWidth(0, 140); // 140 is the best number to fit all 2 columns from the memoryModel and leave an additional empty &quot;column&quot;</span>
+<span class="lineNum">     712 </span><span class="lineCov">         12 :         memory-&gt;setColumnWidth(1, 140);</span>
+<a name="713"><span class="lineNum">     713 </span><span class="lineCov">         12 : }</span></a>
+<span class="lineNum">     714 </span>            : 
+<span class="lineNum">     715 </span><span class="lineCov">          3 : void VirtualMachineGUI::errorModel()</span>
+<span class="lineNum">     716 </span>            : {
+<span class="lineNum">     717 </span><span class="lineCov">          3 :         registersModel = new myQtTableModel(&quot;regLayout&quot;);</span>
+<span class="lineNum">     718 </span><span class="lineCov">          3 :         registersModel-&gt;setObjectName(&quot;regModel&quot;);</span>
+<span class="lineNum">     719 </span><span class="lineCov">          3 :         memoryModel = new myQtTableModel(&quot;memLayout&quot;);</span>
+<span class="lineNum">     720 </span><span class="lineCov">          3 :         memoryModel-&gt;setObjectName(&quot;memModel&quot;);</span>
+<span class="lineNum">     721 </span>            : 
+<span class="lineNum">     722 </span><span class="lineCov">          3 :         registers-&gt;setModel(registersModel);</span>
+<span class="lineNum">     723 </span><span class="lineCov">          3 :         registers-&gt;setColumnWidth(0, 140); // 140 is the best number to fit all three columns from the registerModel</span>
+<span class="lineNum">     724 </span><span class="lineCov">          3 :         registers-&gt;setColumnWidth(1, 140);</span>
+<span class="lineNum">     725 </span><span class="lineCov">          3 :         registers-&gt;setColumnWidth(2, 140);</span>
+<span class="lineNum">     726 </span>            : 
+<span class="lineNum">     727 </span><span class="lineCov">          3 :         memory-&gt;setModel(memoryModel);</span>
+<span class="lineNum">     728 </span><span class="lineCov">          3 :         memory-&gt;setColumnWidth(0, 140); // 140 is the best number to fit all 2 columns from the memoryModel and leave an additional empty &quot;column&quot;</span>
+<span class="lineNum">     729 </span><span class="lineCov">          3 :         memory-&gt;setColumnWidth(1, 140);</span>
+<a name="730"><span class="lineNum">     730 </span><span class="lineCov">          3 : }</span></a>
+<span class="lineNum">     731 </span>            : 
+<span class="lineNum">     732 </span><span class="lineNoCov">          0 : void VirtualMachineGUI::updateModelView()</span>
+<span class="lineNum">     733 </span>            : {
+<span class="lineNum">     734 </span><span class="lineNoCov">          0 :         QModelIndex dummyIndex;</span>
+<span class="lineNum">     735 </span><span class="lineNoCov">          0 :         QVariant dummyMemQvariant = QVariant(tr(&quot;memoryModel&quot;));</span>
+<span class="lineNum">     736 </span><span class="lineNoCov">          0 :         QVariant dummyRegQvariant = QVariant(tr(&quot;registerModel&quot;));</span>
+<span class="lineNum">     737 </span>            : 
+<span class="lineNum">     738 </span><span class="lineNoCov">          0 :         registersModel-&gt;updateModel((vmpointer-&gt;getRegisterMap()), (vmpointer-&gt;getMemoryLayout()), &quot;registerModel&quot;);</span>
+<span class="lineNum">     739 </span><span class="lineNoCov">          0 :         memoryModel-&gt;updateModel((vmpointer-&gt;getRegisterMap()), (vmpointer-&gt;getMemoryLayout()), &quot;memoryModel&quot;);</span>
+<span class="lineNum">     740 </span>            : 
+<span class="lineNum">     741 </span><span class="lineNoCov">          0 :         registersModel-&gt;setData(dummyIndex, dummyRegQvariant, Qt::EditRole); // Only thing I use setData() for is to emit the dataChanged() signal</span>
+<span class="lineNum">     742 </span><span class="lineNoCov">          0 :         memoryModel-&gt;setData(dummyIndex, dummyMemQvariant, Qt::EditRole);</span>
+<a name="743"><span class="lineNum">     743 </span><span class="lineNoCov">          0 : }</span></a>
+<span class="lineNum">     744 </span>            : 
+<span class="lineNum">     745 </span><span class="lineNoCov">          0 : void VirtualMachineGUI::enableAndDisableView(bool boolValue)</span>
+<span class="lineNum">     746 </span>            : {
+<span class="lineNum">     747 </span>            :         bool oppBoolValue;
+<span class="lineNum">     748 </span><span class="lineNoCov">          0 :         if (boolValue == true)</span>
+<span class="lineNum">     749 </span><span class="lineNoCov">          0 :                 oppBoolValue = false;</span>
+<span class="lineNum">     750 </span>            :         else
+<span class="lineNum">     751 </span><span class="lineNoCov">          0 :                 oppBoolValue = true;</span>
+<span class="lineNum">     752 </span>            : 
+<span class="lineNum">     753 </span><span class="lineNoCov">          0 :         breakRun-&gt;setEnabled(boolValue);</span>
+<span class="lineNum">     754 </span><span class="lineNoCov">          0 :         run-&gt;setEnabled(oppBoolValue);</span>
+<span class="lineNum">     755 </span><span class="lineNoCov">          0 :         step-&gt;setEnabled(oppBoolValue);</span>
+<span class="lineNum">     756 </span>            : 
+<span class="lineNum">     757 </span><span class="lineNoCov">          0 :         text-&gt;setEnabled(oppBoolValue);</span>
+<span class="lineNum">     758 </span><span class="lineNoCov">          0 :         registers-&gt;setEnabled(oppBoolValue);</span>
+<span class="lineNum">     759 </span><span class="lineNoCov">          0 :         memory-&gt;setEnabled(oppBoolValue);</span>
+<span class="lineNum">     760 </span><span class="lineNoCov">          0 :         status-&gt;setEnabled(oppBoolValue);</span>
+<a name="761"><span class="lineNum">     761 </span><span class="lineNoCov">          0 : }</span></a>
+<span class="lineNum">     762 </span>            : 
+<span class="lineNum">     763 </span><span class="lineCov">         39 : void VirtualMachineGUI::stepSlot()</span>
+<span class="lineNum">     764 </span>            : {
+<span class="lineNum">     765 </span><span class="lineCov">         39 :         if (errorOpeningFile == false)</span>
+<span class="lineNum">     766 </span>            :         {
+<span class="lineNum">     767 </span>            :                 // GUI will update based on if the user has clicked the step button, and the register/memory contents will update accordingly
+<span class="lineNum">     768 </span><span class="lineNoCov">          0 :                 if (((vmpointer-&gt;isEndOfFileCheck()) == false)) {</span>
+<span class="lineNum">     769 </span><span class="lineNoCov">          0 :                         vmpointer-&gt;update_simulation_public(); // This updates the virtual machine and its values</span>
+<span class="lineNum">     770 </span><span class="lineNoCov">          0 :                         vmpointer-&gt;update_pcReg();</span>
+<span class="lineNum">     771 </span>            : 
+<span class="lineNum">     772 </span><span class="lineNoCov">          0 :                         updateModelView();</span>
+<span class="lineNum">     773 </span>            : 
+<span class="lineNum">     774 </span><span class="lineNoCov">          0 :                         highlightText();</span>
+<span class="lineNum">     775 </span>            :                 }
+<span class="lineNum">     776 </span>            :                 else {
+<span class="lineNum">     777 </span><span class="lineNoCov">          0 :                         status-&gt;setText(&quot;Error: reached the end of the file, can not Step anymore.&quot;);</span>
+<span class="lineNum">     778 </span>            :                 }
+<span class="lineNum">     779 </span><span class="lineNoCov">          0 :                 vmpointer-&gt;isEndOfFileCheck();</span>
+<span class="lineNum">     780 </span>            :         }
+<a name="781"><span class="lineNum">     781 </span><span class="lineCov">         39 : }</span></a>
+<span class="lineNum">     782 </span>            : 
+<span class="lineNum">     783 </span><span class="lineNoCov">          0 : void VirtualMachineGUI::runSlot()</span>
+<span class="lineNum">     784 </span>            : {
+<span class="lineNum">     785 </span><span class="lineNoCov">          0 :         if (errorOpeningFile == false) {</span>
+<span class="lineNum">     786 </span>            : 
+<span class="lineNum">     787 </span><span class="lineNoCov">          0 :                 if (((vmpointer-&gt;isEndOfFileCheck()) == false)) {</span>
+<span class="lineNum">     788 </span>            :                         
+<span class="lineNum">     789 </span><span class="lineNoCov">          0 :                         enableAndDisableView(true);</span>
+<span class="lineNum">     790 </span>            : 
+<span class="lineNum">     791 </span><span class="lineNoCov">          0 :                         vmpointer-&gt;runOrBreak_public(&quot;run&quot;); // Will keep stepping until I reached the end of the file or if I press the break button</span>
+<span class="lineNum">     792 </span>            :                 }
+<span class="lineNum">     793 </span>            :                 else {
+<span class="lineNum">     794 </span><span class="lineNoCov">          0 :                         status-&gt;setText(&quot;Error: reached the end of the file, can not run the program.&quot;);</span>
+<span class="lineNum">     795 </span>            :                 }
+<span class="lineNum">     796 </span><span class="lineNoCov">          0 :                 vmpointer-&gt;isEndOfFileCheck();</span>
+<span class="lineNum">     797 </span>            :         }
+<span class="lineNum">     798 </span>            : 
+<a name="799"><span class="lineNum">     799 </span><span class="lineNoCov">          0 : }</span></a>
+<span class="lineNum">     800 </span>            : 
+<span class="lineNum">     801 </span><span class="lineNoCov">          0 : void VirtualMachineGUI::breakSlot()</span>
+<span class="lineNum">     802 </span>            : {
+<span class="lineNum">     803 </span><span class="lineNoCov">          0 :         if (errorOpeningFile == false) {</span>
+<span class="lineNum">     804 </span>            : 
+<span class="lineNum">     805 </span><span class="lineNoCov">          0 :                 vmpointer-&gt;runOrBreak_public(&quot;break&quot;); // Will keep stepping until I reached the end of the file or if I press the break button</span>
+<span class="lineNum">     806 </span>            : 
+<span class="lineNum">     807 </span><span class="lineNoCov">          0 :                 enableAndDisableView(false);</span>
+<span class="lineNum">     808 </span>            : 
+<span class="lineNum">     809 </span><span class="lineNoCov">          0 :                 updateModelView();</span>
+<span class="lineNum">     810 </span>            : 
+<span class="lineNum">     811 </span><span class="lineNoCov">          0 :                 hasBreaked = true;</span>
+<span class="lineNum">     812 </span><span class="lineNoCov">          0 :                 highlightText();</span>
+<span class="lineNum">     813 </span><span class="lineNoCov">          0 :                 hasBreaked = false;</span>
+<span class="lineNum">     814 </span>            : 
+<span class="lineNum">     815 </span><span class="lineNoCov">          0 :                 if(vmpointer-&gt;isEndOfFileCheck() == true)</span>
+<span class="lineNum">     816 </span><span class="lineNoCov">          0 :                         status-&gt;setText(&quot;Error: reached the end of the file, can not run the program.&quot;);</span>
+<span class="lineNum">     817 </span>            :         }
+<span class="lineNum">     818 </span>            : 
+<a name="819"><span class="lineNum">     819 </span><span class="lineNoCov">          0 : }</span></a>
+<span class="lineNum">     820 </span>            : 
+<span class="lineNum">     821 </span><span class="lineNoCov">          0 : void VirtualMachineGUI::guiShow()</span>
+<a name="822"><span class="lineNum">     822 </span>            : {</a>
+<span class="lineNum">     823 </span><span class="lineNoCov">          0 :         mainWindow-&gt;showMaximized();</span>
+<span class="lineNum">     824 </span><span class="lineCov">          9 : }</span>
+<span class="lineNum">     825 </span>            : 
+<span class="lineNum">     826 </span>            : 
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.12</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

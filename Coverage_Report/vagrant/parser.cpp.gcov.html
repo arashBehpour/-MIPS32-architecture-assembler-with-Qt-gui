@@ -1,0 +1,1533 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - Coverage.combined.cleaned - /vagrant/parser.cpp</title>
+  <link rel="stylesheet" type="text/css" href="../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../index.html">top level</a> - <a href="index.html">vagrant</a> - parser.cpp<span style="font-size: 80%;"> (source / <a href="parser.cpp.func-sort-c.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">Coverage.combined.cleaned</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">884</td>
+            <td class="headerCovTableEntry">902</td>
+            <td class="headerCovTableEntryHi">98.0 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2018-04-25 07:19:55</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">52</td>
+            <td class="headerCovTableEntry">52</td>
+            <td class="headerCovTableEntryHi">100.0 %</td>
+          </tr>
+          <tr><td><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : // implement the parser here</a>
+<span class="lineNum">       2 </span>            : #include &quot;parser.hpp&quot;
+<span class="lineNum">       3 </span>            : #include &lt;assert.h&gt;
+<span class="lineNum">       4 </span>            : #include &lt;limits&gt;// This is for the function bool fitsBits(); to check the boundaries of integers
+<a name="5"><span class="lineNum">       5 </span>            : </a>
+<span class="lineNum">       6 </span>            : 
+<span class="lineNum">       7 </span><span class="lineCov">        728 : Parser::Parser(const TokenList&amp; tokenList) // assigns the tokenList from the lexer to the private token list of the class</span>
+<span class="lineNum">       8 </span>            : {
+<span class="lineNum">       9 </span><span class="lineCov">        728 :         assemblyTokenList = tokenList;</span>
+<span class="lineNum">      10 </span><span class="lineCov">        728 :         systemState = INITIAL_STATE;</span>
+<a name="11"><span class="lineNum">      11 </span><span class="lineCov">        728 : }</span></a>
+<span class="lineNum">      12 </span>            : 
+<span class="lineNum">      13 </span><span class="lineCov">       1456 : Parser::~Parser()</span>
+<span class="lineNum">      14 </span>            : {
+<span class="lineNum">      15 </span><span class="lineCov">        728 :         opcodeArguments.clear();</span>
+<span class="lineNum">      16 </span><span class="lineCov">        728 :         constantsMap.clear();</span>
+<a name="17"><span class="lineNum">      17 </span><span class="lineCov">        728 : }</span></a>
+<span class="lineNum">      18 </span>            : 
+<span class="lineNum">      19 </span><span class="lineCov">        728 : void Parser::parseFile()</span>
+<span class="lineNum">      20 </span>            : {
+<span class="lineNum">      21 </span><span class="lineCov">        728 :         TokenList::iterator it = assemblyTokenList.begin(); // could have done |auto| instead of |TokenList::iterator|</span>
+<span class="lineNum">      22 </span>            :         inputValue currentInput; // Classifying the input type of the token
+<span class="lineNum">      23 </span><span class="lineCov">       1456 :         string inputString; // This is the current string assigned by the current token</span>
+<span class="lineNum">      24 </span><span class="lineCov">        728 :         correctGrammer = false; // variable used to indicate if the file correctly was parsed</span>
+<span class="lineNum">      25 </span><span class="lineCov">        728 :         initializeRegisters();</span>
+<span class="lineNum">      26 </span>            : 
+<span class="lineNum">      27 </span><span class="lineCov">      47320 :         do {</span>
+<span class="lineNum">      28 </span><span class="lineCov">      23457 :                 currentInput = classify(it, assemblyTokenList.end(), inputString);</span>
+<span class="lineNum">      29 </span><span class="lineCov">      23457 :                 if ((currentInput != ERROR_IN) &amp;&amp; (currentInput != EOT)) // also systemState != ERROR_STATE </span>
+<span class="lineNum">      30 </span><span class="lineCov">      23394 :                         ++it; // increment iterator to next element if there was no errors</span>
+<span class="lineNum">      31 </span>            : 
+<span class="lineNum">      32 </span><span class="lineCov">      23457 :                 switch (systemState) {</span>
+<span class="lineNum">      33 </span>            :                 case INITIAL_STATE:
+<span class="lineNum">      34 </span><span class="lineCov">        728 :                         update_mode(systemState, currentInput, it);</span>
+<span class="lineNum">      35 </span><span class="lineCov">        728 :                         break;</span>
+<span class="lineNum">      36 </span>            :                         
+<span class="lineNum">      37 </span>            :                 case DECLARATION_MODE_STATE:
+<span class="lineNum">      38 </span><span class="lineCov">       1232 :                         update_declaration(systemState, currentInput);</span>
+<span class="lineNum">      39 </span><span class="lineCov">       1232 :                         break;</span>
+<span class="lineNum">      40 </span>            : 
+<span class="lineNum">      41 </span>            :                 case TEXT_MODE_STATE:
+<span class="lineNum">      42 </span><span class="lineCov">        490 :                         update_instruction(systemState, currentInput);</span>
+<span class="lineNum">      43 </span><span class="lineCov">        490 :                         break;</span>
+<span class="lineNum">      44 </span>            : 
+<span class="lineNum">      45 </span>            :                 case NOP_STATE:
+<span class="lineNum">      46 </span><span class="lineCov">        126 :                         update_nop(systemState, currentInput);</span>
+<span class="lineNum">      47 </span><span class="lineCov">        126 :                         break;</span>
+<span class="lineNum">      48 </span>            : 
+<span class="lineNum">      49 </span>            :                 case LABEL_STATE_S0:
+<span class="lineNum">      50 </span><span class="lineCov">        770 :                         update_text_label(systemState, currentInput);</span>
+<span class="lineNum">      51 </span><span class="lineCov">        770 :                         break;</span>
+<span class="lineNum">      52 </span>            : 
+<span class="lineNum">      53 </span>            :                 case CONSTANT_STATE_S0:
+<span class="lineNum">      54 </span><span class="lineCov">        273 :                         update_constant1(systemState, currentInput);</span>
+<span class="lineNum">      55 </span><span class="lineCov">        273 :                         break;</span>
+<span class="lineNum">      56 </span>            : 
+<span class="lineNum">      57 </span>            :                 case CONSTANT_STATE_S1:
+<span class="lineNum">      58 </span><span class="lineCov">        259 :                         update_constant2(systemState, currentInput);</span>
+<span class="lineNum">      59 </span><span class="lineCov">        259 :                         break;</span>
+<span class="lineNum">      60 </span>            : 
+<span class="lineNum">      61 </span>            :                 case CONSTANT_STATE_S2:
+<span class="lineNum">      62 </span><span class="lineCov">        252 :                         update_constant3(systemState, currentInput, inputString);</span>
+<span class="lineNum">      63 </span><span class="lineCov">        252 :                         break;</span>
+<span class="lineNum">      64 </span>            : 
+<span class="lineNum">      65 </span>            :                 case LAYOUT_STATE_INT_S0:
+<span class="lineNum">      66 </span><span class="lineCov">        665 :                         update_intLayout1(systemState, currentInput, inputString);</span>
+<span class="lineNum">      67 </span><span class="lineCov">        665 :                         break;</span>
+<span class="lineNum">      68 </span>            : 
+<span class="lineNum">      69 </span>            :                 case LAYOUT_STATE_INT_S1:
+<span class="lineNum">      70 </span><span class="lineCov">        714 :                         update_intLayout2(systemState, currentInput);</span>
+<span class="lineNum">      71 </span><span class="lineCov">        714 :                         break;</span>
+<span class="lineNum">      72 </span>            : 
+<span class="lineNum">      73 </span>            :                 case SEP_STATE: // == LAYOUT_STATE_INT_S2 but in the text mode section and SEP_State for the .text section
+<span class="lineNum">      74 </span><span class="lineCov">       3444 :                         update_sep(systemState, currentInput, inputString);</span>
+<span class="lineNum">      75 </span><span class="lineCov">       3444 :                         break;</span>
+<span class="lineNum">      76 </span>            : 
+<span class="lineNum">      77 </span>            :                 case LAYOUT_STATE_STR_S0:
+<span class="lineNum">      78 </span><span class="lineCov">         77 :                         update_strLayout1(systemState, currentInput);</span>
+<span class="lineNum">      79 </span><span class="lineCov">         77 :                         break;</span>
+<span class="lineNum">      80 </span>            : 
+<span class="lineNum">      81 </span>            :                 case STRING_DELIM_STATE1:  // == LAYOUT_STATE_STR_S1
+<span class="lineNum">      82 </span><span class="lineCov">         70 :                         update_strLayout2(systemState, currentInput);</span>
+<span class="lineNum">      83 </span><span class="lineCov">         70 :                         break;</span>
+<span class="lineNum">      84 </span>            : 
+<span class="lineNum">      85 </span>            :                 case LAYOUT_STATE_STR_S2: 
+<span class="lineNum">      86 </span><span class="lineCov">         70 :                         update_strLayout3(systemState, currentInput); </span>
+<span class="lineNum">      87 </span><span class="lineCov">         70 :                         break;</span>
+<span class="lineNum">      88 </span>            : 
+<span class="lineNum">      89 </span>            :                 case STRING_DELIM_STATE2: // == LAYOUT_STATE_STR_S3
+<span class="lineNum">      90 </span><span class="lineCov">         56 :                         update_strLayout4(systemState, currentInput, inputString);</span>
+<span class="lineNum">      91 </span><span class="lineCov">         56 :                         break;</span>
+<span class="lineNum">      92 </span>            : 
+<span class="lineNum">      93 </span>            :                 case EOL_STATE:
+<span class="lineNum">      94 </span><span class="lineCov">       1386 :                         update_eol(systemState, currentInput);</span>
+<span class="lineNum">      95 </span><span class="lineCov">       1386 :                         break;</span>
+<span class="lineNum">      96 </span>            : 
+<span class="lineNum">      97 </span>            :                 case text_EOL_STATE:
+<span class="lineNum">      98 </span><span class="lineCov">       3542 :                         update_text_eol(systemState, currentInput);</span>
+<span class="lineNum">      99 </span><span class="lineCov">       3542 :                         break;</span>
+<span class="lineNum">     100 </span>            : 
+<span class="lineNum">     101 </span>            :                 case OPCODE_STATE:
+<span class="lineNum">     102 </span><span class="lineCov">       2919 :                         update_opcode(systemState, currentInput, inputString);</span>
+<span class="lineNum">     103 </span><span class="lineCov">       2919 :                         break;</span>
+<span class="lineNum">     104 </span>            : 
+<span class="lineNum">     105 </span>            :                 case ARG1_STATE:
+<span class="lineNum">     106 </span><span class="lineCov">       2821 :                         update_arg1(systemState, currentInput);</span>
+<span class="lineNum">     107 </span><span class="lineCov">       2821 :                         break;</span>
+<span class="lineNum">     108 </span>            : 
+<span class="lineNum">     109 </span>            :                 case ARG2_REG_STATE:
+<span class="lineNum">     110 </span><span class="lineCov">        833 :                         update_arg2Reg(systemState, currentInput);</span>
+<span class="lineNum">     111 </span><span class="lineCov">        833 :                         break;</span>
+<span class="lineNum">     112 </span>            : 
+<span class="lineNum">     113 </span>            :                 case ARG2_IMMEDIATE_STATE:
+<span class="lineNum">     114 </span><span class="lineCov">        413 :                         update_arg2Immediate(systemState, currentInput);</span>
+<span class="lineNum">     115 </span><span class="lineCov">        413 :                         break;</span>
+<span class="lineNum">     116 </span>            : 
+<span class="lineNum">     117 </span>            :                 case ARG_SOURCE_STATE:
+<span class="lineNum">     118 </span><span class="lineCov">        770 :                         update_arg2and3Source(systemState, currentInput);</span>
+<span class="lineNum">     119 </span><span class="lineCov">        770 :                         break;</span>
+<span class="lineNum">     120 </span>            : 
+<span class="lineNum">     121 </span>            :                 case ARG2_MEMREF_STATE:
+<span class="lineNum">     122 </span><span class="lineCov">       1092 :                         update_arg2Memref(systemState, currentInput);</span>
+<span class="lineNum">     123 </span><span class="lineCov">       1092 :                         break;</span>
+<span class="lineNum">     124 </span>            : 
+<span class="lineNum">     125 </span>            :                 case OPENP_STATE:
+<span class="lineNum">     126 </span><span class="lineCov">        140 :                         update_openP(systemState, currentInput, inputString);</span>
+<span class="lineNum">     127 </span><span class="lineCov">        140 :                         break;</span>
+<span class="lineNum">     128 </span>            : 
+<span class="lineNum">     129 </span>            :                 case CLOSEP_STATE:
+<span class="lineNum">     130 </span><span class="lineCov">        133 :                         update_closeP(systemState, currentInput);</span>
+<span class="lineNum">     131 </span><span class="lineCov">        133 :                         break;</span>
+<span class="lineNum">     132 </span>            : 
+<span class="lineNum">     133 </span>            :                 case OFFSET_STATE: // THis state could be called OFFSET_AND_IMMEDIATE_STATE but naming convention to long
+<span class="lineNum">     134 </span><span class="lineCov">        133 :                         update_offsetOrImmediate(systemState, currentInput);</span>
+<span class="lineNum">     135 </span><span class="lineCov">        133 :                         break;</span>
+<span class="lineNum">     136 </span>            : 
+<span class="lineNum">     137 </span>            :                 case ERROR_STATE: // Dummy State 
+<span class="lineNum">     138 </span><span class="lineCov">         49 :                         break;</span>
+<span class="lineNum">     139 </span>            :                 };
+<span class="lineNum">     140 </span>            : 
+<span class="lineNum">     141 </span><span class="lineCov">      69965 :         } while ((systemState != ERROR_STATE) &amp;&amp; (it != assemblyTokenList.end()) ); // Will continue parsing until I have hit an error or until I have hit the end of the token list</span>
+<span class="lineNum">     142 </span>            : 
+<span class="lineNum">     143 </span><span class="lineCov">        728 :         if (assemblyTokenList.empty())</span>
+<span class="lineNum">     144 </span><span class="lineCov">          7 :                 errorMessage = &quot;Error:0: Attempted to parse an empty file&quot;;</span>
+<span class="lineNum">     145 </span>            : 
+<span class="lineNum">     146 </span><span class="lineCov">        728 :         if(systemState != ERROR_STATE)</span>
+<span class="lineNum">     147 </span><span class="lineCov">        322 :                 correctGrammer = true;</span>
+<a name="148"><span class="lineNum">     148 </span><span class="lineCov">        728 : }</span></a>
+<span class="lineNum">     149 </span>            : 
+<span class="lineNum">     150 </span><span class="lineCov">        728 : bool Parser::successfullyParsed()</span>
+<span class="lineNum">     151 </span>            : {
+<span class="lineNum">     152 </span><span class="lineCov">        728 :         return correctGrammer;</span>
+<a name="153"><span class="lineNum">     153 </span>            : }</a>
+<span class="lineNum">     154 </span>            : 
+<span class="lineNum">     155 </span><span class="lineCov">        399 : string Parser::errorMsg()</span>
+<span class="lineNum">     156 </span>            : {
+<span class="lineNum">     157 </span><span class="lineCov">        399 :         if (!correctGrammer)</span>
+<span class="lineNum">     158 </span><span class="lineCov">        392 :                 return errorMessage;</span>
+<span class="lineNum">     159 </span>            :         else
+<span class="lineNum">     160 </span><span class="lineCov">          7 :                 return &quot;&quot;;</span>
+<a name="161"><span class="lineNum">     161 </span>            : }</a>
+<span class="lineNum">     162 </span>            : 
+<span class="lineNum">     163 </span><span class="lineCov">       4214 : string Parser::determineHexValue(size_t integer)</span>
+<span class="lineNum">     164 </span>            : {
+<span class="lineNum">     165 </span><span class="lineCov">       4214 :         if (integer == 0)</span>
+<span class="lineNum">     166 </span><span class="lineCov">       2856 :                 return &quot;0&quot;;</span>
+<span class="lineNum">     167 </span><span class="lineCov">       1358 :         else if (integer == 1)</span>
+<span class="lineNum">     168 </span><span class="lineCov">        140 :                 return &quot;1&quot;;</span>
+<span class="lineNum">     169 </span><span class="lineCov">       1218 :         else if (integer == 2)</span>
+<span class="lineNum">     170 </span><span class="lineCov">        105 :                 return &quot;2&quot;;</span>
+<span class="lineNum">     171 </span><span class="lineCov">       1113 :         else if (integer == 3)</span>
+<span class="lineNum">     172 </span><span class="lineCov">         49 :                 return &quot;3&quot;;</span>
+<span class="lineNum">     173 </span><span class="lineCov">       1064 :         else if (integer == 4)</span>
+<span class="lineNum">     174 </span><span class="lineCov">         70 :                 return &quot;4&quot;;</span>
+<span class="lineNum">     175 </span><span class="lineCov">        994 :         else if (integer == 5)</span>
+<span class="lineNum">     176 </span><span class="lineCov">         70 :                 return &quot;5&quot;;</span>
+<span class="lineNum">     177 </span><span class="lineCov">        924 :         else if (integer == 6)</span>
+<span class="lineNum">     178 </span><span class="lineCov">        210 :                 return &quot;6&quot;;</span>
+<span class="lineNum">     179 </span><span class="lineCov">        714 :         else if (integer == 7)</span>
+<span class="lineNum">     180 </span><span class="lineCov">         42 :                 return &quot;7&quot;;</span>
+<span class="lineNum">     181 </span><span class="lineCov">        672 :         else if (integer == 8)</span>
+<span class="lineNum">     182 </span><span class="lineCov">         42 :                 return &quot;8&quot;;</span>
+<span class="lineNum">     183 </span><span class="lineCov">        630 :         else if (integer == 9)</span>
+<span class="lineNum">     184 </span><span class="lineCov">         21 :                 return &quot;9&quot;;</span>
+<span class="lineNum">     185 </span><span class="lineCov">        609 :         else if (integer == 10)</span>
+<span class="lineNum">     186 </span><span class="lineCov">         56 :                 return &quot;a&quot;;</span>
+<span class="lineNum">     187 </span><span class="lineCov">        553 :         else if (integer == 11)</span>
+<span class="lineNum">     188 </span><span class="lineCov">         28 :                 return &quot;b&quot;;</span>
+<span class="lineNum">     189 </span><span class="lineCov">        525 :         else if (integer == 12)</span>
+<span class="lineNum">     190 </span><span class="lineCov">        105 :                 return &quot;c&quot;;</span>
+<span class="lineNum">     191 </span><span class="lineCov">        420 :         else if (integer == 13)</span>
+<span class="lineNum">     192 </span><span class="lineNoCov">          0 :                 return &quot;d&quot;;</span>
+<span class="lineNum">     193 </span><span class="lineCov">        420 :         else if (integer == 14)</span>
+<span class="lineNum">     194 </span><span class="lineCov">         49 :                 return &quot;e&quot;;</span>
+<span class="lineNum">     195 </span><span class="lineCov">        371 :         else if (integer == 15)</span>
+<span class="lineNum">     196 </span><span class="lineCov">        371 :                 return &quot;f&quot;;</span>
+<span class="lineNum">     197 </span>            :         else
+<span class="lineNum">     198 </span><span class="lineNoCov">          0 :                 return &quot;ERROR&quot;; // Will not get to this because in my asciiMemAllocation() and intLayoutMemAllocation() the max integer value that can be sent is 15</span>
+<a name="199"><span class="lineNum">     199 </span>            : }</a>
+<span class="lineNum">     200 </span>            : 
+<span class="lineNum">     201 </span><span class="lineCov">        686 : void Parser::helpIntMemAllocation(string inputString, const string layoutKey)</span>
+<span class="lineNum">     202 </span>            : {
+<span class="lineNum">     203 </span><span class="lineCov">        686 :         if (layoutKey == &quot;.word&quot;) {</span>
+<span class="lineNum">     204 </span><span class="lineCov">        413 :                 intLayoutMemAllocation(0, inputString, layoutKey);</span>
+<span class="lineNum">     205 </span><span class="lineCov">        413 :                 intLayoutMemAllocation(8, inputString, layoutKey);</span>
+<span class="lineNum">     206 </span><span class="lineCov">        413 :                 intLayoutMemAllocation(16, inputString, layoutKey);</span>
+<span class="lineNum">     207 </span><span class="lineCov">        413 :                 intLayoutMemAllocation(24, inputString, layoutKey);</span>
+<span class="lineNum">     208 </span>            :         }
+<span class="lineNum">     209 </span><span class="lineCov">        273 :         else if (layoutKey == &quot;.space&quot;) {</span>
+<span class="lineNum">     210 </span><span class="lineCov">         63 :                 int32_t sizeToBeAllocated = stol(inputString);</span>
+<span class="lineNum">     211 </span><span class="lineCov">     703955 :                 for (int32_t i = 0; i &lt; sizeToBeAllocated; i++) { // the counter will be AN int32_t to match the sizeToBeAllocated variable</span>
+<span class="lineNum">     212 </span><span class="lineCov">     703892 :                         memoryLayout.push_back(&quot;00&quot;);</span>
+<span class="lineNum">     213 </span><span class="lineCov">     703892 :                         lastAvailableAddress++;</span>
+<span class="lineNum">     214 </span>            :                 }
+<span class="lineNum">     215 </span>            :         }
+<span class="lineNum">     216 </span><span class="lineCov">        210 :         else if (layoutKey == &quot;.half&quot;) {</span>
+<span class="lineNum">     217 </span><span class="lineCov">         35 :                 intLayoutMemAllocation(0, inputString, layoutKey);</span>
+<span class="lineNum">     218 </span><span class="lineCov">         35 :                 intLayoutMemAllocation(8, inputString, layoutKey);</span>
+<span class="lineNum">     219 </span>            :         }
+<span class="lineNum">     220 </span><span class="lineCov">        175 :         else if (layoutKey == &quot;.byte&quot;)</span>
+<span class="lineNum">     221 </span>            :         {
+<span class="lineNum">     222 </span><span class="lineCov">        175 :                 intLayoutMemAllocation(0, inputString, layoutKey);</span>
+<span class="lineNum">     223 </span>            :         }
+<a name="224"><span class="lineNum">     224 </span><span class="lineCov">        686 : }</span></a>
+<span class="lineNum">     225 </span>            : 
+<span class="lineNum">     226 </span><span class="lineCov">         42 : void Parser::asciiMemAllocation(string inputString)</span>
+<span class="lineNum">     227 </span>            : {
+<span class="lineNum">     228 </span><span class="lineCov">        252 :         for (size_t i = 0; i &lt; inputString.size(); i++) { // For each character store the proper hex string value</span>
+<span class="lineNum">     229 </span><span class="lineCov">        210 :                 bitset&lt;8&gt; binIn((uint8_t)inputString[i]); // Converts the character into its decimal value then converts it to binary</span>
+<span class="lineNum">     230 </span><span class="lineCov">        210 :                 size_t hexValueRight = 0, hexValueLeft = 0;</span>
+<span class="lineNum">     231 </span><span class="lineCov">        210 :                 if (binIn[0])</span>
+<span class="lineNum">     232 </span><span class="lineCov">        105 :                         hexValueRight += 1;</span>
+<span class="lineNum">     233 </span><span class="lineCov">        210 :                 if (binIn[1])</span>
+<span class="lineNum">     234 </span><span class="lineCov">         91 :                         hexValueRight += 2;</span>
+<span class="lineNum">     235 </span><span class="lineCov">        210 :                 if (binIn[2])</span>
+<span class="lineNum">     236 </span><span class="lineCov">        140 :                         hexValueRight += 4;</span>
+<span class="lineNum">     237 </span><span class="lineCov">        210 :                 if (binIn[3])</span>
+<span class="lineNum">     238 </span><span class="lineCov">        133 :                         hexValueRight += 8;</span>
+<span class="lineNum">     239 </span><span class="lineCov">        210 :                 if (binIn[4])</span>
+<span class="lineNum">     240 </span><span class="lineCov">         14 :                         hexValueLeft += 1;</span>
+<span class="lineNum">     241 </span><span class="lineCov">        210 :                 if (binIn[5])</span>
+<span class="lineNum">     242 </span><span class="lineCov">        196 :                         hexValueLeft += 2;</span>
+<span class="lineNum">     243 </span><span class="lineCov">        210 :                 if (binIn[6])</span>
+<span class="lineNum">     244 </span><span class="lineCov">        203 :                         hexValueLeft += 4;</span>
+<span class="lineNum">     245 </span><span class="lineCov">        210 :                 if (binIn[7])</span>
+<span class="lineNum">     246 </span><span class="lineNoCov">          0 :                         hexValueLeft += 8;</span>
+<span class="lineNum">     247 </span>            : 
+<span class="lineNum">     248 </span><span class="lineCov">        210 :                 memoryLayout.push_back(determineHexValue(hexValueLeft).append(determineHexValue(hexValueRight)) ); // ex. &quot;7&quot; + &quot;f&quot; = &quot;7f&quot; </span>
+<span class="lineNum">     249 </span><span class="lineCov">        210 :                 lastAvailableAddress++;</span>
+<span class="lineNum">     250 </span>            :         }
+<a name="251"><span class="lineNum">     251 </span><span class="lineCov">         42 : }</span></a>
+<span class="lineNum">     252 </span>            : 
+<span class="lineNum">     253 </span><span class="lineCov">       1897 : void Parser::intLayoutMemAllocation(size_t start, string inputString, const string layoutKey)</span>
+<span class="lineNum">     254 </span>            : {
+<span class="lineNum">     255 </span><span class="lineCov">       1897 :         if (layoutKey == &quot;.word&quot;) {</span>
+<span class="lineNum">     256 </span><span class="lineCov">       1652 :                 bitset&lt;32&gt; bitSet ((int32_t)stol(inputString));</span>
+<span class="lineNum">     257 </span><span class="lineCov">       1652 :                 size_t hexLeftInt = 0, hexRightInt = 0;</span>
+<span class="lineNum">     258 </span><span class="lineCov">       1652 :                 if (bitSet[start])</span>
+<span class="lineNum">     259 </span><span class="lineCov">        273 :                         hexRightInt += 1;</span>
+<span class="lineNum">     260 </span><span class="lineCov">       1652 :                 if (bitSet[start + 1])</span>
+<span class="lineNum">     261 </span><span class="lineCov">        322 :                         hexRightInt += 2;</span>
+<span class="lineNum">     262 </span><span class="lineCov">       1652 :                 if (bitSet[start + 2])</span>
+<span class="lineNum">     263 </span><span class="lineCov">        259 :                         hexRightInt += 4;</span>
+<span class="lineNum">     264 </span><span class="lineCov">       1652 :                 if (bitSet[start + 3])</span>
+<span class="lineNum">     265 </span><span class="lineCov">        308 :                         hexRightInt += 8;</span>
+<span class="lineNum">     266 </span><span class="lineCov">       1652 :                 if (bitSet[start + 4])</span>
+<span class="lineNum">     267 </span><span class="lineCov">        196 :                         hexLeftInt += 1;</span>
+<span class="lineNum">     268 </span><span class="lineCov">       1652 :                 if (bitSet[start + 5])</span>
+<span class="lineNum">     269 </span><span class="lineCov">        175 :                         hexLeftInt += 2;</span>
+<span class="lineNum">     270 </span><span class="lineCov">       1652 :                 if (bitSet[start + 6])</span>
+<span class="lineNum">     271 </span><span class="lineCov">        203 :                         hexLeftInt += 4;</span>
+<span class="lineNum">     272 </span><span class="lineCov">       1652 :                 if (bitSet[start + 7])</span>
+<span class="lineNum">     273 </span><span class="lineCov">        175 :                         hexLeftInt += 8;</span>
+<span class="lineNum">     274 </span>            : 
+<span class="lineNum">     275 </span><span class="lineCov">       1652 :                 memoryLayout.push_back(determineHexValue(hexLeftInt).append(determineHexValue(hexRightInt)) ); // ex. &quot;7&quot; + &quot;f&quot; = &quot;7f&quot; </span>
+<span class="lineNum">     276 </span><span class="lineCov">       1652 :                 lastAvailableAddress++;</span>
+<span class="lineNum">     277 </span>            :         }
+<span class="lineNum">     278 </span><span class="lineCov">        245 :         else if (layoutKey == &quot;.half&quot;) {</span>
+<span class="lineNum">     279 </span><span class="lineCov">         70 :                 bitset&lt;16&gt; bitSet ((int16_t)stol(inputString));</span>
+<span class="lineNum">     280 </span><span class="lineCov">         70 :                 size_t hexLeftInt = 0, hexRightInt = 0;</span>
+<span class="lineNum">     281 </span><span class="lineCov">         70 :                 if (bitSet[start])</span>
+<span class="lineNum">     282 </span><span class="lineCov">         21 :                         hexRightInt += 1;</span>
+<span class="lineNum">     283 </span><span class="lineCov">         70 :                 if (bitSet[start + 1])</span>
+<span class="lineNum">     284 </span><span class="lineCov">         14 :                         hexRightInt += 2;</span>
+<span class="lineNum">     285 </span><span class="lineCov">         70 :                 if (bitSet[start + 2])</span>
+<span class="lineNum">     286 </span><span class="lineCov">         21 :                         hexRightInt += 4;</span>
+<span class="lineNum">     287 </span><span class="lineCov">         70 :                 if (bitSet[start + 3])</span>
+<span class="lineNum">     288 </span><span class="lineCov">         21 :                         hexRightInt += 8;</span>
+<span class="lineNum">     289 </span><span class="lineCov">         70 :                 if (bitSet[start + 4])</span>
+<span class="lineNum">     290 </span><span class="lineCov">         14 :                         hexLeftInt += 1;</span>
+<span class="lineNum">     291 </span><span class="lineCov">         70 :                 if (bitSet[start + 5])</span>
+<span class="lineNum">     292 </span><span class="lineCov">         14 :                         hexLeftInt += 2;</span>
+<span class="lineNum">     293 </span><span class="lineCov">         70 :                 if (bitSet[start + 6])</span>
+<span class="lineNum">     294 </span><span class="lineCov">          7 :                         hexLeftInt += 4;</span>
+<span class="lineNum">     295 </span><span class="lineCov">         70 :                 if (bitSet[start + 7])</span>
+<span class="lineNum">     296 </span><span class="lineCov">         14 :                         hexLeftInt += 8;</span>
+<span class="lineNum">     297 </span>            : 
+<span class="lineNum">     298 </span><span class="lineCov">         70 :                 memoryLayout.push_back(determineHexValue(hexLeftInt).append(determineHexValue(hexRightInt)) ); // ex. &quot;7&quot; + &quot;f&quot; = &quot;7f&quot; </span>
+<span class="lineNum">     299 </span><span class="lineCov">         70 :                 lastAvailableAddress++;</span>
+<span class="lineNum">     300 </span>            :         }
+<span class="lineNum">     301 </span><span class="lineCov">        175 :         else if (layoutKey == &quot;.byte&quot;) {</span>
+<span class="lineNum">     302 </span><span class="lineCov">        175 :                 bitset&lt;8&gt; bitSet ((int8_t)stol(inputString));</span>
+<span class="lineNum">     303 </span><span class="lineCov">        175 :                 size_t hexLeftInt = 0, hexRightInt = 0;</span>
+<span class="lineNum">     304 </span><span class="lineCov">        175 :                 if (bitSet[start])</span>
+<span class="lineNum">     305 </span><span class="lineCov">         91 :                         hexRightInt += 1;</span>
+<span class="lineNum">     306 </span><span class="lineCov">        175 :                 if (bitSet[start + 1])</span>
+<span class="lineNum">     307 </span><span class="lineCov">         91 :                         hexRightInt += 2;</span>
+<span class="lineNum">     308 </span><span class="lineCov">        175 :                 if (bitSet[start + 2])</span>
+<span class="lineNum">     309 </span><span class="lineCov">         77 :                         hexRightInt += 4;</span>
+<span class="lineNum">     310 </span><span class="lineCov">        175 :                 if (bitSet[start + 3])</span>
+<span class="lineNum">     311 </span><span class="lineCov">         21 :                         hexRightInt += 8;</span>
+<span class="lineNum">     312 </span><span class="lineCov">        175 :                 if (bitSet[start + 4])</span>
+<span class="lineNum">     313 </span><span class="lineCov">          7 :                         hexLeftInt += 1;</span>
+<span class="lineNum">     314 </span><span class="lineCov">        175 :                 if (bitSet[start + 5])</span>
+<span class="lineNum">     315 </span><span class="lineCov">          7 :                         hexLeftInt += 2;</span>
+<span class="lineNum">     316 </span><span class="lineCov">        175 :                 if (bitSet[start + 6])</span>
+<span class="lineNum">     317 </span><span class="lineCov">          7 :                         hexLeftInt += 4;</span>
+<span class="lineNum">     318 </span><span class="lineCov">        175 :                 if (bitSet[start + 7])</span>
+<span class="lineNum">     319 </span><span class="lineNoCov">          0 :                         hexLeftInt += 8;</span>
+<span class="lineNum">     320 </span>            : 
+<span class="lineNum">     321 </span><span class="lineCov">        175 :                 memoryLayout.push_back(determineHexValue(hexLeftInt).append(determineHexValue(hexRightInt)) ); // ex. &quot;7&quot; + &quot;f&quot; = &quot;7f&quot; </span>
+<span class="lineNum">     322 </span><span class="lineCov">        175 :                 lastAvailableAddress++;</span>
+<span class="lineNum">     323 </span>            :         }
+<span class="lineNum">     324 </span>            : 
+<a name="325"><span class="lineNum">     325 </span><span class="lineCov">       1897 : }</span></a>
+<span class="lineNum">     326 </span>            : 
+<span class="lineNum">     327 </span><span class="lineCov">       3332 : void Parser::incrementVectorOfProgramInstructions(const string opcode, const vector&lt;argument&gt; opcodeArgs)</span>
+<span class="lineNum">     328 </span>            : {
+<span class="lineNum">     329 </span><span class="lineCov">       3332 :         if (!opcodeArgs.empty()) {</span>
+<span class="lineNum">     330 </span><span class="lineCov">       5768 :                 instructionType curInstructions;</span>
+<span class="lineNum">     331 </span><span class="lineCov">       2884 :                 curInstructions.instructionArgs = opcodeArgs;</span>
+<span class="lineNum">     332 </span><span class="lineCov">       2884 :                 curInstructions.opcode = opcode;</span>
+<span class="lineNum">     333 </span><span class="lineCov">       2884 :                 programInstructions.push_back(curInstructions);</span>
+<span class="lineNum">     334 </span>            :         }
+<a name="335"><span class="lineNum">     335 </span><span class="lineCov">       3332 : }</span></a>
+<span class="lineNum">     336 </span>            : 
+<span class="lineNum">     337 </span><span class="lineCov">      23457 : inputValue Parser::classify(TokenList::const_iterator it, TokenList::const_iterator end, string&amp; inputString)</span>
+<span class="lineNum">     338 </span>            : {
+<span class="lineNum">     339 </span><span class="lineCov">      23457 :         inputValue input = EOT;</span>
+<span class="lineNum">     340 </span><span class="lineCov">      23457 :         if(it != end)</span>
+<span class="lineNum">     341 </span><span class="lineCov">      23450 :                 lineOfError = it-&gt;line(); // assigns the line number of token that the iterator is pointing at</span>
+<span class="lineNum">     342 </span>            : 
+<span class="lineNum">     343 </span><span class="lineCov">      23457 :         if (it == end) {</span>
+<span class="lineNum">     344 </span><span class="lineCov">          7 :                 input = EOT;</span>
+<span class="lineNum">     345 </span>            :         }
+<span class="lineNum">     346 </span><span class="lineCov">      23450 :         else if (it-&gt;type() == EOL) {</span>
+<span class="lineNum">     347 </span><span class="lineCov">       5320 :                 input = EOL_IN;</span>
+<span class="lineNum">     348 </span>            :         }
+<span class="lineNum">     349 </span><span class="lineCov">      18130 :         else if (it-&gt;type() == SEP) {</span>
+<span class="lineNum">     350 </span><span class="lineCov">       3514 :                 input = SEP_IN;</span>
+<span class="lineNum">     351 </span>            :         }
+<span class="lineNum">     352 </span><span class="lineCov">      14616 :         else if (it-&gt;type() == EQUAL) {</span>
+<span class="lineNum">     353 </span><span class="lineCov">        343 :                 input = EQUAL_IN;</span>
+<span class="lineNum">     354 </span>            :         }
+<span class="lineNum">     355 </span><span class="lineCov">      14273 :         else if (it-&gt;type() == OPEN_PAREN) {</span>
+<span class="lineNum">     356 </span><span class="lineCov">        140 :                 input = OPENP_IN;</span>
+<span class="lineNum">     357 </span>            :         }
+<span class="lineNum">     358 </span><span class="lineCov">      14133 :         else if (it-&gt;type() == CLOSE_PAREN) {</span>
+<span class="lineNum">     359 </span><span class="lineCov">        133 :                 input = CLOSEP_IN;</span>
+<span class="lineNum">     360 </span>            :         }
+<span class="lineNum">     361 </span><span class="lineCov">      14000 :         else if (it-&gt;type() == STRING_DELIM) {</span>
+<span class="lineNum">     362 </span><span class="lineCov">        126 :                 input = STRING_DELIM_IN;</span>
+<span class="lineNum">     363 </span>            :         }
+<span class="lineNum">     364 </span><span class="lineCov">      13874 :         else if ((it-&gt;type() == STRING) &amp;&amp; (it-&gt;value() == &quot;.data&quot;)) {</span>
+<span class="lineNum">     365 </span><span class="lineCov">        567 :                 input = DECLARATION_MODE_IN;</span>
+<span class="lineNum">     366 </span>            :         }
+<span class="lineNum">     367 </span><span class="lineCov">      13307 :         else if ((it-&gt;type() == STRING) &amp;&amp; (it-&gt;value() == &quot;.text&quot;)) {</span>
+<span class="lineNum">     368 </span><span class="lineCov">        497 :                 input = TEXT_MODE_IN;</span>
+<span class="lineNum">     369 </span>            :         }
+<span class="lineNum">     370 </span><span class="lineCov">      12810 :         else if(it-&gt;type() == STRING) { // This string will at least have a length of 1. Also this is the default case when the value in the STRING token is none of the above</span>
+<span class="lineNum">     371 </span><span class="lineCov">      12810 :                 inputString = it-&gt;value();</span>
+<span class="lineNum">     372 </span><span class="lineCov">      12810 :                 char lastChar = inputString[inputString.length() - 1];</span>
+<span class="lineNum">     373 </span><span class="lineCov">      12810 :                 char firstChar = inputString[0];</span>
+<span class="lineNum">     374 </span>            : 
+<span class="lineNum">     375 </span><span class="lineCov">      12810 :                 if(mode == &quot;.data&quot;)</span>
+<span class="lineNum">     376 </span><span class="lineCov">       2849 :                         stringTokenDeclarationClassify(inputString, firstChar, lastChar, input); // inputString: to be able to change this value and use it in the program, input: will be the enum inputValue input</span>
+<span class="lineNum">     377 </span><span class="lineCov">       9961 :                 else if (mode == &quot;.text&quot;) {                                                                                                </span>
+<span class="lineNum">     378 </span>            :                         
+<span class="lineNum">     379 </span><span class="lineCov">       9954 :                         if ((inputString.length() != 1) &amp;&amp; (lastChar == ':') &amp;&amp; (isalpha(firstChar) || (firstChar == '_')) ) { // if STRING is a &lt;Label&gt;</span>
+<span class="lineNum">     380 </span>            :                                 
+<span class="lineNum">     381 </span><span class="lineCov">        504 :                                 checkIfLabel(systemState, input, inputString); // Checks if the string is a label and If it is then sets the input = LABEL_IN</span>
+<span class="lineNum">     382 </span>            :                         }
+<span class="lineNum">     383 </span><span class="lineCov">       9450 :                         else if (inputString == &quot;nop&quot;) {</span>
+<span class="lineNum">     384 </span><span class="lineCov">        126 :                                 opcode = inputString;</span>
+<span class="lineNum">     385 </span><span class="lineCov">        126 :                                 input = NOP_IN;</span>
+<span class="lineNum">     386 </span>            :                         }
+<span class="lineNum">     387 </span><span class="lineCov">       9324 :                         else if (isOpcode(inputString)) {</span>
+<span class="lineNum">     388 </span><span class="lineCov">       2919 :                                 opcode = inputString; // assigns the current verfied opcode to a private variable that will be used later</span>
+<span class="lineNum">     389 </span><span class="lineCov">       2919 :                                 input = OPCODE_IN;</span>
+<span class="lineNum">     390 </span>            :                         }
+<span class="lineNum">     391 </span><span class="lineCov">       6405 :                         else if (isRegister(inputString, registersMap) ) {  </span>
+<span class="lineNum">     392 </span><span class="lineCov">       4697 :                                 input = REGISTER_IN;</span>
+<span class="lineNum">     393 </span>            :                         }
+<span class="lineNum">     394 </span><span class="lineCov">       1708 :                         else if ((isalpha(firstChar) || (firstChar == '_')) ) { // POTENTIAL to be a new &lt;constant&gt; OR could be a constant already declared</span>
+<span class="lineNum">     395 </span>            :                                 
+<span class="lineNum">     396 </span><span class="lineCov">       1099 :                                 checkIfConstant(systemState, input, inputString);  // Checks to see if the string has potential to be a valid constant and if it is then sets the input = INITALIZED_CONSTANT_IN</span>
+<span class="lineNum">     397 </span>            :                         }
+<span class="lineNum">     398 </span><span class="lineCov">        609 :                         else if ((firstChar == '-') || (firstChar == '+') || (isdigit(firstChar)) ) { // if STRING is an &lt;integer&gt;) </span>
+<span class="lineNum">     399 </span>            : 
+<span class="lineNum">     400 </span><span class="lineCov">        602 :                                 checkIfInteger(systemState, input, inputString, firstChar); // Checks to see if the string is an integer and if it is then sets the input = INTEGER_IN</span>
+<span class="lineNum">     401 </span>            :                         }
+<span class="lineNum">     402 </span>            :                         else {
+<span class="lineNum">     403 </span><span class="lineCov">          7 :                                 systemState = ERROR_STATE;</span>
+<span class="lineNum">     404 </span><span class="lineCov">          7 :                                 input = ERROR_IN;</span>
+<span class="lineNum">     405 </span><span class="lineCov">          7 :                                 errorMessage = &quot;Error:&quot; + to_string(lineOfError) + &quot;: Not a valid Instruction. Could not be defined in the text declaration MIPS assembly.&quot;;</span>
+<span class="lineNum">     406 </span>            :                                 //UNQUIE ERROR MESSAGE: The STRING TOKEN could not be defined in the text instruction MIPS assembly.
+<span class="lineNum">     407 </span>            :                         }
+<span class="lineNum">     408 </span>            : 
+<span class="lineNum">     409 </span>            :                 }
+<span class="lineNum">     410 </span>            :         }
+<span class="lineNum">     411 </span>            : 
+<span class="lineNum">     412 </span><span class="lineCov">      23457 :         return input;</span>
+<span class="lineNum">     413 </span>            : }
+<span class="lineNum">     414 </span>            : 
+<a name="415"><span class="lineNum">     415 </span>            : </a>
+<span class="lineNum">     416 </span>            : 
+<span class="lineNum">     417 </span><span class="lineCov">        728 : void Parser::update_mode(States&amp; systemState, inputValue input, TokenList::const_iterator it)</span>
+<span class="lineNum">     418 </span>            : {
+<span class="lineNum">     419 </span>            :         //assert((systemState = INITIAL_STATE) || (systemState = EOL_STATE));
+<span class="lineNum">     420 </span>            : 
+<span class="lineNum">     421 </span><span class="lineCov">        728 :         switch (input) {</span>
+<span class="lineNum">     422 </span>            :         case DECLARATION_MODE_IN:
+<span class="lineNum">     423 </span>            :                 // For both the declaration mode and text mode an EOL token must follow to be considered correct grammer
+<span class="lineNum">     424 </span><span class="lineCov">        546 :                 if (it-&gt;type() == EOL){</span>
+<span class="lineNum">     425 </span><span class="lineCov">        539 :                         systemState = DECLARATION_MODE_STATE;</span>
+<span class="lineNum">     426 </span>            :                         //mode = &quot;.data&quot;;
+<span class="lineNum">     427 </span>            :                 }
+<span class="lineNum">     428 </span>            :                 else {
+<span class="lineNum">     429 </span><span class="lineCov">          7 :                         systemState = ERROR_STATE;</span>
+<span class="lineNum">     430 </span><span class="lineCov">          7 :                         errorMessage = &quot;Error:&quot; + to_string(lineOfError) + &quot;: The Data declaration section must be on its own line.&quot;;</span>
+<span class="lineNum">     431 </span>            :                 }
+<span class="lineNum">     432 </span><span class="lineCov">        546 :                 break;</span>
+<span class="lineNum">     433 </span>            : 
+<span class="lineNum">     434 </span>            :         case TEXT_MODE_IN:
+<span class="lineNum">     435 </span><span class="lineCov">        168 :                 if (it-&gt;type() == EOL) {</span>
+<span class="lineNum">     436 </span><span class="lineCov">        161 :                         systemState = TEXT_MODE_STATE;</span>
+<span class="lineNum">     437 </span>            :                         //mode = &quot;.text&quot;;
+<span class="lineNum">     438 </span>            :                 }
+<span class="lineNum">     439 </span>            :                 else {
+<span class="lineNum">     440 </span><span class="lineCov">          7 :                         systemState = ERROR_STATE;</span>
+<span class="lineNum">     441 </span><span class="lineCov">          7 :                         errorMessage = &quot;Error:&quot; + to_string(lineOfError) + &quot;: The Text declaration section must be on its own line.&quot;;</span>
+<span class="lineNum">     442 </span>            :                 }
+<span class="lineNum">     443 </span><span class="lineCov">        168 :                 break;</span>
+<span class="lineNum">     444 </span>            :         default:
+<span class="lineNum">     445 </span><span class="lineCov">         14 :                 systemState = ERROR_STATE;</span>
+<span class="lineNum">     446 </span><span class="lineCov">         14 :                 errorMessage = &quot;Error:&quot; + to_string(lineOfError) + &quot;: There has not been a data nor text declaration in the file.&quot;;</span>
+<span class="lineNum">     447 </span><span class="lineCov">         14 :                 break;</span>
+<span class="lineNum">     448 </span>            :         };
+<span class="lineNum">     449 </span>            : 
+<span class="lineNum">     450 </span>            :         
+<a name="451"><span class="lineNum">     451 </span><span class="lineCov">        728 : }</span></a>
+<span class="lineNum">     452 </span>            : 
+<span class="lineNum">     453 </span><span class="lineCov">       1232 : void Parser::update_declaration(States&amp; systemState, inputValue input)</span>
+<span class="lineNum">     454 </span>            : {
+<span class="lineNum">     455 </span><span class="lineCov">       1232 :         assert(systemState = DECLARATION_MODE_STATE);</span>
+<span class="lineNum">     456 </span><span class="lineCov">       1232 :         mode = &quot;.data&quot;;</span>
+<span class="lineNum">     457 </span>            : 
+<span class="lineNum">     458 </span><span class="lineCov">       1232 :         switch (input) {</span>
+<span class="lineNum">     459 </span>            :         case INT_LAYOUT_IN:
+<span class="lineNum">     460 </span><span class="lineCov">        616 :                 systemState = LAYOUT_STATE_INT_S0;</span>
+<span class="lineNum">     461 </span><span class="lineCov">        616 :                 break;</span>
+<span class="lineNum">     462 </span>            : 
+<span class="lineNum">     463 </span>            :         case STRING_LAYOUT_IN:
+<span class="lineNum">     464 </span><span class="lineCov">         28 :                 systemState = LAYOUT_STATE_STR_S0;</span>
+<span class="lineNum">     465 </span><span class="lineCov">         28 :                 break;</span>
+<span class="lineNum">     466 </span>            : 
+<span class="lineNum">     467 </span>            :         case EOL_IN:
+<span class="lineNum">     468 </span><span class="lineCov">        581 :                 systemState = EOL_STATE;</span>
+<span class="lineNum">     469 </span><span class="lineCov">        581 :                 break;</span>
+<span class="lineNum">     470 </span>            : 
+<span class="lineNum">     471 </span>            :         //case STRING_DELIM_IN: // This is needed when for example. .ascii &quot;bleh&quot; is on its own line because the .ascii will be the indication of being in the DECLARATION_MODE_STATE
+<span class="lineNum">     472 </span>            :                 //systemState = STRING_DELIM_STATE1;
+<span class="lineNum">     473 </span>            :                 //break;
+<span class="lineNum">     474 </span>            : 
+<span class="lineNum">     475 </span>            :         default:
+<span class="lineNum">     476 </span><span class="lineCov">          7 :                 systemState = ERROR_STATE;</span>
+<span class="lineNum">     477 </span><span class="lineCov">          7 :                 errorMessage = &quot;Error:&quot; + to_string(lineOfError) + &quot;: Not a valid follow up argument after a declaration.&quot;; //Means the update declaration state cases are looking at the argument after &lt;constant&gt;,&lt;label&gt;, or &lt;layout&gt;</span>
+<span class="lineNum">     478 </span><span class="lineCov">          7 :                 break;</span>
+<span class="lineNum">     479 </span>            :         }
+<span class="lineNum">     480 </span>            : 
+<a name="481"><span class="lineNum">     481 </span><span class="lineCov">       1232 : }</span></a>
+<span class="lineNum">     482 </span>            : 
+<span class="lineNum">     483 </span><span class="lineCov">        490 : void Parser::update_instruction(States &amp; systemState, inputValue input) </span>
+<span class="lineNum">     484 </span>            : {
+<span class="lineNum">     485 </span><span class="lineCov">        490 :         assert(systemState = TEXT_MODE_STATE);</span>
+<span class="lineNum">     486 </span><span class="lineCov">        490 :         mode = &quot;.text&quot;;</span>
+<span class="lineNum">     487 </span>            :         
+<span class="lineNum">     488 </span><span class="lineCov">        490 :         switch (input) {</span>
+<span class="lineNum">     489 </span>            :         case EOL_IN: 
+<span class="lineNum">     490 </span><span class="lineCov">        483 :                 systemState = text_EOL_STATE;</span>
+<span class="lineNum">     491 </span><span class="lineCov">        483 :                 break;</span>
+<span class="lineNum">     492 </span>            : 
+<span class="lineNum">     493 </span>            :         default:
+<span class="lineNum">     494 </span><span class="lineCov">          7 :                 systemState = ERROR_STATE;</span>
+<span class="lineNum">     495 </span><span class="lineCov">          7 :                 errorMessage = &quot;Error:&quot; + to_string(lineOfError) + &quot;: Just entered into the instruction section and initial instruction is Not valid.&quot;;</span>
+<span class="lineNum">     496 </span><span class="lineCov">          7 :                 break;</span>
+<span class="lineNum">     497 </span>            :         };
+<a name="498"><span class="lineNum">     498 </span><span class="lineCov">        490 : }</span></a>
+<span class="lineNum">     499 </span>            : 
+<span class="lineNum">     500 </span><span class="lineCov">       3542 : void Parser::update_text_eol(States &amp; systemState, inputValue input)</span>
+<span class="lineNum">     501 </span>            : {
+<span class="lineNum">     502 </span><span class="lineCov">       3542 :         assert(systemState == text_EOL_STATE);</span>
+<span class="lineNum">     503 </span><span class="lineCov">       3542 :         opcodeArguments.clear(); // clears the arguments for the next line of instructions/operations</span>
+<span class="lineNum">     504 </span>            : 
+<span class="lineNum">     505 </span><span class="lineCov">       3542 :         switch (input) {</span>
+<span class="lineNum">     506 </span>            :         case OPCODE_IN:
+<span class="lineNum">     507 </span><span class="lineCov">       2884 :                 systemState = OPCODE_STATE;</span>
+<span class="lineNum">     508 </span><span class="lineCov">       2884 :                 break;</span>
+<span class="lineNum">     509 </span>            : 
+<span class="lineNum">     510 </span>            :         case NOP_IN:
+<span class="lineNum">     511 </span><span class="lineCov">        105 :                 systemState = NOP_STATE;</span>
+<span class="lineNum">     512 </span><span class="lineCov">        105 :                 break;</span>
+<span class="lineNum">     513 </span>            : 
+<span class="lineNum">     514 </span>            :         case LABEL_IN:
+<span class="lineNum">     515 </span><span class="lineCov">        504 :                 systemState = LABEL_STATE_S0;</span>
+<span class="lineNum">     516 </span><span class="lineCov">        504 :                 break;</span>
+<span class="lineNum">     517 </span>            : 
+<span class="lineNum">     518 </span>            :         case DECLARATION_MODE_IN:
+<span class="lineNum">     519 </span><span class="lineCov">          7 :                 systemState = DECLARATION_MODE_STATE; // This case is for when the file looks like: &quot;.text\n.data\n&quot;</span>
+<span class="lineNum">     520 </span><span class="lineCov">          7 :                 break;</span>
+<span class="lineNum">     521 </span>            : 
+<span class="lineNum">     522 </span>            :         case TEXT_MODE_IN:
+<span class="lineNum">     523 </span><span class="lineCov">         35 :                 systemState = TEXT_MODE_STATE;</span>
+<span class="lineNum">     524 </span><span class="lineCov">         35 :                 break;</span>
+<span class="lineNum">     525 </span>            : 
+<span class="lineNum">     526 </span>            :         default:
+<span class="lineNum">     527 </span><span class="lineCov">          7 :                 systemState = ERROR_STATE;</span>
+<span class="lineNum">     528 </span><span class="lineCov">          7 :                 errorMessage = &quot;Error:&quot; + to_string(lineOfError) + &quot;: Not a valid instruction.&quot;;</span>
+<span class="lineNum">     529 </span><span class="lineCov">          7 :                 break;</span>
+<span class="lineNum">     530 </span>            :         };
+<span class="lineNum">     531 </span>            : 
+<a name="532"><span class="lineNum">     532 </span><span class="lineCov">       3542 : }</span></a>
+<span class="lineNum">     533 </span>            : 
+<span class="lineNum">     534 </span><span class="lineCov">        126 : void Parser::update_nop(States &amp; systemState, inputValue input) </span>
+<span class="lineNum">     535 </span>            : {
+<span class="lineNum">     536 </span><span class="lineCov">        126 :         assert(systemState == NOP_STATE);</span>
+<span class="lineNum">     537 </span>            :         
+<span class="lineNum">     538 </span><span class="lineCov">        126 :         switch (input) {</span>
+<span class="lineNum">     539 </span>            :         case EOL_IN:
+<span class="lineNum">     540 </span><span class="lineCov">        119 :                 incrementVectorOfOpcodeArguments(&quot;nop&quot;, input);</span>
+<span class="lineNum">     541 </span><span class="lineCov">        119 :                 incrementVectorOfProgramInstructions(opcode, opcodeArguments);</span>
+<span class="lineNum">     542 </span><span class="lineCov">        119 :                 systemState = text_EOL_STATE;</span>
+<span class="lineNum">     543 </span><span class="lineCov">        119 :                 break;</span>
+<span class="lineNum">     544 </span>            : 
+<span class="lineNum">     545 </span>            :         default: 
+<span class="lineNum">     546 </span><span class="lineCov">          7 :                 systemState = ERROR_STATE;</span>
+<span class="lineNum">     547 </span><span class="lineCov">          7 :                 errorMessage = &quot;Error:&quot; + to_string(lineOfError) + &quot;: There Can not be more assembly text on the line where a 'nop' has been declared.&quot;;</span>
+<span class="lineNum">     548 </span><span class="lineCov">          7 :                 break;</span>
+<span class="lineNum">     549 </span>            :         };
+<a name="550"><span class="lineNum">     550 </span><span class="lineCov">        126 : }</span></a>
+<span class="lineNum">     551 </span>            : 
+<span class="lineNum">     552 </span><span class="lineCov">       2919 : void Parser::update_opcode(States &amp; systemState, inputValue input, string inputString)</span>
+<span class="lineNum">     553 </span>            : {
+<span class="lineNum">     554 </span><span class="lineCov">       2919 :         assert(systemState == OPCODE_STATE);</span>
+<span class="lineNum">     555 </span>            :         //auto labelFind = labelsMap.find(inputString);
+<span class="lineNum">     556 </span>            : 
+<span class="lineNum">     557 </span><span class="lineCov">       2919 :         if (/*(labelFind != labelsMap.end())*/ input == CONSTANT_FIRST_PART_IN &amp;&amp; opcode == &quot;j&quot;) { // This is because the instruction jump needs a label to jump too. I check in the simulator if that label is actually in the file or not</span>
+<span class="lineNum">     558 </span><span class="lineCov">         91 :                 incrementVectorOfOpcodeArguments(inputString, input);</span>
+<span class="lineNum">     559 </span><span class="lineCov">         91 :                 systemState = LABEL_STATE_S0;</span>
+<span class="lineNum">     560 </span>            :         }
+<span class="lineNum">     561 </span><span class="lineCov">       2828 :         else if (input == REGISTER_IN) {</span>
+<span class="lineNum">     562 </span><span class="lineCov">       2821 :                 systemState = ARG1_STATE;</span>
+<span class="lineNum">     563 </span><span class="lineCov">       2821 :                 incrementVectorOfOpcodeArguments(inputString, input); // This pushes the registers name and its inputValue(register_in) in my vector which will keep track of all the arguments on the current line</span>
+<span class="lineNum">     564 </span>            :         }
+<span class="lineNum">     565 </span>            :         else {
+<span class="lineNum">     566 </span><span class="lineCov">          7 :                 systemState = ERROR_STATE;</span>
+<span class="lineNum">     567 </span><span class="lineCov">          7 :                 errorMessage = &quot;Error:&quot; + to_string(lineOfError) + &quot;: There needs to be a register following the Opcode or if it is the special case of 'j' then the label must be predefined.&quot;;</span>
+<span class="lineNum">     568 </span>            :         }
+<span class="lineNum">     569 </span>            : 
+<a name="570"><span class="lineNum">     570 </span><span class="lineCov">       2919 : }</span></a>
+<span class="lineNum">     571 </span>            : 
+<span class="lineNum">     572 </span><span class="lineCov">       2821 : void Parser::update_arg1(States &amp; systemState, inputValue input)</span>
+<span class="lineNum">     573 </span>            : {
+<span class="lineNum">     574 </span><span class="lineCov">       2821 :         assert(systemState == ARG1_STATE);</span>
+<span class="lineNum">     575 </span>            : 
+<span class="lineNum">     576 </span><span class="lineCov">       2821 :         switch (input) {</span>
+<span class="lineNum">     577 </span>            :         case SEP_IN:
+<span class="lineNum">     578 </span><span class="lineCov">       2618 :                 systemState = SEP_STATE;</span>
+<span class="lineNum">     579 </span><span class="lineCov">       2618 :                 break;</span>
+<span class="lineNum">     580 </span>            :         case EOL_IN:
+<span class="lineNum">     581 </span><span class="lineCov">        189 :                 if ((opcode == &quot;mfhi&quot;) || (opcode == &quot;mflo&quot;) || (opcode == &quot;mthi&quot;) || (opcode == &quot;mtlo&quot;)) {</span>
+<span class="lineNum">     582 </span><span class="lineCov">        182 :                         incrementVectorOfProgramInstructions(opcode, opcodeArguments);</span>
+<span class="lineNum">     583 </span><span class="lineCov">        182 :                         systemState = text_EOL_STATE;</span>
+<span class="lineNum">     584 </span>            :                 }
+<span class="lineNum">     585 </span>            :                 else {
+<span class="lineNum">     586 </span><span class="lineCov">          7 :                         systemState = ERROR_STATE; // B/C maybe(lineOfError-1): the error occured on the EOL input indicates that the error happened on the previous line</span>
+<span class="lineNum">     587 </span><span class="lineCov">          7 :                         errorMessage = &quot;Error:&quot; + to_string(lineOfError) + &quot;: Input token is an EOL, but format was not one of the allowable opcodes: mfhi, mflo, mthi, mtlo&quot;;</span>
+<span class="lineNum">     588 </span>            :                 }
+<span class="lineNum">     589 </span><span class="lineCov">        189 :                 break;</span>
+<span class="lineNum">     590 </span>            : 
+<span class="lineNum">     591 </span>            :         default:
+<span class="lineNum">     592 </span><span class="lineCov">         14 :                 systemState = ERROR_STATE;</span>
+<span class="lineNum">     593 </span><span class="lineCov">         14 :                 errorMessage = &quot;Error:&quot; + to_string(lineOfError) + &quot;: There is not a comma or new line following the register(first argument)&quot;;</span>
+<span class="lineNum">     594 </span><span class="lineCov">         14 :                 break;</span>
+<span class="lineNum">     595 </span>            :         }
+<a name="596"><span class="lineNum">     596 </span><span class="lineCov">       2821 : }</span></a>
+<span class="lineNum">     597 </span>            : 
+<span class="lineNum">     598 </span><span class="lineCov">        833 : void Parser::update_arg2Reg(States &amp; systemState, inputValue input)</span>
+<span class="lineNum">     599 </span>            : {
+<span class="lineNum">     600 </span><span class="lineCov">        833 :         assert(systemState == ARG2_REG_STATE);</span>
+<span class="lineNum">     601 </span>            : 
+<span class="lineNum">     602 </span><span class="lineCov">        833 :         switch (input) {</span>
+<span class="lineNum">     603 </span>            :         case SEP_IN:
+<span class="lineNum">     604 </span><span class="lineCov">       1890 :                 if ((opcode == &quot;add&quot;) || (opcode == &quot;addu&quot;) || (opcode == &quot;sub&quot;) || (opcode == &quot;subu&quot;) || (opcode == &quot;mul&quot;) || (opcode == &quot;mulo&quot;) || </span>
+<span class="lineNum">     605 </span><span class="lineCov">        630 :                         (opcode == &quot;mulou&quot;) || (opcode == &quot;div&quot;) || (opcode == &quot;divu&quot;) || (opcode == &quot;rem&quot;) || (opcode == &quot;remu&quot;) || (opcode == &quot;and&quot;) ||</span>
+<span class="lineNum">     606 </span><span class="lineCov">        749 :                         (opcode == &quot;nor&quot;) || (opcode == &quot;or&quot;) || (opcode == &quot;xor&quot;) ) {</span>
+<span class="lineNum">     607 </span>            : 
+<span class="lineNum">     608 </span><span class="lineCov">        553 :                         systemState = SEP_STATE;</span>
+<span class="lineNum">     609 </span>            :                 }
+<span class="lineNum">     610 </span>            :                 else {
+<span class="lineNum">     611 </span><span class="lineCov">         14 :                         systemState = ERROR_STATE;</span>
+<span class="lineNum">     612 </span><span class="lineCov">         14 :                         errorMessage = &quot;Error:&quot; + to_string(lineOfError) + &quot;: Input token is a comma, but format was not one of the allowable opcodes: add,addu,sub,subu,mul,mulo,mulou,div,divu,rem,remu,and,nor,or, xor&quot;;</span>
+<span class="lineNum">     613 </span>            :                 }
+<span class="lineNum">     614 </span><span class="lineCov">        567 :                 break;</span>
+<span class="lineNum">     615 </span>            :         case EOL_IN:
+<span class="lineNum">     616 </span><span class="lineCov">        770 :                 if ((opcode == &quot;move&quot;) || (opcode == &quot;mult&quot;) || (opcode == &quot;multu&quot;) || (opcode == &quot;div&quot;) || (opcode == &quot;divu&quot;) || (opcode == &quot;abs&quot;) || </span>
+<span class="lineNum">     617 </span><span class="lineCov">        315 :                         (opcode == &quot;neg&quot;)  || (opcode == &quot;negu&quot;)) {</span>
+<span class="lineNum">     618 </span>            : 
+<span class="lineNum">     619 </span><span class="lineCov">        252 :                         incrementVectorOfProgramInstructions(opcode, opcodeArguments);</span>
+<span class="lineNum">     620 </span><span class="lineCov">        252 :                         systemState = text_EOL_STATE;</span>
+<span class="lineNum">     621 </span>            :                 }
+<span class="lineNum">     622 </span>            :                 else {
+<span class="lineNum">     623 </span><span class="lineCov">         14 :                         systemState = ERROR_STATE; // B/C (maybe linOfError -1)the error occured on the EOL input indicates that the error happened on the previous line</span>
+<span class="lineNum">     624 </span><span class="lineCov">         14 :                         errorMessage = &quot;Error:&quot; + to_string(lineOfError) + &quot;: Input token is EOL, but format was not one of the allowable opcodes: move, mult, multu, div, divu, abs, neg, negu&quot;;</span>
+<span class="lineNum">     625 </span>            :                 }
+<span class="lineNum">     626 </span><span class="lineCov">        266 :                 break;</span>
+<span class="lineNum">     627 </span>            : 
+<span class="lineNum">     628 </span>            :         default:
+<span class="lineNum">     629 </span><span class="lineNoCov">          0 :                 systemState = ERROR_STATE; // B/C the argument error appeared when the state was on a previous line the input is on a new one, showing an incomplete instruction operation on the previous line</span>
+<span class="lineNum">     630 </span><span class="lineNoCov">          0 :                 errorMessage = &quot;Error:&quot; + to_string(lineOfError - 1) + &quot;: There is Not a comma or new line following the register(second argument)&quot;;</span>
+<span class="lineNum">     631 </span><span class="lineNoCov">          0 :                 break;</span>
+<span class="lineNum">     632 </span>            :         }
+<a name="633"><span class="lineNum">     633 </span><span class="lineCov">        833 : }</span></a>
+<span class="lineNum">     634 </span>            : 
+<span class="lineNum">     635 </span><span class="lineCov">        413 : void Parser::update_arg2Immediate(States&amp; systemState, inputValue input)</span>
+<span class="lineNum">     636 </span>            : {
+<span class="lineNum">     637 </span><span class="lineCov">        413 :         assert(systemState == ARG2_IMMEDIATE_STATE);</span>
+<span class="lineNum">     638 </span>            : 
+<span class="lineNum">     639 </span><span class="lineCov">        413 :         switch (input) {</span>
+<span class="lineNum">     640 </span>            :         case EOL_IN:
+<span class="lineNum">     641 </span>            :                 // here transfer the information into programInstructions
+<span class="lineNum">     642 </span><span class="lineCov">        406 :                 incrementVectorOfProgramInstructions(opcode, opcodeArguments); </span>
+<span class="lineNum">     643 </span><span class="lineCov">        406 :                 systemState = text_EOL_STATE;</span>
+<span class="lineNum">     644 </span><span class="lineCov">        406 :                 break;</span>
+<span class="lineNum">     645 </span>            : 
+<span class="lineNum">     646 </span>            :         default:
+<span class="lineNum">     647 </span><span class="lineCov">          7 :                 systemState = ERROR_STATE;</span>
+<span class="lineNum">     648 </span><span class="lineCov">          7 :                 errorMessage = &quot;Error:&quot; + to_string(lineOfError) + &quot;: There is not a new line following the &lt;immediate&gt; format.&quot;;</span>
+<span class="lineNum">     649 </span><span class="lineCov">          7 :                 break;</span>
+<span class="lineNum">     650 </span>            :         }
+<a name="651"><span class="lineNum">     651 </span><span class="lineCov">        413 : }</span></a>
+<span class="lineNum">     652 </span>            : 
+<span class="lineNum">     653 </span><span class="lineCov">        770 : void Parser::update_arg2and3Source(States &amp; systemState, inputValue input)</span>
+<span class="lineNum">     654 </span>            : {
+<span class="lineNum">     655 </span><span class="lineCov">        770 :         assert(systemState == ARG_SOURCE_STATE);</span>
+<span class="lineNum">     656 </span>            :         
+<span class="lineNum">     657 </span><span class="lineCov">        770 :                 switch (input) {</span>
+<span class="lineNum">     658 </span>            :                 case SEP_IN:
+<span class="lineNum">     659 </span><span class="lineCov">        189 :                         if ((opcode == &quot;beq&quot;) || (opcode == &quot;bne&quot;) || (opcode == &quot;blt&quot;) || (opcode == &quot;ble&quot;) || (opcode == &quot;bgt&quot;) || (opcode == &quot;bge&quot;)) {</span>
+<span class="lineNum">     660 </span><span class="lineCov">        175 :                                 systemState = SEP_STATE;</span>
+<span class="lineNum">     661 </span>            :                         }
+<span class="lineNum">     662 </span>            :                         else {
+<span class="lineNum">     663 </span><span class="lineCov">         14 :                                 systemState = ERROR_STATE;</span>
+<span class="lineNum">     664 </span><span class="lineCov">         14 :                                 errorMessage = &quot;Error:&quot; + to_string(lineOfError) + &quot;: Input token is a Comma, but format was not one of the allowable opcodes: beq, bne, blt, ble, bgt, bge.&quot;;</span>
+<span class="lineNum">     665 </span>            :                         }
+<span class="lineNum">     666 </span><span class="lineCov">        189 :                         break;</span>
+<span class="lineNum">     667 </span>            :                 case EOL_IN:
+<span class="lineNum">     668 </span><span class="lineCov">       1974 :                         if ((opcode == &quot;not&quot;) || (opcode == &quot;add&quot;) || (opcode == &quot;addu&quot;) || (opcode == &quot;sub&quot;) || (opcode == &quot;subu&quot;) || (opcode == &quot;mul&quot;) || (opcode == &quot;mulo&quot;) ||</span>
+<span class="lineNum">     669 </span><span class="lineCov">        609 :                                 (opcode == &quot;mulou&quot;) || (opcode == &quot;div&quot;) || (opcode == &quot;divu&quot;) || (opcode == &quot;rem&quot;) || (opcode == &quot;remu&quot;) || (opcode == &quot;and&quot;) ||</span>
+<span class="lineNum">     670 </span><span class="lineCov">        756 :                                 (opcode == &quot;nor&quot;) || (opcode == &quot;not&quot;) || (opcode == &quot;or&quot;) || (opcode == &quot;xor&quot;)  ) {</span>
+<span class="lineNum">     671 </span>            : 
+<span class="lineNum">     672 </span><span class="lineCov">        567 :                                 incrementVectorOfProgramInstructions(opcode, opcodeArguments);</span>
+<span class="lineNum">     673 </span><span class="lineCov">        567 :                                 systemState = text_EOL_STATE;</span>
+<span class="lineNum">     674 </span>            :                         }
+<span class="lineNum">     675 </span>            :                         else {
+<span class="lineNum">     676 </span><span class="lineCov">         14 :                                 systemState = ERROR_STATE; // B/C the error occured on the EOL input indicates that the error happened on the previous line</span>
+<span class="lineNum">     677 </span><span class="lineCov">         14 :                                 errorMessage = &quot;Error:&quot; + to_string(lineOfError) + &quot;: Input token is an EOL, but format was not one of the allowable opcodes: add,addu,sub,subu,mul,mulo,mulou,div,divu,rem,remu,and,nor,not,or, xor.&quot;;</span>
+<span class="lineNum">     678 </span>            :                         }
+<span class="lineNum">     679 </span><span class="lineCov">        581 :                         break;</span>
+<span class="lineNum">     680 </span>            : 
+<span class="lineNum">     681 </span>            :                 default:
+<span class="lineNum">     682 </span><span class="lineNoCov">          0 :                         systemState = ERROR_STATE; // B/C the argument error appeared when the state was on a previous line the input is on a new one, showing an incomplete instruction operation on the previous line</span>
+<span class="lineNum">     683 </span><span class="lineNoCov">          0 :                         errorMessage = &quot;Error:&quot; + to_string(lineOfError - 1) + &quot;: There is Not a new line nor a comma following the format &lt;source&gt;: register, integer, or Constant.&quot;;</span>
+<span class="lineNum">     684 </span><span class="lineNoCov">          0 :                         break;</span>
+<span class="lineNum">     685 </span>            :                 }
+<span class="lineNum">     686 </span>            : 
+<a name="687"><span class="lineNum">     687 </span><span class="lineCov">        770 : }</span></a>
+<span class="lineNum">     688 </span>            : 
+<span class="lineNum">     689 </span><span class="lineCov">       1092 : void Parser::update_arg2Memref(States &amp; systemState, inputValue input)</span>
+<span class="lineNum">     690 </span>            : {
+<span class="lineNum">     691 </span><span class="lineCov">       1092 :         assert(systemState == ARG2_MEMREF_STATE);</span>
+<span class="lineNum">     692 </span>            : 
+<span class="lineNum">     693 </span><span class="lineCov">       1092 :         switch (input) {</span>
+<span class="lineNum">     694 </span>            :         case EOL_IN: // This is for when there is no offset in the &lt;memref&gt; , also we will not have a parenthesis error because lexer checks for that already
+<span class="lineNum">     695 </span><span class="lineCov">        952 :                 incrementVectorOfProgramInstructions(opcode, opcodeArguments);</span>
+<span class="lineNum">     696 </span><span class="lineCov">        952 :                 systemState = text_EOL_STATE;</span>
+<span class="lineNum">     697 </span><span class="lineCov">        952 :                 break;</span>
+<span class="lineNum">     698 </span>            : 
+<span class="lineNum">     699 </span>            :         case CLOSEP_IN:
+<span class="lineNum">     700 </span><span class="lineCov">        133 :                 systemState = CLOSEP_STATE;</span>
+<span class="lineNum">     701 </span><span class="lineCov">        133 :                 break;</span>
+<span class="lineNum">     702 </span>            : 
+<span class="lineNum">     703 </span>            :         default:
+<span class="lineNum">     704 </span><span class="lineCov">          7 :                 systemState = ERROR_STATE;</span>
+<span class="lineNum">     705 </span><span class="lineCov">          7 :                 errorMessage = &quot;Error:&quot; + to_string(lineOfError) + &quot;: For &lt;memref&gt; label and register formats there was not a new line1. Or for &lt;memref&gt; register reference formats there was not a closing parenthesis after the referenced register.&quot;;</span>
+<span class="lineNum">     706 </span><span class="lineCov">          7 :                 break;</span>
+<span class="lineNum">     707 </span>            :         };
+<span class="lineNum">     708 </span><span class="lineCov">       1092 : }</span>
+<a name="709"><span class="lineNum">     709 </span>            : </a>
+<span class="lineNum">     710 </span>            : 
+<span class="lineNum">     711 </span><span class="lineCov">        140 : void Parser::update_openP(States &amp; systemState, inputValue input, string inputString)</span>
+<span class="lineNum">     712 </span>            : {
+<span class="lineNum">     713 </span><span class="lineCov">        140 :         assert(systemState == OPENP_STATE);</span>
+<span class="lineNum">     714 </span>            :         
+<span class="lineNum">     715 </span><span class="lineCov">        140 :         auto labelFind = labelsMap.find(inputString);</span>
+<span class="lineNum">     716 </span>            : 
+<span class="lineNum">     717 </span>            :         //inputValue is a register after an open parenthisis || When the immediate value is a constant || the input is an immediate value and covers when the immediate value is an integer ||
+<span class="lineNum">     718 </span><span class="lineCov">        140 :         if (input == REGISTER_IN || input == INITALIZED_CONSTANT_IN || input == INTEGER_IN || (labelFind != labelsMap.end()) ) { // This means the input &lt;memref&gt; is a label name already mapped to a memory address</span>
+<span class="lineNum">     719 </span><span class="lineCov">        133 :                 incrementVectorOfOpcodeArguments(inputString, input);</span>
+<span class="lineNum">     720 </span><span class="lineCov">        133 :                 systemState = ARG2_MEMREF_STATE;</span>
+<span class="lineNum">     721 </span>            :         }
+<span class="lineNum">     722 </span>            :         else {
+<span class="lineNum">     723 </span><span class="lineCov">          7 :                 systemState = ERROR_STATE;</span>
+<span class="lineNum">     724 </span><span class="lineCov">          7 :                 errorMessage = &quot;Error:&quot; + to_string(lineOfError) + &quot;: In the &lt;memref&gt; state but there is no valid register being referenced.&quot;;</span>
+<span class="lineNum">     725 </span>            :         }
+<span class="lineNum">     726 </span>            : 
+<a name="727"><span class="lineNum">     727 </span><span class="lineCov">        140 : }</span></a>
+<span class="lineNum">     728 </span>            : 
+<span class="lineNum">     729 </span><span class="lineCov">        133 : void Parser::update_closeP(States &amp; systemState, inputValue input)</span>
+<span class="lineNum">     730 </span>            : {
+<span class="lineNum">     731 </span><span class="lineCov">        133 :         assert(systemState == CLOSEP_STATE);</span>
+<span class="lineNum">     732 </span>            : 
+<span class="lineNum">     733 </span><span class="lineCov">        133 :         switch (input) {</span>
+<span class="lineNum">     734 </span>            :         case EOL_IN:
+<span class="lineNum">     735 </span><span class="lineCov">        112 :                 incrementVectorOfProgramInstructions(opcode, opcodeArguments); </span>
+<span class="lineNum">     736 </span><span class="lineCov">        112 :                 systemState = text_EOL_STATE;</span>
+<span class="lineNum">     737 </span><span class="lineCov">        112 :                 break;</span>
+<span class="lineNum">     738 </span>            : 
+<span class="lineNum">     739 </span>            :         default:
+<span class="lineNum">     740 </span><span class="lineCov">         21 :                 systemState = ERROR_STATE;</span>
+<span class="lineNum">     741 </span><span class="lineCov">         21 :                 errorMessage = &quot;Error:&quot; + to_string(lineOfError) + &quot;: There is extra information on the current line after the closed parenthesis in the &lt;memref&gt;.&quot;;</span>
+<span class="lineNum">     742 </span><span class="lineCov">         21 :                 break;</span>
+<span class="lineNum">     743 </span>            :         }
+<a name="744"><span class="lineNum">     744 </span><span class="lineCov">        133 : }</span></a>
+<span class="lineNum">     745 </span>            : 
+<span class="lineNum">     746 </span><span class="lineCov">        133 : void Parser::update_offsetOrImmediate(States &amp; systemState, inputValue input)</span>
+<span class="lineNum">     747 </span>            : {
+<span class="lineNum">     748 </span><span class="lineCov">        133 :         assert(systemState == OFFSET_STATE);</span>
+<span class="lineNum">     749 </span>            : 
+<span class="lineNum">     750 </span><span class="lineCov">        133 :         switch (input) {</span>
+<span class="lineNum">     751 </span>            :         case OPENP_IN: // When the previous input was an [OFFSET]
+<span class="lineNum">     752 </span><span class="lineCov">         98 :                 systemState = OPENP_STATE;</span>
+<span class="lineNum">     753 </span><span class="lineCov">         98 :                 break;</span>
+<span class="lineNum">     754 </span>            : 
+<span class="lineNum">     755 </span>            :         case EOL_IN: // When the previous input was an immediate
+<span class="lineNum">     756 </span><span class="lineCov">         28 :                 incrementVectorOfProgramInstructions(opcode, opcodeArguments);</span>
+<span class="lineNum">     757 </span><span class="lineCov">         28 :                 systemState = text_EOL_STATE;</span>
+<span class="lineNum">     758 </span><span class="lineCov">         28 :                 break;</span>
+<span class="lineNum">     759 </span>            : 
+<span class="lineNum">     760 </span>            :         default:
+<span class="lineNum">     761 </span><span class="lineCov">          7 :                 systemState = ERROR_STATE;</span>
+<span class="lineNum">     762 </span><span class="lineCov">          7 :                 errorMessage = &quot;Error:&quot; + to_string(lineOfError) + &quot;: There is not a corresponding open parenthesis for the offset of the &lt;memref&gt;&quot;;</span>
+<span class="lineNum">     763 </span><span class="lineCov">          7 :                 break;</span>
+<span class="lineNum">     764 </span>            :         }
+<span class="lineNum">     765 </span><span class="lineCov">        133 : }</span>
+<a name="766"><span class="lineNum">     766 </span>            : </a>
+<span class="lineNum">     767 </span>            : 
+<span class="lineNum">     768 </span><span class="lineCov">        770 : void Parser::update_text_label(States&amp; systemState, inputValue input) //  note: The .data for labels is actually handled in the update_eol() when it determines that it is a label</span>
+<span class="lineNum">     769 </span>            : {
+<span class="lineNum">     770 </span><span class="lineCov">        770 :         assert(systemState == LABEL_STATE_S0);</span>
+<span class="lineNum">     771 </span>            : 
+<span class="lineNum">     772 </span>            :         // This below is specifically for the .text labelnames
+<span class="lineNum">     773 </span><span class="lineCov">        770 :         if (input == EOL_IN || input == OPCODE_IN || input == NOP_IN) { // want to allocate for valid inputs only</span>
+<span class="lineNum">     774 </span><span class="lineCov">        770 :                 auto labelFind = labelsMap.find(labelName);</span>
+<span class="lineNum">     775 </span><span class="lineCov">        770 :                 if (labelFind == labelsMap.end()) { // If this is a new label add it to my labelsMap</span>
+<span class="lineNum">     776 </span>            :                         LabelInfo layoutStruc;
+<span class="lineNum">     777 </span><span class="lineCov">        504 :                         layoutStruc.isInstructionIndex = true;</span>
+<span class="lineNum">     778 </span><span class="lineCov">        504 :                         layoutStruc.instructionIndexOrFirstMemAddress = programInstructions.size(); // If it is empty index will be 0, indicating that the label will map to the next instructionType element added. That is why the index will be the</span>
+<span class="lineNum">     779 </span><span class="lineCov">        504 :                         labelsMap.emplace(labelName, layoutStruc);                                                                      // The size() and not size()-1. HOWEVER NEED TO IMPLEMENT A CASE WHERE THERE IS A &lt;label&gt; EOL AT THE END OF THE FILE BECAUSE I AM ASSUMING THERE IS A AN INSTRUCION AFTER</span>
+<span class="lineNum">     780 </span>            :                 }                                                                                                                                                               //  If there is a last label before the end of file, then check that labels index and make sure its instructionIndexOrFirstMemAddress &lt;= programInstructions.size() - 1;
+<span class="lineNum">     781 </span>            :         } 
+<span class="lineNum">     782 </span>            :         
+<span class="lineNum">     783 </span><span class="lineCov">        770 :         if (input == EOL_IN) {</span>
+<span class="lineNum">     784 </span><span class="lineCov">        714 :                 incrementVectorOfProgramInstructions(opcode, opcodeArguments);</span>
+<span class="lineNum">     785 </span><span class="lineCov">        714 :                 systemState = text_EOL_STATE;</span>
+<span class="lineNum">     786 </span>            :         }
+<span class="lineNum">     787 </span><span class="lineCov">         56 :         else if (input == OPCODE_IN) </span>
+<span class="lineNum">     788 </span><span class="lineCov">         35 :                 systemState = OPCODE_STATE;</span>
+<span class="lineNum">     789 </span><span class="lineCov">         21 :         else if (input == NOP_IN) </span>
+<span class="lineNum">     790 </span><span class="lineCov">         21 :                 systemState = NOP_STATE;</span>
+<span class="lineNum">     791 </span>            :         else {
+<span class="lineNum">     792 </span><span class="lineNoCov">          0 :                 systemState = ERROR_STATE;</span>
+<span class="lineNum">     793 </span><span class="lineNoCov">          0 :                 errorMessage = &quot;Error:&quot; + to_string(lineOfError) + &quot;: Not a valid format for a &lt;label&gt;.&quot;;</span>
+<span class="lineNum">     794 </span>            :         }
+<a name="795"><span class="lineNum">     795 </span><span class="lineCov">        770 : }</span></a>
+<span class="lineNum">     796 </span>            : 
+<span class="lineNum">     797 </span><span class="lineCov">        686 : void Parser::checkandUpdateDataLabelsMap(States &amp; systemState) </span>
+<span class="lineNum">     798 </span>            : {
+<span class="lineNum">     799 </span><span class="lineCov">       1372 :         string labelNameMinusColon;</span>
+<span class="lineNum">     800 </span><span class="lineCov">       3157 :         for (size_t i = 0; i &lt; labelName.length(); i++)</span>
+<span class="lineNum">     801 </span><span class="lineCov">       2471 :                 labelNameMinusColon = labelNameMinusColon + labelName[i];</span>
+<span class="lineNum">     802 </span>            : 
+<span class="lineNum">     803 </span><span class="lineCov">        686 :         auto labelFind = labelsMap.find(labelNameMinusColon);</span>
+<span class="lineNum">     804 </span><span class="lineCov">        686 :         if (labelFind != labelsMap.end()) {</span>
+<span class="lineNum">     805 </span><span class="lineCov">         14 :                 systemState = ERROR_STATE;</span>
+<span class="lineNum">     806 </span><span class="lineCov">         14 :                 errorMessage = &quot;Error:&quot; + to_string(lineOfError) + &quot;: There was another identical label declared previously.&quot;; // *MEANS IN OUR PARSER RE-ASSIGNING LABEL NAMES IS NOT ALLOWED*</span>
+<span class="lineNum">     807 </span>            :         }
+<span class="lineNum">     808 </span>            :         else {
+<span class="lineNum">     809 </span>            :                 LabelInfo layoutStruc;
+<span class="lineNum">     810 </span><span class="lineCov">        672 :                 layoutStruc.isInstructionIndex = false; </span>
+<span class="lineNum">     811 </span><span class="lineCov">        672 :                 layoutStruc.instructionIndexOrFirstMemAddress = lastAvailableAddress; // Since we are checking the label in the beginning the lastAvailableAdress will be the value mapped from the labelname. Aka first memory address of the label</span>
+<span class="lineNum">     812 </span><span class="lineCov">        672 :                 labelsMap.emplace(labelName, layoutStruc);</span>
+<span class="lineNum">     813 </span>            :         }
+<a name="814"><span class="lineNum">     814 </span><span class="lineCov">        686 : }</span></a>
+<span class="lineNum">     815 </span>            : 
+<span class="lineNum">     816 </span><span class="lineCov">       1386 : void Parser::update_eol(States &amp; systemState, inputValue input)</span>
+<span class="lineNum">     817 </span>            : {
+<span class="lineNum">     818 </span><span class="lineCov">       1386 :         assert(systemState == EOL_STATE);</span>
+<span class="lineNum">     819 </span>            : 
+<span class="lineNum">     820 </span><span class="lineCov">       1386 :         if ( (input == LABEL_IN) || (input == STRING_LAYOUT_IN) || (input == INT_LAYOUT_IN) || (input == DECLARATION_MODE_IN) ) {</span>
+<span class="lineNum">     821 </span>            :                 
+<span class="lineNum">     822 </span><span class="lineCov">       1624 :                 if (input == STRING_LAYOUT_IN) // If there is no label attached to the string layout go directly to LAYOUT_STATE_STR0. example on line: .ascii &quot;bleh&quot; </span>
+<span class="lineNum">     823 </span><span class="lineCov">         49 :                         systemState = LAYOUT_STATE_STR_S0;</span>
+<span class="lineNum">     824 </span><span class="lineCov">        763 :                 else if (input == INT_LAYOUT_IN)</span>
+<span class="lineNum">     825 </span><span class="lineCov">         63 :                         systemState = LAYOUT_STATE_INT_S0;</span>
+<span class="lineNum">     826 </span>            :                 else {
+<span class="lineNum">     827 </span><span class="lineCov">        700 :                         systemState = DECLARATION_MODE_STATE;</span>
+<span class="lineNum">     828 </span><span class="lineCov">        700 :                         if (input == LABEL_IN)</span>
+<span class="lineNum">     829 </span><span class="lineCov">        686 :                                 checkandUpdateDataLabelsMap(systemState);  // If it is a valid label continue parsing, if not == ERROR_STATE. Also in this function adds the label to the labelMap</span>
+<span class="lineNum">     830 </span>            :                 }
+<span class="lineNum">     831 </span>            :                 
+<span class="lineNum">     832 </span>            :         }
+<span class="lineNum">     833 </span><span class="lineCov">        574 :         else if (input == CONSTANT_FIRST_PART_IN || input == INITALIZED_CONSTANT_IN) {</span>
+<span class="lineNum">     834 </span><span class="lineCov">        273 :                 systemState = CONSTANT_STATE_S0; </span>
+<span class="lineNum">     835 </span>            :         }
+<span class="lineNum">     836 </span><span class="lineCov">        301 :         else if (input == TEXT_MODE_IN) { </span>
+<span class="lineNum">     837 </span><span class="lineCov">        294 :                 systemState = TEXT_MODE_STATE;</span>
+<span class="lineNum">     838 </span>            :         }
+<span class="lineNum">     839 </span>            :         else {
+<span class="lineNum">     840 </span><span class="lineCov">          7 :                 systemState = ERROR_STATE; </span>
+<span class="lineNum">     841 </span><span class="lineCov">          7 :                 errorMessage = &quot;Error:&quot; + to_string(lineOfError) + &quot;: Not a valid data nor text declaration.&quot;;</span>
+<span class="lineNum">     842 </span>            :         }
+<a name="843"><span class="lineNum">     843 </span><span class="lineCov">       1386 : }</span></a>
+<span class="lineNum">     844 </span>            : 
+<span class="lineNum">     845 </span><span class="lineCov">        273 : void Parser::update_constant1(States &amp; systemState, inputValue input)</span>
+<span class="lineNum">     846 </span>            : {
+<span class="lineNum">     847 </span><span class="lineCov">        273 :         assert(systemState == CONSTANT_STATE_S0);</span>
+<span class="lineNum">     848 </span>            : 
+<span class="lineNum">     849 </span><span class="lineCov">        273 :         switch (input) {</span>
+<span class="lineNum">     850 </span>            :         case EQUAL_IN:
+<span class="lineNum">     851 </span><span class="lineCov">        259 :                 systemState = CONSTANT_STATE_S1;</span>
+<span class="lineNum">     852 </span><span class="lineCov">        259 :                 break;</span>
+<span class="lineNum">     853 </span>            :         
+<span class="lineNum">     854 </span>            :         default:
+<span class="lineNum">     855 </span><span class="lineCov">         14 :                 systemState = ERROR_STATE;</span>
+<span class="lineNum">     856 </span><span class="lineCov">         14 :                 errorMessage = &quot;Error:&quot; + to_string(lineOfError) + &quot;: constant did not have a corresponding equal sign(=).&quot;;</span>
+<span class="lineNum">     857 </span><span class="lineCov">         14 :                 break;</span>
+<span class="lineNum">     858 </span>            :         };
+<a name="859"><span class="lineNum">     859 </span><span class="lineCov">        273 : }</span></a>
+<span class="lineNum">     860 </span>            : 
+<span class="lineNum">     861 </span><span class="lineCov">        259 : void Parser::update_constant2(States &amp; systemState, inputValue input)</span>
+<span class="lineNum">     862 </span>            : {
+<span class="lineNum">     863 </span><span class="lineCov">        259 :         assert(systemState == CONSTANT_STATE_S1);</span>
+<span class="lineNum">     864 </span>            : 
+<span class="lineNum">     865 </span><span class="lineCov">        259 :         switch (input) {</span>
+<span class="lineNum">     866 </span>            :         case INTEGER_IN:
+<span class="lineNum">     867 </span><span class="lineCov">        252 :                 systemState = CONSTANT_STATE_S2;</span>
+<span class="lineNum">     868 </span><span class="lineCov">        252 :                 break;</span>
+<span class="lineNum">     869 </span>            : 
+<span class="lineNum">     870 </span>            :         default:
+<span class="lineNum">     871 </span><span class="lineCov">          7 :                 systemState = ERROR_STATE;</span>
+<span class="lineNum">     872 </span><span class="lineCov">          7 :                 errorMessage = &quot;Error:&quot; + to_string(lineOfError) + &quot;: constant did not have an integer assigned to it.&quot;;</span>
+<span class="lineNum">     873 </span><span class="lineCov">          7 :                 break;</span>
+<span class="lineNum">     874 </span>            :         };
+<a name="875"><span class="lineNum">     875 </span><span class="lineCov">        259 : }</span></a>
+<span class="lineNum">     876 </span>            : 
+<span class="lineNum">     877 </span><span class="lineCov">        252 : void Parser::update_constant3(States &amp; systemState, inputValue input, string inputString)</span>
+<span class="lineNum">     878 </span>            : {
+<span class="lineNum">     879 </span><span class="lineCov">        252 :         assert(systemState == CONSTANT_STATE_S2);</span>
+<span class="lineNum">     880 </span>            : 
+<span class="lineNum">     881 </span><span class="lineCov">        252 :         if (input == EOL_IN) {</span>
+<span class="lineNum">     882 </span><span class="lineCov">        245 :                 systemState = EOL_STATE;</span>
+<span class="lineNum">     883 </span>            :                 //ADDing THE CONSTANT TO A MAP, remember we have constantName string variable and inputString should be the integer because in the EOL_IN classify case I do not reassign inputString 
+<span class="lineNum">     884 </span><span class="lineCov">        245 :                 auto constantFind = constantsMap.find(constantName); // auto is just an iterator for the unordered_map</span>
+<span class="lineNum">     885 </span><span class="lineCov">        245 :                 if (constantFind != constantsMap.end()) { // If the constant is in the map, then overwrite the value. Else emplace it into the unordered_map</span>
+<span class="lineNum">     886 </span><span class="lineCov">          7 :                         constantFind-&gt;second = inputString;</span>
+<span class="lineNum">     887 </span>            :                 }
+<span class="lineNum">     888 </span>            :                 else {
+<span class="lineNum">     889 </span><span class="lineCov">        238 :                         constantsMap.emplace(constantName, inputString); </span>
+<span class="lineNum">     890 </span>            :                 }
+<span class="lineNum">     891 </span>            :         }
+<span class="lineNum">     892 </span>            :         else {
+<span class="lineNum">     893 </span><span class="lineCov">          7 :                 systemState = ERROR_STATE;</span>
+<span class="lineNum">     894 </span><span class="lineCov">          7 :                 errorMessage = &quot;Error:&quot; + to_string(lineOfError) + &quot;: extra information on the line where the constant is declared.&quot;;</span>
+<span class="lineNum">     895 </span>            :         }
+<a name="896"><span class="lineNum">     896 </span><span class="lineCov">        252 : }</span></a>
+<span class="lineNum">     897 </span>            : 
+<span class="lineNum">     898 </span><span class="lineCov">        665 : void Parser::update_intLayout1(States &amp; systemState, inputValue input, string inputString)</span>
+<span class="lineNum">     899 </span>            : {
+<span class="lineNum">     900 </span><span class="lineCov">        665 :         assert(systemState == LAYOUT_STATE_INT_S0);</span>
+<span class="lineNum">     901 </span>            :         //The initial Integer or previous Initialized Constant before the repetitive cases
+<span class="lineNum">     902 </span><span class="lineCov">        665 :         intLayout_IntOrConstantCheck(systemState, input, inputString); // The inputString should be the already initialized constant if the input is a constant</span>
+<a name="903"><span class="lineNum">     903 </span><span class="lineCov">        665 : }</span></a>
+<span class="lineNum">     904 </span>            : 
+<span class="lineNum">     905 </span><span class="lineCov">        714 : void Parser::update_intLayout2(States &amp; systemState, inputValue input)</span>
+<span class="lineNum">     906 </span>            : {
+<span class="lineNum">     907 </span><span class="lineCov">        714 :         assert(systemState == LAYOUT_STATE_INT_S1);</span>
+<span class="lineNum">     908 </span>            : 
+<span class="lineNum">     909 </span><span class="lineCov">        714 :         switch (input) {</span>
+<span class="lineNum">     910 </span>            :         case EOL_IN:
+<span class="lineNum">     911 </span><span class="lineCov">        588 :                 systemState = EOL_STATE;</span>
+<span class="lineNum">     912 </span><span class="lineCov">        588 :                 break;</span>
+<span class="lineNum">     913 </span>            : 
+<span class="lineNum">     914 </span>            :         case SEP_IN:
+<span class="lineNum">     915 </span><span class="lineCov">        112 :                 systemState = SEP_STATE; // This is basically the LAYOUT_STATE_INT_S2</span>
+<span class="lineNum">     916 </span><span class="lineCov">        112 :                 break;</span>
+<span class="lineNum">     917 </span>            : 
+<span class="lineNum">     918 </span>            :         default:
+<span class="lineNum">     919 </span><span class="lineCov">         14 :                 systemState = ERROR_STATE;</span>
+<span class="lineNum">     920 </span><span class="lineCov">         14 :                 errorMessage = &quot;Error:&quot; + to_string(lineOfError) + &quot;: extra information on the line where an int layout is declared.&quot;;</span>
+<span class="lineNum">     921 </span><span class="lineCov">         14 :                 break;</span>
+<span class="lineNum">     922 </span>            :         };
+<a name="923"><span class="lineNum">     923 </span><span class="lineCov">        714 : }</span></a>
+<span class="lineNum">     924 </span>            : 
+<span class="lineNum">     925 </span><span class="lineCov">       3444 : void Parser::update_sep(States &amp; systemState, inputValue input, string inputString) //In the text mode section it is easier to say that: update_sep()</span>
+<span class="lineNum">     926 </span>            : {
+<span class="lineNum">     927 </span><span class="lineCov">       3444 :         assert(systemState == SEP_STATE);</span>
+<span class="lineNum">     928 </span><span class="lineCov">       3444 :         if(mode == &quot;.data&quot;)</span>
+<span class="lineNum">     929 </span><span class="lineCov">        112 :                 intLayout_IntOrConstantCheck(systemState, input, inputString);</span>
+<span class="lineNum">     930 </span><span class="lineCov">       3332 :         else if (mode == &quot;.text&quot;) </span>
+<span class="lineNum">     931 </span>            :         {
+<span class="lineNum">     932 </span><span class="lineCov">       3332 :                 auto gotConstant = constantsMap.find(inputString);</span>
+<span class="lineNum">     933 </span>            : 
+<span class="lineNum">     934 </span><span class="lineCov">       3332 :                 if (opcodeArguments.size() &lt; 2) // execute when I only I have the first argument stored in the arguments vector</span>
+<span class="lineNum">     935 </span>            :                 { 
+<span class="lineNum">     936 </span><span class="lineCov">       2611 :                         auto gotLabel = labelsMap.find(inputString); // See if the inputString is already a predefined label name, If there is then we can use this name </span>
+<span class="lineNum">     937 </span>            : 
+<span class="lineNum">     938 </span><span class="lineCov">      10059 :                         if (((opcode == &quot;move&quot;) || (opcode == &quot;add&quot;) || (opcode == &quot;addu&quot;) || (opcode == &quot;sub&quot;) || (opcode == &quot;subu&quot;) || (opcode == &quot;mul&quot;) ||</span>
+<span class="lineNum">     939 </span><span class="lineCov">       6517 :                                 (opcode == &quot;mulo&quot;) || (opcode == &quot;mulou&quot;) || (opcode == &quot;mult&quot;) || (opcode == &quot;multu&quot;) || (opcode == &quot;div&quot;) || (opcode == &quot;divu&quot;) ||</span>
+<span class="lineNum">     940 </span><span class="lineCov">       5810 :                                 (opcode == &quot;rem&quot;) || (opcode == &quot;remu&quot;) || (opcode == &quot;abs&quot;) || (opcode == &quot;neg&quot;) || (opcode == &quot;negu&quot;) || (opcode == &quot;and&quot;) ||</span>
+<span class="lineNum">     941 </span><span class="lineCov">       6321 :                                 (opcode == &quot;nor&quot;) || (opcode == &quot;or&quot;) || (opcode == &quot;xor&quot;)) &amp;&amp; (input == REGISTER_IN)) {</span>
+<span class="lineNum">     942 </span>            : 
+<span class="lineNum">     943 </span><span class="lineCov">        833 :                                 incrementVectorOfOpcodeArguments(inputString, input); // This pushes argument 2 into my vector with an input value of a register</span>
+<span class="lineNum">     944 </span><span class="lineCov">        833 :                                 systemState = ARG2_REG_STATE;                           </span>
+<span class="lineNum">     945 </span>            :                         }
+<span class="lineNum">     946 </span><span class="lineCov">       1778 :                         else if ((opcode == &quot;li&quot;) &amp;&amp; ((input == INTEGER_IN) || (gotConstant != constantsMap.end()) )  ) {</span>
+<span class="lineNum">     947 </span>            : 
+<span class="lineNum">     948 </span><span class="lineCov">        413 :                                 incrementVectorOfOpcodeArguments(inputString, input); // This pushes argument 2 into my vector with an inputValue of either a integer or Constant</span>
+<span class="lineNum">     949 </span><span class="lineCov">        413 :                                 systemState = ARG2_IMMEDIATE_STATE;</span>
+<span class="lineNum">     950 </span>            :                         }
+<span class="lineNum">     951 </span><span class="lineCov">       7735 :                         else if (((opcode == &quot;not&quot;) || (opcode == &quot;beq&quot;) || (opcode == &quot;bne&quot;) || (opcode == &quot;blt&quot;) || (opcode == &quot;ble&quot;) || (opcode == &quot;bgt&quot;) ||</span>
+<span class="lineNum">     952 </span><span class="lineCov">       5698 :                                       (opcode == &quot;bge&quot;)) &amp;&amp; ((input == INTEGER_IN) || (gotConstant != constantsMap.end()) || (input == REGISTER_IN) ||</span>
+<span class="lineNum">     953 </span>            :                                       (input == CONSTANT_FIRST_PART_IN))  ) { //**ACTUALLY THE (INPUT==CONSTANT_FIRST) IS NOT PREDEFINED because it is a future initialized label, but after parsing that specific constant = a labels name
+<span class="lineNum">     954 </span>            : 
+<span class="lineNum">     955 </span><span class="lineCov">        224 :                                 incrementVectorOfOpcodeArguments(inputString, input); // This pushes argument 2 into my vector with an inputValue of either a integer, Constant or a register </span>
+<span class="lineNum">     956 </span><span class="lineCov">        224 :                                 systemState = ARG_SOURCE_STATE;</span>
+<span class="lineNum">     957 </span>            :                         }
+<span class="lineNum">     958 </span><span class="lineCov">       4067 :                         else if (((opcode == &quot;lw&quot;) || (opcode == &quot;lh&quot;) || (opcode == &quot;lb&quot;) || (opcode == &quot;la&quot;) || (opcode == &quot;sw&quot;) || (opcode == &quot;sh&quot;) ||</span>
+<span class="lineNum">     959 </span><span class="lineCov">       6839 :                                           (opcode == &quot;sb&quot;)) &amp;&amp; ( (gotLabel != labelsMap.end()) || (input == REGISTER_IN) || (input == INITALIZED_CONSTANT_IN) ||</span>
+<span class="lineNum">     960 </span><span class="lineCov">         42 :                                           (input == INTEGER_IN) || (input == OPENP_IN)) ) { // The INTEGER_IN = [OFFSET] or can also be INTEGER_IN = Immediate : WORKING HERE!!!!!!!</span>
+<span class="lineNum">     961 </span>            : 
+<span class="lineNum">     962 </span><span class="lineCov">       1134 :                                 if (input == REGISTER_IN || (gotLabel != labelsMap.end() || input == INITALIZED_CONSTANT_IN) ) {</span>
+<span class="lineNum">     963 </span><span class="lineCov">        959 :                                         incrementVectorOfOpcodeArguments(inputString, input); // This pushes argument 2 into my vector with an inputValue of either a label or register</span>
+<span class="lineNum">     964 </span><span class="lineCov">        959 :                                         systemState = ARG2_MEMREF_STATE;</span>
+<span class="lineNum">     965 </span>            :                                 }
+<span class="lineNum">     966 </span><span class="lineCov">        175 :                                 else if (input == OPENP_IN) {</span>
+<span class="lineNum">     967 </span><span class="lineCov">         42 :                                         systemState = OPENP_STATE;</span>
+<span class="lineNum">     968 </span>            :                                 }
+<span class="lineNum">     969 </span><span class="lineCov">        133 :                                 else if (input == INTEGER_IN) {</span>
+<span class="lineNum">     970 </span><span class="lineCov">        133 :                                         incrementVectorOfOpcodeArguments(inputString, input);</span>
+<span class="lineNum">     971 </span><span class="lineCov">        133 :                                         systemState = OFFSET_STATE; // besides an Offset, The integer can also be an Immediate value</span>
+<span class="lineNum">     972 </span>            :                                 }
+<span class="lineNum">     973 </span>            :                         }
+<span class="lineNum">     974 </span>            :                         else {
+<span class="lineNum">     975 </span><span class="lineCov">          7 :                                 systemState = ERROR_STATE;</span>
+<span class="lineNum">     976 </span><span class="lineCov">          7 :                                 errorMessage = &quot;Error:&quot; + to_string(lineOfError) + &quot;: The opcode does not match with its corresponding second argument&quot;;</span>
+<span class="lineNum">     977 </span>            :                         }
+<span class="lineNum">     978 </span>            :                 }
+<span class="lineNum">     979 </span><span class="lineCov">        721 :                 else if(opcodeArguments.size() &lt; 4) // execute with arguments 2 and 3, which are stored in the arguments vector</span>
+<span class="lineNum">     980 </span>            :                 {
+<span class="lineNum">     981 </span><span class="lineCov">       3577 :                         if (((opcode == &quot;add&quot;) || (opcode == &quot;addu&quot;) || (opcode == &quot;sub&quot;) || (opcode == &quot;subu&quot;) || (opcode == &quot;mul&quot;) || (opcode == &quot;mulo&quot;) || </span>
+<span class="lineNum">     982 </span><span class="lineCov">       1155 :                                 (opcode == &quot;mulou&quot;) || (opcode == &quot;div&quot;) || (opcode == &quot;divu&quot;) || (opcode == &quot;rem&quot;) || (opcode == &quot;remu&quot;) || </span>
+<span class="lineNum">     983 </span><span class="lineCov">       2576 :                                 (opcode == &quot;and&quot;) || (opcode == &quot;nor&quot;) || (opcode == &quot;or&quot;) || (opcode == &quot;xor&quot;))    &amp;&amp; </span>
+<span class="lineNum">     984 </span><span class="lineCov">       1491 :                                 ((input == INTEGER_IN) || (gotConstant != constantsMap.end()) || (input == REGISTER_IN))    ) {</span>
+<span class="lineNum">     985 </span>            : 
+<span class="lineNum">     986 </span><span class="lineCov">        546 :                                 incrementVectorOfOpcodeArguments(inputString, input); // This pushes argument 3 into my vector with an inputValue of either a integer, Constant or register</span>
+<span class="lineNum">     987 </span><span class="lineCov">        546 :                                 systemState = ARG_SOURCE_STATE;</span>
+<span class="lineNum">     988 </span>            :                         }
+<span class="lineNum">     989 </span><span class="lineCov">        686 :                         else if (((opcode == &quot;beq&quot;) || (opcode == &quot;bne&quot;) || (opcode == &quot;blt&quot;) || (opcode == &quot;ble&quot;) || (opcode == &quot;bgt&quot;) ||</span>
+<span class="lineNum">     990 </span><span class="lineCov">        896 :                                          (opcode == &quot;bge&quot;)) &amp;&amp; ( (gotConstant != constantsMap.end()) || (input == CONSTANT_FIRST_PART_IN))  ) {  //**** the CONSTANT_FIRST_PART_IN is a predicted label that we can jump to using jump instructions</span>
+<span class="lineNum">     991 </span>            : 
+<span class="lineNum">     992 </span><span class="lineCov">        175 :                                 incrementVectorOfOpcodeArguments(inputString, input); // This pushes argument 3 into my vector with an inputValue of a label</span>
+<span class="lineNum">     993 </span><span class="lineCov">        175 :                                 systemState = LABEL_STATE_S0;</span>
+<span class="lineNum">     994 </span>            :                         }
+<span class="lineNum">     995 </span>            :                         else {
+<span class="lineNum">     996 </span><span class="lineNoCov">          0 :                                 systemState = ERROR_STATE;</span>
+<span class="lineNum">     997 </span><span class="lineNoCov">          0 :                                 errorMessage = &quot;Error:&quot; + to_string(lineOfError) + &quot;: The opcode does not match with its corresponding third argument&quot;;</span>
+<span class="lineNum">     998 </span>            :                         }
+<span class="lineNum">     999 </span>            :                 }
+<span class="lineNum">    1000 </span>            :                 else {
+<span class="lineNum">    1001 </span><span class="lineNoCov">          0 :                         systemState = ERROR_STATE;</span>
+<span class="lineNum">    1002 </span><span class="lineNoCov">          0 :                         errorMessage = &quot;Error:&quot; + to_string(lineOfError) + &quot;: There are multiple arguments on the same line. 3 is the maximum arguments allowed. &quot;;</span>
+<span class="lineNum">    1003 </span>            :                 }
+<span class="lineNum">    1004 </span>            : 
+<span class="lineNum">    1005 </span>            :         }
+<span class="lineNum">    1006 </span>            : 
+<a name="1007"><span class="lineNum">    1007 </span><span class="lineCov">       3444 : }</span></a>
+<span class="lineNum">    1008 </span>            : 
+<span class="lineNum">    1009 </span><span class="lineCov">         77 : void Parser::update_strLayout1(States &amp; systemState, inputValue input)</span>
+<span class="lineNum">    1010 </span>            : {
+<span class="lineNum">    1011 </span><span class="lineCov">         77 :         assert(systemState == LAYOUT_STATE_STR_S0);</span>
+<span class="lineNum">    1012 </span>            : 
+<span class="lineNum">    1013 </span><span class="lineCov">         77 :         switch (input) {</span>
+<span class="lineNum">    1014 </span>            :         case STRING_DELIM_IN:
+<span class="lineNum">    1015 </span><span class="lineCov">         70 :                 systemState = STRING_DELIM_STATE1;</span>
+<span class="lineNum">    1016 </span><span class="lineCov">         70 :                 break;</span>
+<span class="lineNum">    1017 </span>            : 
+<span class="lineNum">    1018 </span>            :         default:
+<span class="lineNum">    1019 </span><span class="lineCov">          7 :                 systemState = ERROR_STATE;</span>
+<span class="lineNum">    1020 </span><span class="lineCov">          7 :                 errorMessage = &quot;Error:&quot; + to_string(lineOfError) + &quot;: No string delimiter after string layout has been declared.&quot;;</span>
+<span class="lineNum">    1021 </span><span class="lineCov">          7 :                 break;</span>
+<span class="lineNum">    1022 </span>            :         };
+<a name="1023"><span class="lineNum">    1023 </span><span class="lineCov">         77 : }</span></a>
+<span class="lineNum">    1024 </span>            : 
+<span class="lineNum">    1025 </span><span class="lineCov">         70 : void Parser::update_strLayout2(States &amp; systemState, inputValue input)</span>
+<span class="lineNum">    1026 </span>            : {
+<span class="lineNum">    1027 </span><span class="lineCov">         70 :         assert(systemState == STRING_DELIM_STATE1);</span>
+<span class="lineNum">    1028 </span>            : 
+<span class="lineNum">    1029 </span>            :         // Anytype of string in the the string delimiters is valid
+<span class="lineNum">    1030 </span><span class="lineCov">         70 :         if (input == CHARS_IN || input == CONSTANT_FIRST_PART_IN || input == LABEL_IN || input == INITALIZED_CONSTANT_IN || input == INTEGER_IN) {</span>
+<span class="lineNum">    1031 </span><span class="lineCov">         70 :                 systemState = LAYOUT_STATE_STR_S2;</span>
+<span class="lineNum">    1032 </span>            :         }
+<a name="1033"><span class="lineNum">    1033 </span><span class="lineCov">         70 : }</span></a>
+<span class="lineNum">    1034 </span>            : 
+<span class="lineNum">    1035 </span><span class="lineCov">         70 : void Parser::update_strLayout3(States &amp; systemState, inputValue input)</span>
+<span class="lineNum">    1036 </span>            : {
+<span class="lineNum">    1037 </span><span class="lineCov">         70 :         assert(systemState == LAYOUT_STATE_STR_S2);</span>
+<span class="lineNum">    1038 </span>            : 
+<span class="lineNum">    1039 </span><span class="lineCov">         70 :         switch (input) {</span>
+<span class="lineNum">    1040 </span>            :         case STRING_DELIM_IN:
+<span class="lineNum">    1041 </span><span class="lineCov">         56 :                 systemState = STRING_DELIM_STATE2;</span>
+<span class="lineNum">    1042 </span><span class="lineCov">         56 :                 break;</span>
+<span class="lineNum">    1043 </span>            : 
+<span class="lineNum">    1044 </span>            :         default:
+<span class="lineNum">    1045 </span><span class="lineCov">         14 :                 systemState = ERROR_STATE;</span>
+<span class="lineNum">    1046 </span><span class="lineCov">         14 :                 errorMessage = &quot;Error:&quot; + to_string(lineOfError) + &quot;: No closing string delimiter after the &lt;string&gt;.&quot;;</span>
+<span class="lineNum">    1047 </span><span class="lineCov">         14 :                 break;</span>
+<span class="lineNum">    1048 </span>            :         };
+<a name="1049"><span class="lineNum">    1049 </span><span class="lineCov">         70 : }</span></a>
+<span class="lineNum">    1050 </span>            : 
+<span class="lineNum">    1051 </span><span class="lineCov">         56 : void Parser::update_strLayout4(States &amp; systemState, inputValue input, string inputString)</span>
+<span class="lineNum">    1052 </span>            : {
+<span class="lineNum">    1053 </span><span class="lineCov">         56 :         assert(systemState = STRING_DELIM_STATE2);</span>
+<span class="lineNum">    1054 </span>            : 
+<span class="lineNum">    1055 </span><span class="lineCov">         56 :         switch (input) {</span>
+<span class="lineNum">    1056 </span>            :         case EOL_IN:
+<span class="lineNum">    1057 </span>            :                 //ALLOCATE MEMORY for either .ascii or .asciiz. Will use the layoutKey variable to determine which format, but inputString which will be the &lt;string&gt; information can be properly allocated.
+<span class="lineNum">    1058 </span>            :                 // Each character gets their own byte
+<span class="lineNum">    1059 </span><span class="lineCov">         42 :                 if (layoutKey == &quot;.ascii&quot;)</span>
+<span class="lineNum">    1060 </span><span class="lineCov">         28 :                         asciiMemAllocation(inputString);</span>
+<span class="lineNum">    1061 </span><span class="lineCov">         14 :                 else if (layoutKey == &quot;.asciiz&quot;) {</span>
+<span class="lineNum">    1062 </span><span class="lineCov">         14 :                         asciiMemAllocation(inputString);</span>
+<span class="lineNum">    1063 </span><span class="lineCov">         14 :                         memoryLayout.push_back(&quot;00&quot;); // adding the terminated null character as a byte = zero</span>
+<span class="lineNum">    1064 </span><span class="lineCov">         14 :                         lastAvailableAddress++;</span>
+<span class="lineNum">    1065 </span>            :                 }
+<span class="lineNum">    1066 </span>            : 
+<span class="lineNum">    1067 </span><span class="lineCov">         42 :                 systemState = EOL_STATE;</span>
+<span class="lineNum">    1068 </span><span class="lineCov">         42 :                 break;</span>
+<span class="lineNum">    1069 </span>            : 
+<span class="lineNum">    1070 </span>            :         default:
+<span class="lineNum">    1071 </span><span class="lineCov">         14 :                 systemState = ERROR_STATE;</span>
+<span class="lineNum">    1072 </span><span class="lineCov">         14 :                 errorMessage = &quot;Error:&quot; + to_string(lineOfError) + &quot;: extra information on the line where a string layout is declared.&quot;;</span>
+<span class="lineNum">    1073 </span><span class="lineCov">         14 :                 break;</span>
+<span class="lineNum">    1074 </span>            :         };
+<span class="lineNum">    1075 </span><span class="lineCov">         56 : }</span>
+<span class="lineNum">    1076 </span>            : 
+<a name="1077"><span class="lineNum">    1077 </span>            : </a>
+<span class="lineNum">    1078 </span>            : 
+<span class="lineNum">    1079 </span><span class="lineCov">        756 : bool Parser::fitsBits(const string layoutKey, const string inputInteger, const inputValue input) </span>
+<span class="lineNum">    1080 </span>            : {
+<span class="lineNum">    1081 </span>            :         // the inputInteger can be either an &lt;integer&gt; or the value of the &lt;constant&gt;
+<span class="lineNum">    1082 </span><span class="lineCov">        756 :         char firstCharInteger = inputInteger[0];</span>
+<span class="lineNum">    1083 </span><span class="lineCov">        756 :         int64_t convertedInput = stoll(inputInteger); //Range: –9,223,372,036,854,775,808 through 9,223,372,036,854,775,807 </span>
+<span class="lineNum">    1084 </span>            :         
+<span class="lineNum">    1085 </span><span class="lineCov">        756 :         if (layoutKey == &quot;.word&quot; || layoutKey == &quot;.space&quot; || (input == INITALIZED_CONSTANT_IN &amp;&amp; (layoutKey == &quot;.word&quot; || layoutKey == &quot;.space&quot;)) ) {</span>
+<span class="lineNum">    1086 </span><span class="lineCov">        518 :                 if (firstCharInteger == '+' || firstCharInteger == '-') { // These are signed integers. RANGE: -2,147,483,648 (-2^31) through 2,147,483,647 (2^31 - 1)</span>
+<span class="lineNum">    1087 </span><span class="lineCov">         56 :                         int32_t i32min = numeric_limits&lt;int32_t&gt;::min(); // min() function that returns the smallest finite value of the given type </span>
+<span class="lineNum">    1088 </span>            :                         
+<span class="lineNum">    1089 </span><span class="lineCov">         56 :                         if ((convertedInput &gt;= i32min) &amp;&amp; (convertedInput &lt;= 2147483647))</span>
+<span class="lineNum">    1090 </span><span class="lineCov">         49 :                                 return true;</span>
+<span class="lineNum">    1091 </span>            :                 }
+<span class="lineNum">    1092 </span>            :                 else { // These are unsigned integers. RANGE: 0 through 4,294,967,295 (2^32 - 1) 
+<span class="lineNum">    1093 </span><span class="lineCov">        462 :                         if (convertedInput &lt;= 4294967295)</span>
+<span class="lineNum">    1094 </span><span class="lineCov">        455 :                                 return true;</span>
+<span class="lineNum">    1095 </span>            :                 }
+<span class="lineNum">    1096 </span>            :         }
+<span class="lineNum">    1097 </span><span class="lineCov">        238 :         else if (layoutKey == &quot;.half&quot; || (input == INITALIZED_CONSTANT_IN &amp;&amp; layoutKey == &quot;.half&quot;) ) {</span>
+<span class="lineNum">    1098 </span><span class="lineCov">         42 :                 if (firstCharInteger == '+' || firstCharInteger == '-') { // These are signed integers. RANGE: -32768 (-2^15) through 32767 (2^15 - 1)</span>
+<span class="lineNum">    1099 </span><span class="lineCov">         21 :                         if ((convertedInput &gt;= -32768) &amp;&amp; (convertedInput &lt;= 32767))</span>
+<span class="lineNum">    1100 </span><span class="lineCov">          7 :                                 return true;</span>
+<span class="lineNum">    1101 </span>            :                 }
+<span class="lineNum">    1102 </span>            :                 else { // These are unsigned integers. RANGE: 0 through 65535 (2^16 - 1)
+<span class="lineNum">    1103 </span><span class="lineCov">         28 :                         if (convertedInput &lt;= 665535)</span>
+<span class="lineNum">    1104 </span><span class="lineCov">         28 :                                 return true;</span>
+<span class="lineNum">    1105 </span>            :                 }
+<span class="lineNum">    1106 </span>            :         }
+<span class="lineNum">    1107 </span><span class="lineCov">        196 :         else if (layoutKey == &quot;.byte&quot; || (input == INITALIZED_CONSTANT_IN &amp;&amp; layoutKey == &quot;.byte&quot;) ) {</span>
+<span class="lineNum">    1108 </span><span class="lineCov">        196 :                 if (firstCharInteger == '+' || firstCharInteger == '-') { // These are signed integers. RANGE: -128 (-2^7) through 127</span>
+<span class="lineNum">    1109 </span><span class="lineCov">         49 :                         if ((convertedInput &gt;= -128) &amp;&amp; (convertedInput &lt;= 127))</span>
+<span class="lineNum">    1110 </span><span class="lineCov">          7 :                                 return true;</span>
+<span class="lineNum">    1111 </span>            :                 }
+<span class="lineNum">    1112 </span>            :                 else { // These are unsigned integers. RANGE: 0 through 255 (2^8 - 1)
+<span class="lineNum">    1113 </span><span class="lineCov">        168 :                         if (convertedInput &lt;= 255)</span>
+<span class="lineNum">    1114 </span><span class="lineCov">        168 :                                 return true;</span>
+<span class="lineNum">    1115 </span>            :                 }
+<span class="lineNum">    1116 </span>            :         }
+<span class="lineNum">    1117 </span>            : 
+<span class="lineNum">    1118 </span><span class="lineCov">         42 :         return false; // If in an if statement does not return true means that this function will return false because it did not satisfy the necessary condition</span>
+<a name="1119"><span class="lineNum">    1119 </span>            : }</a>
+<span class="lineNum">    1120 </span>            : 
+<span class="lineNum">    1121 </span><span class="lineCov">        777 : void Parser::intLayout_IntOrConstantCheck(States &amp; systemState, inputValue input, string inputString)</span>
+<span class="lineNum">    1122 </span>            : {
+<span class="lineNum">    1123 </span><span class="lineCov">        777 :         if (input == INTEGER_IN) {</span>
+<span class="lineNum">    1124 </span>            :                 // 1) use the inputString that will contain the integer, check to see if integer is valid size with its corresponding specific key layout(&quot;.word&quot;, &quot;.half&quot;, &quot;.byte&quot;, &quot;.space&quot;)
+<span class="lineNum">    1125 </span>            :                 // 2) ALLOCATE MEMORY for the data as we go, Depending on the key layout for the specific integer
+<span class="lineNum">    1126 </span><span class="lineCov">        721 :                 if (fitsBits(layoutKey, inputString, input)) {</span>
+<span class="lineNum">    1127 </span>            :                         //ALLOCATE APPROPRIATE SIZE HERE BASED ON LAYOUT KEY. for example .space specfies how many bytes of memory to be alllocated and fills them with zero. DIFFERENT THAN .word
+<span class="lineNum">    1128 </span>            :                         
+<span class="lineNum">    1129 </span><span class="lineCov">        686 :                         helpIntMemAllocation(inputString, layoutKey);</span>
+<span class="lineNum">    1130 </span><span class="lineCov">        686 :                         systemState = LAYOUT_STATE_INT_S1;</span>
+<span class="lineNum">    1131 </span>            :                 }
+<span class="lineNum">    1132 </span>            :                 else {
+<span class="lineNum">    1133 </span><span class="lineCov">         35 :                         systemState = ERROR_STATE;</span>
+<span class="lineNum">    1134 </span><span class="lineCov">         35 :                         errorMessage = &quot;Error:&quot; + to_string(lineOfError) + &quot;: the integer(in bits) did not fit its corresponding layout.&quot;;</span>
+<span class="lineNum">    1135 </span>            :                 }
+<span class="lineNum">    1136 </span>            :         }
+<span class="lineNum">    1137 </span><span class="lineCov">         56 :         else if (input == INITALIZED_CONSTANT_IN) {</span>
+<span class="lineNum">    1138 </span><span class="lineCov">         35 :                 auto it = constantsMap.find(inputString); // The inputstring should be the already initalized constant</span>
+<span class="lineNum">    1139 </span><span class="lineCov">         35 :                 if (fitsBits(layoutKey, it-&gt;second, input)) {</span>
+<span class="lineNum">    1140 </span>            :                         //ALLOCATing APPROPRIATE HERE based on the keyLayout: CONSTANT will not be used in an int_layout declaration for this parser. for example cant do .byte CONSTANT,B,Z
+<span class="lineNum">    1141 </span>            :                         //helpIntMemAllocation(inputString, layoutKey);   
+<span class="lineNum">    1142 </span>            : 
+<span class="lineNum">    1143 </span><span class="lineCov">         28 :                         systemState = LAYOUT_STATE_INT_S1;</span>
+<span class="lineNum">    1144 </span>            :                 }
+<span class="lineNum">    1145 </span>            :                 else {
+<span class="lineNum">    1146 </span><span class="lineCov">          7 :                         systemState = ERROR_STATE;</span>
+<span class="lineNum">    1147 </span><span class="lineCov">          7 :                         errorMessage = &quot;Error:&quot; + to_string(lineOfError) + &quot;: the previously defined constant(in bits) did not fit its corresponding layout.&quot;;</span>
+<span class="lineNum">    1148 </span>            :                 }
+<span class="lineNum">    1149 </span>            :         }
+<span class="lineNum">    1150 </span>            :         else {
+<span class="lineNum">    1151 </span><span class="lineCov">         21 :                 systemState = ERROR_STATE;</span>
+<span class="lineNum">    1152 </span><span class="lineCov">         21 :                 if(input == EOL_IN) // B/C the error occured on the EOL input indicates that the error happened on the previous line</span>
+<span class="lineNum">    1153 </span><span class="lineCov">          7 :                         errorMessage = &quot;Error:&quot; + to_string(lineOfError) + &quot;: There is no follow up integer for its layout on previous line.&quot;;</span>
+<span class="lineNum">    1154 </span>            :                 else
+<span class="lineNum">    1155 </span><span class="lineCov">         14 :                         errorMessage = &quot;Error:&quot; + to_string(lineOfError) + &quot;: Not a valid integer for its layout.&quot;;</span>
+<span class="lineNum">    1156 </span>            :         }
+<span class="lineNum">    1157 </span><span class="lineCov">        777 : }</span>
+<a name="1158"><span class="lineNum">    1158 </span>            : </a>
+<span class="lineNum">    1159 </span>            : 
+<span class="lineNum">    1160 </span><span class="lineCov">       2849 : void Parser::stringTokenDeclarationClassify(string&amp; inputString, char firstChar, char lastChar, inputValue&amp; input)</span>
+<span class="lineNum">    1161 </span>            : {
+<span class="lineNum">    1162 </span><span class="lineCov">       2849 :         if ((inputString == &quot;.word&quot;) || (inputString == &quot;.half&quot;) || (inputString == &quot;.byte&quot;) || (inputString == &quot;.space&quot;)) {</span>
+<span class="lineNum">    1163 </span><span class="lineCov">        679 :                 input = INT_LAYOUT_IN;</span>
+<span class="lineNum">    1164 </span>            : 
+<span class="lineNum">    1165 </span><span class="lineCov">        679 :                 if (inputString == &quot;.word&quot;) { //LSB first -&gt; The allocation occurs in intLayout_IntOrConstantCheck() function and update_strLayout3() function which is for .ascii and .asciiz</span>
+<span class="lineNum">    1166 </span>            :                                                                           //followed by a comma separated list of 32 bit integers I. Allocate 4 bytes of space
+<span class="lineNum">    1167 </span><span class="lineCov">        448 :                         layoutKey = &quot;.word&quot;; //--&gt; Private variable so I will not lose the layout key</span>
+<span class="lineNum">    1168 </span>            :                 }
+<span class="lineNum">    1169 </span><span class="lineCov">        231 :                 else if (inputString == &quot;.half&quot;) {</span>
+<span class="lineNum">    1170 </span>            :                         //followed by a comma separated list of 16 bit integers I. Allocate 2 bytes of space
+<span class="lineNum">    1171 </span><span class="lineCov">         56 :                         layoutKey = &quot;.half&quot;;</span>
+<span class="lineNum">    1172 </span>            :                 }
+<span class="lineNum">    1173 </span><span class="lineCov">        175 :                 else if (inputString == &quot;.byte&quot;) {</span>
+<span class="lineNum">    1174 </span>            :                         //followed by a comma separated list of 8 bit integers. Allocate 1 byte of space
+<span class="lineNum">    1175 </span><span class="lineCov">        105 :                         layoutKey = &quot;.byte&quot;;</span>
+<span class="lineNum">    1176 </span>            :                 }
+<span class="lineNum">    1177 </span><span class="lineCov">         70 :                 else if (inputString == &quot;.space&quot;) {</span>
+<span class="lineNum">    1178 </span>            :                         //followed by an integer I specifying the amount of space in bytes. Allocate I bytes of space
+<span class="lineNum">    1179 </span><span class="lineCov">         70 :                         layoutKey = &quot;.space&quot;;</span>
+<span class="lineNum">    1180 </span>            :                 }
+<span class="lineNum">    1181 </span>            :         }
+<span class="lineNum">    1182 </span><span class="lineCov">       2170 :         else if ((inputString == &quot;.ascii&quot;) || (inputString == &quot;.asciiz&quot;)) {</span>
+<span class="lineNum">    1183 </span><span class="lineCov">         77 :                 input = STRING_LAYOUT_IN;</span>
+<span class="lineNum">    1184 </span>            : 
+<span class="lineNum">    1185 </span><span class="lineCov">         77 :                 if (inputString == &quot;.ascii&quot;) {</span>
+<span class="lineNum">    1186 </span>            :                         //followed by a string of length L (not automatically null-terminated). Allocate L bytes of space
+<span class="lineNum">    1187 </span><span class="lineCov">         35 :                         layoutKey = &quot;.ascii&quot;;</span>
+<span class="lineNum">    1188 </span>            :                 }
+<span class="lineNum">    1189 </span><span class="lineCov">         42 :                 else if (inputString == &quot;.asciiz&quot;) {</span>
+<span class="lineNum">    1190 </span>            :                         //followed by a string of length L (automatically null-terminated). Same as .ascii but terminate the string with a null (decimal value 0) character
+<span class="lineNum">    1191 </span><span class="lineCov">         42 :                         layoutKey = &quot;.asciiz&quot;;</span>
+<span class="lineNum">    1192 </span>            :                 }
+<span class="lineNum">    1193 </span>            :         }
+<span class="lineNum">    1194 </span><span class="lineCov">       2093 :         else if (systemState == STRING_DELIM_STATE1) { // CHECK to see if STRING token is the characters inbetween a &lt;string&gt; ; Make sure previous systemState = STRING_DELIM</span>
+<span class="lineNum">    1195 </span><span class="lineCov">        336 :                 for (size_t i = 0; i &lt; inputString.length(); i++) {</span>
+<span class="lineNum">    1196 </span><span class="lineCov">        266 :                         if (!isprint(inputString[i])) {</span>
+<span class="lineNum">    1197 </span><span class="lineNoCov">          0 :                                 systemState = ERROR_STATE; input = ERROR_IN;</span>
+<span class="lineNum">    1198 </span><span class="lineNoCov">          0 :                                 errorMessage = &quot;Error:&quot; + to_string(lineOfError) + &quot;: The characters in the &lt;string&gt; must be printable by ascii.&quot;;</span>
+<span class="lineNum">    1199 </span>            :                         }
+<span class="lineNum">    1200 </span>            :                 }
+<span class="lineNum">    1201 </span>            : 
+<span class="lineNum">    1202 </span><span class="lineCov">         70 :                 if (systemState != ERROR_STATE)</span>
+<span class="lineNum">    1203 </span><span class="lineCov">         70 :                         input = CHARS_IN;</span>
+<span class="lineNum">    1204 </span>            :         }
+<span class="lineNum">    1205 </span><span class="lineCov">       2023 :         else if ((inputString.length() != 1) &amp;&amp; (lastChar == ':') &amp;&amp; (isalpha(firstChar) || (firstChar == '_'))) { // CHECK to see if STRING is a &lt;Label&gt;</span>
+<span class="lineNum">    1206 </span>            :                 
+<span class="lineNum">    1207 </span><span class="lineCov">        693 :                 checkIfLabel(systemState, input, inputString); // Checks if the string is a label and performs certain actions depending on the result</span>
+<span class="lineNum">    1208 </span>            : 
+<span class="lineNum">    1209 </span>            :         }
+<span class="lineNum">    1210 </span><span class="lineCov">       1330 :         else if ((isalpha(firstChar) || (firstChar == '_'))) { // POTENTIAL to be a new &lt;constant&gt; OR could be a constant already declared</span>
+<span class="lineNum">    1211 </span>            : 
+<span class="lineNum">    1212 </span><span class="lineCov">        336 :                 checkIfConstant(systemState, input, inputString);</span>
+<span class="lineNum">    1213 </span>            : 
+<span class="lineNum">    1214 </span>            :         }
+<span class="lineNum">    1215 </span><span class="lineCov">        994 :         else if ((firstChar == '-') || (firstChar == '+') || (isdigit(firstChar))) { // CHECK to see if STRING is an &lt;integer&gt;</span>
+<span class="lineNum">    1216 </span>            :                 
+<span class="lineNum">    1217 </span><span class="lineCov">        987 :                 checkIfInteger(systemState, input, inputString, firstChar);</span>
+<span class="lineNum">    1218 </span>            : 
+<span class="lineNum">    1219 </span>            :         }
+<span class="lineNum">    1220 </span>            :         else {
+<span class="lineNum">    1221 </span><span class="lineCov">          7 :                 systemState = ERROR_STATE;</span>
+<span class="lineNum">    1222 </span><span class="lineCov">          7 :                 input = ERROR_IN;</span>
+<span class="lineNum">    1223 </span><span class="lineCov">          7 :                 errorMessage = &quot;Error:&quot; + to_string(lineOfError) + &quot;: Not a valid Declaration. Could not be defined in the data declaration MIPS assembly.&quot;;</span>
+<span class="lineNum">    1224 </span>            :         }
+<a name="1225"><span class="lineNum">    1225 </span><span class="lineCov">       2849 : }</span></a>
+<span class="lineNum">    1226 </span>            : 
+<span class="lineNum">    1227 </span><span class="lineCov">       1197 : void Parser::checkIfLabel(States&amp; systemState, inputValue&amp; input, string inputString)</span>
+<span class="lineNum">    1228 </span>            : {
+<span class="lineNum">    1229 </span><span class="lineCov">       5936 :         for (size_t i = 0; i &lt; inputString.length() - 1; i++) {  // It is length() - 1 because i am not including the last character which should be ':'</span>
+<span class="lineNum">    1230 </span><span class="lineCov">       4746 :                 if (!isdigit(inputString[i]) &amp;&amp; !isalpha(inputString[i]) &amp;&amp; !(inputString[i] == '_')) {</span>
+<span class="lineNum">    1231 </span><span class="lineCov">          7 :                         systemState = ERROR_STATE;</span>
+<span class="lineNum">    1232 </span><span class="lineCov">          7 :                         input = ERROR_IN;</span>
+<span class="lineNum">    1233 </span><span class="lineCov">          7 :                         errorMessage = &quot;Error:&quot; + to_string(lineOfError) + &quot;: Not proper way to initialize a &lt;Label&gt;.&quot;;</span>
+<span class="lineNum">    1234 </span><span class="lineCov">          7 :                         break;</span>
+<span class="lineNum">    1235 </span>            :                 }
+<span class="lineNum">    1236 </span>            :         }
+<span class="lineNum">    1237 </span>            : 
+<span class="lineNum">    1238 </span><span class="lineCov">       1197 :         if (systemState != ERROR_STATE) {</span>
+<span class="lineNum">    1239 </span><span class="lineCov">       1190 :                 input = LABEL_IN;</span>
+<span class="lineNum">    1240 </span><span class="lineCov">       1190 :                 labelName = &quot;&quot;; // Re-initialize the labelName to null so it does not add on to the current existing label names</span>
+<span class="lineNum">    1241 </span><span class="lineCov">       5922 :                 for (size_t i = 0; i &lt; inputString.length() - 1; i++)  // saves the labels name(but not ':') just in case if I assign a label to an integer from the int_layout</span>
+<span class="lineNum">    1242 </span><span class="lineCov">       4732 :                         labelName = labelName + inputString[i];</span>
+<span class="lineNum">    1243 </span>            :         }
+<a name="1244"><span class="lineNum">    1244 </span><span class="lineCov">       1197 : }</span></a>
+<span class="lineNum">    1245 </span>            : 
+<span class="lineNum">    1246 </span><span class="lineCov">       1435 : void Parser::checkIfConstant(States&amp; systemState, inputValue&amp; input, string inputString)</span>
+<span class="lineNum">    1247 </span>            : {
+<span class="lineNum">    1248 </span><span class="lineCov">       1435 :         auto got = constantsMap.find(inputString); // == std::unordered_map&lt;string,int&gt;::const_iterator got</span>
+<span class="lineNum">    1249 </span>            : 
+<span class="lineNum">    1250 </span><span class="lineCov">       1435 :         if (got != constantsMap.end()) {</span>
+<span class="lineNum">    1251 </span><span class="lineCov">        322 :                 input = INITALIZED_CONSTANT_IN;</span>
+<span class="lineNum">    1252 </span>            :         }
+<span class="lineNum">    1253 </span>            :         else {
+<span class="lineNum">    1254 </span><span class="lineCov">       5922 :                 for (size_t i = 0; i &lt; inputString.length(); i++) {</span>
+<span class="lineNum">    1255 </span><span class="lineCov">       4816 :                         if (!isdigit(inputString[i]) &amp;&amp; !isalpha(inputString[i]) &amp;&amp; !(inputString[i] == '_')) {</span>
+<span class="lineNum">    1256 </span><span class="lineCov">          7 :                                 systemState = ERROR_STATE;</span>
+<span class="lineNum">    1257 </span><span class="lineCov">          7 :                                 input = ERROR_IN;</span>
+<span class="lineNum">    1258 </span><span class="lineCov">          7 :                                 errorMessage = &quot;Error:&quot; + to_string(lineOfError) + &quot;: Not proper way to initialize a &lt;constant&gt;.&quot;;</span>
+<span class="lineNum">    1259 </span><span class="lineCov">          7 :                                 break;</span>
+<span class="lineNum">    1260 </span>            :                         }
+<span class="lineNum">    1261 </span>            :                 }
+<span class="lineNum">    1262 </span>            : 
+<span class="lineNum">    1263 </span><span class="lineCov">       1113 :                 if (systemState != ERROR_STATE) {</span>
+<span class="lineNum">    1264 </span><span class="lineCov">       1106 :                         input = CONSTANT_FIRST_PART_IN;</span>
+<span class="lineNum">    1265 </span><span class="lineCov">       1106 :                         constantName = inputString; // private variable so now I will not be afraid of losing the name of the assigned integer</span>
+<span class="lineNum">    1266 </span>            :                 }
+<span class="lineNum">    1267 </span>            :         }
+<a name="1268"><span class="lineNum">    1268 </span><span class="lineCov">       1435 : }</span></a>
+<span class="lineNum">    1269 </span>            : 
+<span class="lineNum">    1270 </span><span class="lineCov">       1589 : void Parser::checkIfInteger(States &amp; systemState, inputValue &amp; input, string inputString, char firstChar)</span>
+<span class="lineNum">    1271 </span>            : {
+<span class="lineNum">    1272 </span><span class="lineCov">       1589 :         if ((inputString.length() == 1) &amp;&amp; !isdigit(firstChar)) {</span>
+<span class="lineNum">    1273 </span><span class="lineCov">          7 :                 systemState = ERROR_STATE;</span>
+<span class="lineNum">    1274 </span><span class="lineCov">          7 :                 input = ERROR_IN;</span>
+<span class="lineNum">    1275 </span><span class="lineCov">          7 :                 errorMessage = &quot;Error:&quot; + to_string(lineOfError) + &quot;: An Integer requires a digit with its sign.&quot;;</span>
+<span class="lineNum">    1276 </span>            :         }
+<span class="lineNum">    1277 </span>            :         else {
+<span class="lineNum">    1278 </span><span class="lineCov">       1582 :                 size_t i = 0;</span>
+<span class="lineNum">    1279 </span><span class="lineCov">       1582 :                 if ((firstChar == '-') || (firstChar == '+'))</span>
+<span class="lineNum">    1280 </span><span class="lineCov">        133 :                         i = 1;</span>
+<span class="lineNum">    1281 </span>            : 
+<span class="lineNum">    1282 </span><span class="lineCov">       6482 :                 while (i &lt; inputString.length()) {</span>
+<span class="lineNum">    1283 </span><span class="lineCov">       2464 :                         if (!isdigit(inputString[i]) ) {</span>
+<span class="lineNum">    1284 </span><span class="lineCov">         14 :                                 systemState = ERROR_STATE;</span>
+<span class="lineNum">    1285 </span><span class="lineCov">         14 :                                 input = ERROR_IN;</span>
+<span class="lineNum">    1286 </span><span class="lineCov">         14 :                                 errorMessage = &quot;Error:&quot; + to_string(lineOfError) + &quot;: An Integer is only made up of digits.&quot;;</span>
+<span class="lineNum">    1287 </span><span class="lineCov">         14 :                                 break;</span>
+<span class="lineNum">    1288 </span>            :                         }
+<span class="lineNum">    1289 </span><span class="lineCov">       2450 :                         i++;</span>
+<span class="lineNum">    1290 </span>            :                 }
+<span class="lineNum">    1291 </span>            : 
+<span class="lineNum">    1292 </span><span class="lineCov">       1582 :                 if (systemState != ERROR_STATE) {</span>
+<span class="lineNum">    1293 </span><span class="lineCov">       1568 :                         input = INTEGER_IN;</span>
+<span class="lineNum">    1294 </span><span class="lineCov">       1568 :                         inputString = inputString;</span>
+<span class="lineNum">    1295 </span>            :                 }
+<span class="lineNum">    1296 </span>            :         }
+<a name="1297"><span class="lineNum">    1297 </span><span class="lineCov">       1589 : }</span></a>
+<span class="lineNum">    1298 </span>            : 
+<span class="lineNum">    1299 </span><span class="lineCov">       9324 : bool Parser::isOpcode(string inputString)</span>
+<span class="lineNum">    1300 </span>            : {
+<span class="lineNum">    1301 </span>            :         //Data Movement instructions
+<span class="lineNum">    1302 </span><span class="lineCov">      35679 :         if ((inputString == &quot;lw&quot;) || (inputString == &quot;lh&quot;) || (inputString == &quot;lb&quot;) || (inputString == &quot;li&quot;) || (inputString == &quot;la&quot;) ||</span>
+<span class="lineNum">    1303 </span><span class="lineCov">      23576 :                 (inputString == &quot;sw&quot;) || (inputString == &quot;sh&quot;) || (inputString == &quot;sb&quot;) || (inputString == &quot;move&quot;) || (inputString == &quot;mfhi&quot;) ||</span>
+<span class="lineNum">    1304 </span><span class="lineCov">      22456 :                 (inputString == &quot;mflo&quot;) || (inputString == &quot;mthi&quot;) || (inputString == &quot;mtlo&quot;) || (inputString == &quot;add&quot;) || (inputString == &quot;addu&quot;) ||</span>
+<span class="lineNum">    1305 </span><span class="lineCov">      21854 :                 (inputString == &quot;sub&quot;) || (inputString == &quot;subu&quot;) || (inputString == &quot;mul&quot;) || (inputString == &quot;mulo&quot;) || (inputString == &quot;mulou&quot;) ||</span>
+<span class="lineNum">    1306 </span><span class="lineCov">      21154 :                 (inputString == &quot;mult&quot;) || (inputString == &quot;multu&quot;) || (inputString == &quot;div&quot;) || (inputString == &quot;divu&quot;) || (inputString == &quot;rem&quot;) ||</span>
+<span class="lineNum">    1307 </span><span class="lineCov">      20594 :                 (inputString == &quot;remu&quot;) || (inputString == &quot;abs&quot;) || (inputString == &quot;neg&quot;) || (inputString == &quot;negu&quot;) || (inputString == &quot;and&quot;) ||</span>
+<span class="lineNum">    1308 </span><span class="lineCov">      20188 :                 (inputString == &quot;nor&quot;) || (inputString == &quot;not&quot;) || (inputString == &quot;or&quot;) || (inputString == &quot;xor&quot;) || (inputString == &quot;j&quot;) ||</span>
+<span class="lineNum">    1309 </span><span class="lineCov">      28896 :                 (inputString == &quot;beq&quot;) || (inputString == &quot;bne&quot;) || (inputString == &quot;blt&quot;) || (inputString == &quot;ble&quot;) || (inputString == &quot;bgt&quot;) ||</span>
+<span class="lineNum">    1310 </span><span class="lineCov">       6426 :                 (inputString == &quot;bge&quot;)) { // All of the possible opcodes</span>
+<span class="lineNum">    1311 </span>            : 
+<span class="lineNum">    1312 </span><span class="lineCov">       2919 :                 return true;</span>
+<span class="lineNum">    1313 </span>            :         }
+<span class="lineNum">    1314 </span>            :         else
+<span class="lineNum">    1315 </span><span class="lineCov">       6405 :                 return false;</span>
+<a name="1316"><span class="lineNum">    1316 </span>            : }</a>
+<span class="lineNum">    1317 </span>            : 
+<span class="lineNum">    1318 </span><span class="lineCov">       6405 : bool Parser::isRegister(string inputString, unordered_map&lt;string, int32_t&gt; registersMap) </span>
+<span class="lineNum">    1319 </span>            : {
+<span class="lineNum">    1320 </span><span class="lineCov">      12810 :         string curRegister = determineRegister(inputString);</span>
+<span class="lineNum">    1321 </span><span class="lineCov">       6405 :         unordered_map&lt;string, int32_t&gt;::const_iterator found = registersMap.find(curRegister);</span>
+<span class="lineNum">    1322 </span><span class="lineCov">       6405 :         if (found != registersMap.end())</span>
+<span class="lineNum">    1323 </span><span class="lineCov">       4697 :                 return true;</span>
+<span class="lineNum">    1324 </span>            :         else
+<span class="lineNum">    1325 </span><span class="lineCov">       1708 :                 return false;</span>
+<a name="1326"><span class="lineNum">    1326 </span>            : }</a>
+<span class="lineNum">    1327 </span>            : 
+<span class="lineNum">    1328 </span><span class="lineCov">        728 : void Parser::initializeRegisters()</span>
+<span class="lineNum">    1329 </span>            : {
+<span class="lineNum">    1330 </span>            :         //Actual registers
+<span class="lineNum">    1331 </span><span class="lineCov">        728 :         registersMap.emplace(&quot;$0&quot;, 0);</span>
+<span class="lineNum">    1332 </span><span class="lineCov">        728 :         registersMap.emplace(&quot;$1&quot;, 0);</span>
+<span class="lineNum">    1333 </span><span class="lineCov">        728 :         registersMap.emplace(&quot;$2&quot;, 0);</span>
+<span class="lineNum">    1334 </span><span class="lineCov">        728 :         registersMap.emplace(&quot;$3&quot;, 0);</span>
+<span class="lineNum">    1335 </span><span class="lineCov">        728 :         registersMap.emplace(&quot;$4&quot;, 0);</span>
+<span class="lineNum">    1336 </span><span class="lineCov">        728 :         registersMap.emplace(&quot;$5&quot;, 0);</span>
+<span class="lineNum">    1337 </span><span class="lineCov">        728 :         registersMap.emplace(&quot;$6&quot;, 0);</span>
+<span class="lineNum">    1338 </span><span class="lineCov">        728 :         registersMap.emplace(&quot;$7&quot;, 0);</span>
+<span class="lineNum">    1339 </span><span class="lineCov">        728 :         registersMap.emplace(&quot;$8&quot;, 0);</span>
+<span class="lineNum">    1340 </span><span class="lineCov">        728 :         registersMap.emplace(&quot;$9&quot;, 0);</span>
+<span class="lineNum">    1341 </span><span class="lineCov">        728 :         registersMap.emplace(&quot;$10&quot;, 0);</span>
+<span class="lineNum">    1342 </span><span class="lineCov">        728 :         registersMap.emplace(&quot;$11&quot;, 0);</span>
+<span class="lineNum">    1343 </span><span class="lineCov">        728 :         registersMap.emplace(&quot;$12&quot;, 0);</span>
+<span class="lineNum">    1344 </span><span class="lineCov">        728 :         registersMap.emplace(&quot;$13&quot;, 0);</span>
+<span class="lineNum">    1345 </span><span class="lineCov">        728 :         registersMap.emplace(&quot;$14&quot;, 0);</span>
+<span class="lineNum">    1346 </span><span class="lineCov">        728 :         registersMap.emplace(&quot;$15&quot;, 0);</span>
+<span class="lineNum">    1347 </span><span class="lineCov">        728 :         registersMap.emplace(&quot;$16&quot;, 0);</span>
+<span class="lineNum">    1348 </span><span class="lineCov">        728 :         registersMap.emplace(&quot;$17&quot;, 0);</span>
+<span class="lineNum">    1349 </span><span class="lineCov">        728 :         registersMap.emplace(&quot;$18&quot;, 0);</span>
+<span class="lineNum">    1350 </span><span class="lineCov">        728 :         registersMap.emplace(&quot;$19&quot;, 0);</span>
+<span class="lineNum">    1351 </span><span class="lineCov">        728 :         registersMap.emplace(&quot;$20&quot;, 0);</span>
+<span class="lineNum">    1352 </span><span class="lineCov">        728 :         registersMap.emplace(&quot;$21&quot;, 0);</span>
+<span class="lineNum">    1353 </span><span class="lineCov">        728 :         registersMap.emplace(&quot;$22&quot;, 0);</span>
+<span class="lineNum">    1354 </span><span class="lineCov">        728 :         registersMap.emplace(&quot;$23&quot;, 0);</span>
+<span class="lineNum">    1355 </span><span class="lineCov">        728 :         registersMap.emplace(&quot;$24&quot;, 0);</span>
+<span class="lineNum">    1356 </span><span class="lineCov">        728 :         registersMap.emplace(&quot;$25&quot;, 0);</span>
+<span class="lineNum">    1357 </span><span class="lineCov">        728 :         registersMap.emplace(&quot;$26&quot;, 0);</span>
+<span class="lineNum">    1358 </span><span class="lineCov">        728 :         registersMap.emplace(&quot;$27&quot;, 0);</span>
+<span class="lineNum">    1359 </span><span class="lineCov">        728 :         registersMap.emplace(&quot;$28&quot;, 0);</span>
+<span class="lineNum">    1360 </span><span class="lineCov">        728 :         registersMap.emplace(&quot;$29&quot;, 0);</span>
+<span class="lineNum">    1361 </span><span class="lineCov">        728 :         registersMap.emplace(&quot;$30&quot;, 0);</span>
+<span class="lineNum">    1362 </span><span class="lineCov">        728 :         registersMap.emplace(&quot;$31&quot;, 0);</span>
+<span class="lineNum">    1363 </span><span class="lineCov">        728 :         registersMap.emplace(&quot;$pc&quot;, 0);</span>
+<span class="lineNum">    1364 </span><span class="lineCov">        728 :         registersMap.emplace(&quot;$hi&quot;, 0);</span>
+<span class="lineNum">    1365 </span><span class="lineCov">        728 :         registersMap.emplace(&quot;$lo&quot;, 0);</span>
+<a name="1366"><span class="lineNum">    1366 </span><span class="lineCov">        728 : }</span></a>
+<span class="lineNum">    1367 </span>            : 
+<span class="lineNum">    1368 </span><span class="lineCov">       6447 : void Parser::incrementVectorOfOpcodeArguments(const string inputString, const inputValue input)</span>
+<span class="lineNum">    1369 </span>            : {
+<span class="lineNum">    1370 </span><span class="lineCov">      12894 :         argument curArg;</span>
+<span class="lineNum">    1371 </span><span class="lineCov">       6447 :         curArg.inValue = input;</span>
+<span class="lineNum">    1372 </span><span class="lineCov">       6447 :         if (input == INITALIZED_CONSTANT_IN) {</span>
+<span class="lineNum">    1373 </span><span class="lineCov">        280 :                 auto constantFind = constantsMap.find(inputString);</span>
+<span class="lineNum">    1374 </span><span class="lineCov">        280 :                 curArg.inString = constantFind-&gt;second;</span>
+<span class="lineNum">    1375 </span>            :         }
+<span class="lineNum">    1376 </span>            :         else 
+<span class="lineNum">    1377 </span><span class="lineCov">       6167 :                 curArg.inString = inputString;</span>
+<span class="lineNum">    1378 </span>            : 
+<span class="lineNum">    1379 </span><span class="lineCov">       6447 :         opcodeArguments.push_back(curArg);</span>
+<a name="1380"><span class="lineNum">    1380 </span><span class="lineCov">       6447 : }</span></a>
+<span class="lineNum">    1381 </span>            : 
+<span class="lineNum">    1382 </span><span class="lineCov">       6405 : string Parser::determineRegister(string inputStringRegister)</span>
+<span class="lineNum">    1383 </span>            : {
+<span class="lineNum">    1384 </span>            :         // The second condition is the Alias for the specific register
+<span class="lineNum">    1385 </span><span class="lineCov">       6405 :         if (inputStringRegister == &quot;$0&quot; || inputStringRegister == &quot;$zero&quot;)// Hardwired to the value of zero</span>
+<span class="lineNum">    1386 </span><span class="lineCov">        455 :                 return &quot;$0&quot;;</span>
+<span class="lineNum">    1387 </span><span class="lineCov">       5950 :         else if (inputStringRegister == &quot;$1&quot; || inputStringRegister == &quot;$at&quot;)// Assembler Temporary (reserved for assembler pseudoinstructions)</span>
+<span class="lineNum">    1388 </span><span class="lineCov">         21 :                 return &quot;$0&quot;;</span>
+<span class="lineNum">    1389 </span><span class="lineCov">       5929 :         else if (inputStringRegister == &quot;$2&quot; || inputStringRegister == &quot;$v0&quot;) // expression evaluation and function results</span>
+<span class="lineNum">    1390 </span><span class="lineCov">         35 :                 return &quot;$2&quot;;</span>
+<span class="lineNum">    1391 </span><span class="lineCov">       5894 :         else if (inputStringRegister == &quot;$3&quot; || inputStringRegister == &quot;$v1&quot;)</span>
+<span class="lineNum">    1392 </span><span class="lineCov">         21 :                 return &quot;$3&quot;;</span>
+<span class="lineNum">    1393 </span><span class="lineCov">       5873 :         else if (inputStringRegister == &quot;$4&quot; || inputStringRegister == &quot;$a0&quot;)// first 4 arguments of procedures</span>
+<span class="lineNum">    1394 </span><span class="lineCov">         21 :                 return &quot;$4&quot;;</span>
+<span class="lineNum">    1395 </span><span class="lineCov">       5852 :         else if (inputStringRegister == &quot;$5&quot; || inputStringRegister == &quot;$a1&quot;)</span>
+<span class="lineNum">    1396 </span><span class="lineCov">         21 :                 return &quot;$5&quot;;</span>
+<span class="lineNum">    1397 </span><span class="lineCov">       5831 :         else if (inputStringRegister == &quot;$6&quot; || inputStringRegister == &quot;$a2&quot;)</span>
+<span class="lineNum">    1398 </span><span class="lineCov">         21 :                 return &quot;$6&quot;;</span>
+<span class="lineNum">    1399 </span><span class="lineCov">       5810 :         else if (inputStringRegister == &quot;$7&quot; || inputStringRegister == &quot;$a3&quot;)</span>
+<span class="lineNum">    1400 </span><span class="lineCov">         21 :                 return &quot;$7&quot;;</span>
+<span class="lineNum">    1401 </span><span class="lineCov">       5789 :         else if (inputStringRegister == &quot;$8&quot; || inputStringRegister == &quot;$t0&quot;)// Temporaries (not saved)</span>
+<span class="lineNum">    1402 </span><span class="lineCov">       1386 :                 return &quot;$8&quot;;</span>
+<span class="lineNum">    1403 </span><span class="lineCov">       4403 :         else if (inputStringRegister == &quot;$9&quot; || inputStringRegister == &quot;$t1&quot;)</span>
+<span class="lineNum">    1404 </span><span class="lineCov">        945 :                 return &quot;$9&quot;;</span>
+<span class="lineNum">    1405 </span><span class="lineCov">       3458 :         else if (inputStringRegister == &quot;$10&quot; || inputStringRegister == &quot;$t2&quot;)</span>
+<span class="lineNum">    1406 </span><span class="lineCov">        763 :                 return &quot;$10&quot;;</span>
+<span class="lineNum">    1407 </span><span class="lineCov">       2695 :         else if (inputStringRegister == &quot;$11&quot; || inputStringRegister == &quot;$t3&quot;)</span>
+<span class="lineNum">    1408 </span><span class="lineCov">        231 :                 return &quot;$11&quot;;</span>
+<span class="lineNum">    1409 </span><span class="lineCov">       2464 :         else if (inputStringRegister == &quot;$12&quot; || inputStringRegister == &quot;$t4&quot;)</span>
+<span class="lineNum">    1410 </span><span class="lineCov">         84 :                 return &quot;$12&quot;;</span>
+<span class="lineNum">    1411 </span><span class="lineCov">       2380 :         else if (inputStringRegister == &quot;$13&quot; || inputStringRegister == &quot;$t5&quot;)</span>
+<span class="lineNum">    1412 </span><span class="lineCov">         77 :                 return &quot;$13&quot;;</span>
+<span class="lineNum">    1413 </span><span class="lineCov">       2303 :         else if (inputStringRegister == &quot;$14&quot; || inputStringRegister == &quot;$t6&quot;)</span>
+<span class="lineNum">    1414 </span><span class="lineCov">         35 :                 return &quot;$14&quot;;</span>
+<span class="lineNum">    1415 </span><span class="lineCov">       2268 :         else if (inputStringRegister == &quot;$15&quot; || inputStringRegister == &quot;$t7&quot;)</span>
+<span class="lineNum">    1416 </span><span class="lineCov">         28 :                 return &quot;$15&quot;;</span>
+<span class="lineNum">    1417 </span><span class="lineCov">       2240 :         else if (inputStringRegister == &quot;$16&quot; || inputStringRegister == &quot;$s0&quot;)// Saved Values</span>
+<span class="lineNum">    1418 </span><span class="lineCov">         21 :                 return &quot;$16&quot;;</span>
+<span class="lineNum">    1419 </span><span class="lineCov">       2219 :         else if (inputStringRegister == &quot;$17&quot; || inputStringRegister == &quot;$s1&quot;)</span>
+<span class="lineNum">    1420 </span><span class="lineCov">         21 :                 return &quot;$17&quot;;</span>
+<span class="lineNum">    1421 </span><span class="lineCov">       2198 :         else if (inputStringRegister == &quot;$18&quot; || inputStringRegister == &quot;$s2&quot;)</span>
+<span class="lineNum">    1422 </span><span class="lineCov">         21 :                 return &quot;$18&quot;;</span>
+<span class="lineNum">    1423 </span><span class="lineCov">       2177 :         else if (inputStringRegister == &quot;$19&quot; || inputStringRegister == &quot;$s3&quot;)</span>
+<span class="lineNum">    1424 </span><span class="lineCov">         21 :                 return &quot;$19&quot;;</span>
+<span class="lineNum">    1425 </span><span class="lineCov">       2156 :         else if (inputStringRegister == &quot;$20&quot; || inputStringRegister == &quot;$s4&quot;)</span>
+<span class="lineNum">    1426 </span><span class="lineCov">         21 :                 return &quot;$20&quot;;</span>
+<span class="lineNum">    1427 </span><span class="lineCov">       2135 :         else if (inputStringRegister == &quot;$21&quot; || inputStringRegister == &quot;$s5&quot;)</span>
+<span class="lineNum">    1428 </span><span class="lineCov">         21 :                 return &quot;$21&quot;;</span>
+<span class="lineNum">    1429 </span><span class="lineCov">       2114 :         else if (inputStringRegister == &quot;$22&quot; || inputStringRegister == &quot;$s6&quot;)</span>
+<span class="lineNum">    1430 </span><span class="lineCov">         21 :                 return &quot;$22&quot;;</span>
+<span class="lineNum">    1431 </span><span class="lineCov">       2093 :         else if (inputStringRegister == &quot;$23&quot; || inputStringRegister == &quot;$s7&quot;)</span>
+<span class="lineNum">    1432 </span><span class="lineCov">         35 :                 return &quot;$23&quot;;</span>
+<span class="lineNum">    1433 </span><span class="lineCov">       2058 :         else if (inputStringRegister == &quot;$24&quot; || inputStringRegister == &quot;$t8&quot;)// Temporaries (not saved)</span>
+<span class="lineNum">    1434 </span><span class="lineCov">        105 :                 return &quot;$24&quot;;</span>
+<span class="lineNum">    1435 </span><span class="lineCov">       1953 :         else if (inputStringRegister == &quot;$25&quot; || inputStringRegister == &quot;$t9&quot;)</span>
+<span class="lineNum">    1436 </span><span class="lineCov">         98 :                 return &quot;$25&quot;;</span>
+<span class="lineNum">    1437 </span><span class="lineCov">       1855 :         else if (inputStringRegister == &quot;$26&quot; || inputStringRegister == &quot;$k0&quot;)// for interrupt and exception handlers</span>
+<span class="lineNum">    1438 </span><span class="lineCov">         21 :                 return &quot;$26&quot;;</span>
+<span class="lineNum">    1439 </span><span class="lineCov">       1834 :         else if (inputStringRegister == &quot;$27&quot; || inputStringRegister == &quot;$k1&quot;)</span>
+<span class="lineNum">    1440 </span><span class="lineCov">         21 :                 return &quot;$27&quot;;</span>
+<span class="lineNum">    1441 </span><span class="lineCov">       1813 :         else if (inputStringRegister == &quot;$28&quot; || inputStringRegister == &quot;$gp&quot;)// the global pointer</span>
+<span class="lineNum">    1442 </span><span class="lineCov">         21 :                 return &quot;$28&quot;;</span>
+<span class="lineNum">    1443 </span><span class="lineCov">       1792 :         else if (inputStringRegister == &quot;$29&quot; || inputStringRegister == &quot;$sp&quot;) // stack pointer</span>
+<span class="lineNum">    1444 </span><span class="lineCov">         21 :                 return &quot;$29&quot;;</span>
+<span class="lineNum">    1445 </span><span class="lineCov">       1771 :         else if (inputStringRegister == &quot;$30&quot; || inputStringRegister == &quot;$fp&quot;) // frame pointer</span>
+<span class="lineNum">    1446 </span><span class="lineCov">         21 :                 return &quot;$30&quot;;</span>
+<span class="lineNum">    1447 </span><span class="lineCov">       1750 :         else if (inputStringRegister == &quot;$31&quot; || inputStringRegister == &quot;$ra&quot;) // return address</span>
+<span class="lineNum">    1448 </span><span class="lineCov">         21 :                 return &quot;$31&quot;;</span>
+<span class="lineNum">    1449 </span><span class="lineCov">       1729 :         else if (inputStringRegister == &quot;$pc&quot;) // program counter</span>
+<span class="lineNum">    1450 </span><span class="lineCov">          7 :                 return &quot;$pc&quot;;</span>
+<span class="lineNum">    1451 </span><span class="lineCov">       1722 :         else if (inputStringRegister == &quot;$hi&quot;) // 2 registers used by ALU</span>
+<span class="lineNum">    1452 </span><span class="lineCov">          7 :                 return &quot;$hi&quot;;</span>
+<span class="lineNum">    1453 </span><span class="lineCov">       1715 :         else if (inputStringRegister == &quot;$lo&quot;)</span>
+<span class="lineNum">    1454 </span><span class="lineCov">          7 :                 return &quot;$lo&quot;;</span>
+<a name="1455"><span class="lineNum">    1455 </span>            :         else</a>
+<span class="lineNum">    1456 </span><span class="lineCov">       1708 :                 return &quot;error&quot;; // If the input string which is supposed to represent a register does not match any of the naming protocals</span>
+<span class="lineNum">    1457 </span><span class="lineCov">         42 : }</span>
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.12</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

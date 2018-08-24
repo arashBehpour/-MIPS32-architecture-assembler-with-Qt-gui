@@ -1,0 +1,772 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - Coverage.combined.cleaned - /vagrant/simulator.cpp</title>
+  <link rel="stylesheet" type="text/css" href="../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../index.html">top level</a> - <a href="index.html">vagrant</a> - simulator.cpp<span style="font-size: 80%;"> (source / <a href="simulator.cpp.func-sort-c.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">Coverage.combined.cleaned</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">348</td>
+            <td class="headerCovTableEntry">445</td>
+            <td class="headerCovTableEntryMed">78.2 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2018-04-25 07:19:55</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">17</td>
+            <td class="headerCovTableEntry">20</td>
+            <td class="headerCovTableEntryMed">85.0 %</td>
+          </tr>
+          <tr><td><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : #include &quot;simulator.hpp&quot;</a>
+<span class="lineNum">       2 </span>            : #include &quot;parser.hpp&quot;
+<span class="lineNum">       3 </span>            : #include &lt;assert.h&gt;
+<span class="lineNum">       4 </span>            : #include &lt;limits&gt;
+<span class="lineNum">       5 </span>            : #include &lt;thread&gt;
+<span class="lineNum">       6 </span>            : 
+<span class="lineNum">       7 </span>            : 
+<a name="8"><span class="lineNum">       8 </span>            : //**************************Helper Function*******************************//</a>
+<span class="lineNum">       9 </span>            : // Same function as in parser, If I have time integrate this without repetative code.
+<span class="lineNum">      10 </span><span class="lineCov">       1708 : static string determineRegister(string inputStringRegister)</span>
+<span class="lineNum">      11 </span>            : {
+<span class="lineNum">      12 </span>            :         // The second condition is the Alias for the specific register
+<span class="lineNum">      13 </span><span class="lineCov">       1708 :         if (inputStringRegister == &quot;$0&quot; || inputStringRegister == &quot;$zero&quot;)// Hardwired to the value of zero</span>
+<span class="lineNum">      14 </span><span class="lineCov">         14 :                 return &quot;$0&quot;;</span>
+<span class="lineNum">      15 </span><span class="lineCov">       1694 :         else if (inputStringRegister == &quot;$1&quot; || inputStringRegister == &quot;$at&quot;)// Assembler Temporary (reserved for assembler pseudoinstructions)</span>
+<span class="lineNum">      16 </span><span class="lineCov">          7 :                 return &quot;$0&quot;;</span>
+<span class="lineNum">      17 </span><span class="lineCov">       1687 :         else if (inputStringRegister == &quot;$2&quot; || inputStringRegister == &quot;$v0&quot;) // expression evaluation and function results</span>
+<span class="lineNum">      18 </span><span class="lineCov">         21 :                 return &quot;$2&quot;;</span>
+<span class="lineNum">      19 </span><span class="lineCov">       1666 :         else if (inputStringRegister == &quot;$3&quot; || inputStringRegister == &quot;$v1&quot;)</span>
+<span class="lineNum">      20 </span><span class="lineCov">          7 :                 return &quot;$3&quot;;</span>
+<span class="lineNum">      21 </span><span class="lineCov">       1659 :         else if (inputStringRegister == &quot;$4&quot; || inputStringRegister == &quot;$a0&quot;)// first 4 arguments of procedures</span>
+<span class="lineNum">      22 </span><span class="lineCov">          7 :                 return &quot;$4&quot;;</span>
+<span class="lineNum">      23 </span><span class="lineCov">       1652 :         else if (inputStringRegister == &quot;$5&quot; || inputStringRegister == &quot;$a1&quot;)</span>
+<span class="lineNum">      24 </span><span class="lineCov">          7 :                 return &quot;$5&quot;;</span>
+<span class="lineNum">      25 </span><span class="lineCov">       1645 :         else if (inputStringRegister == &quot;$6&quot; || inputStringRegister == &quot;$a2&quot;)</span>
+<span class="lineNum">      26 </span><span class="lineCov">          7 :                 return &quot;$6&quot;;</span>
+<span class="lineNum">      27 </span><span class="lineCov">       1638 :         else if (inputStringRegister == &quot;$7&quot; || inputStringRegister == &quot;$a3&quot;)</span>
+<span class="lineNum">      28 </span><span class="lineCov">          7 :                 return &quot;$7&quot;;</span>
+<span class="lineNum">      29 </span><span class="lineCov">       1631 :         else if (inputStringRegister == &quot;$8&quot; || inputStringRegister == &quot;$t0&quot;)// Temporaries (not saved)</span>
+<span class="lineNum">      30 </span><span class="lineCov">        539 :                 return &quot;$8&quot;;</span>
+<span class="lineNum">      31 </span><span class="lineCov">       1092 :         else if (inputStringRegister == &quot;$9&quot; || inputStringRegister == &quot;$t1&quot;)</span>
+<span class="lineNum">      32 </span><span class="lineCov">        448 :                 return &quot;$9&quot;;</span>
+<span class="lineNum">      33 </span><span class="lineCov">        644 :         else if (inputStringRegister == &quot;$10&quot; || inputStringRegister == &quot;$t2&quot;)</span>
+<span class="lineNum">      34 </span><span class="lineCov">        175 :                 return &quot;$10&quot;;</span>
+<span class="lineNum">      35 </span><span class="lineCov">        469 :         else if (inputStringRegister == &quot;$11&quot; || inputStringRegister == &quot;$t3&quot;)</span>
+<span class="lineNum">      36 </span><span class="lineCov">         98 :                 return &quot;$11&quot;;</span>
+<span class="lineNum">      37 </span><span class="lineCov">        371 :         else if (inputStringRegister == &quot;$12&quot; || inputStringRegister == &quot;$t4&quot;)</span>
+<span class="lineNum">      38 </span><span class="lineCov">         28 :                 return &quot;$12&quot;;</span>
+<span class="lineNum">      39 </span><span class="lineCov">        343 :         else if (inputStringRegister == &quot;$13&quot; || inputStringRegister == &quot;$t5&quot;)</span>
+<span class="lineNum">      40 </span><span class="lineCov">         35 :                 return &quot;$13&quot;;</span>
+<span class="lineNum">      41 </span><span class="lineCov">        308 :         else if (inputStringRegister == &quot;$14&quot; || inputStringRegister == &quot;$t6&quot;)</span>
+<span class="lineNum">      42 </span><span class="lineCov">          7 :                 return &quot;$14&quot;;</span>
+<span class="lineNum">      43 </span><span class="lineCov">        301 :         else if (inputStringRegister == &quot;$15&quot; || inputStringRegister == &quot;$t7&quot;)</span>
+<span class="lineNum">      44 </span><span class="lineCov">          7 :                 return &quot;$15&quot;;</span>
+<span class="lineNum">      45 </span><span class="lineCov">        294 :         else if (inputStringRegister == &quot;$16&quot; || inputStringRegister == &quot;$s0&quot;)// Saved Values</span>
+<span class="lineNum">      46 </span><span class="lineCov">          7 :                 return &quot;$16&quot;;</span>
+<span class="lineNum">      47 </span><span class="lineCov">        287 :         else if (inputStringRegister == &quot;$17&quot; || inputStringRegister == &quot;$s1&quot;)</span>
+<span class="lineNum">      48 </span><span class="lineCov">          7 :                 return &quot;$17&quot;;</span>
+<span class="lineNum">      49 </span><span class="lineCov">        280 :         else if (inputStringRegister == &quot;$18&quot; || inputStringRegister == &quot;$s2&quot;)</span>
+<span class="lineNum">      50 </span><span class="lineCov">          7 :                 return &quot;$18&quot;;</span>
+<span class="lineNum">      51 </span><span class="lineCov">        273 :         else if (inputStringRegister == &quot;$19&quot; || inputStringRegister == &quot;$s3&quot;)</span>
+<span class="lineNum">      52 </span><span class="lineCov">          7 :                 return &quot;$19&quot;;</span>
+<span class="lineNum">      53 </span><span class="lineCov">        266 :         else if (inputStringRegister == &quot;$20&quot; || inputStringRegister == &quot;$s4&quot;)</span>
+<span class="lineNum">      54 </span><span class="lineCov">          7 :                 return &quot;$20&quot;;</span>
+<span class="lineNum">      55 </span><span class="lineCov">        259 :         else if (inputStringRegister == &quot;$21&quot; || inputStringRegister == &quot;$s5&quot;)</span>
+<span class="lineNum">      56 </span><span class="lineCov">          7 :                 return &quot;$21&quot;;</span>
+<span class="lineNum">      57 </span><span class="lineCov">        252 :         else if (inputStringRegister == &quot;$22&quot; || inputStringRegister == &quot;$s6&quot;)</span>
+<span class="lineNum">      58 </span><span class="lineCov">          7 :                 return &quot;$22&quot;;</span>
+<span class="lineNum">      59 </span><span class="lineCov">        245 :         else if (inputStringRegister == &quot;$23&quot; || inputStringRegister == &quot;$s7&quot;)</span>
+<span class="lineNum">      60 </span><span class="lineCov">         21 :                 return &quot;$23&quot;;</span>
+<span class="lineNum">      61 </span><span class="lineCov">        224 :         else if (inputStringRegister == &quot;$24&quot; || inputStringRegister == &quot;$t8&quot;)// Temporaries (not saved)</span>
+<span class="lineNum">      62 </span><span class="lineCov">         84 :                 return &quot;$24&quot;;</span>
+<span class="lineNum">      63 </span><span class="lineCov">        140 :         else if (inputStringRegister == &quot;$25&quot; || inputStringRegister == &quot;$t9&quot;)</span>
+<span class="lineNum">      64 </span><span class="lineCov">         84 :                 return &quot;$25&quot;;</span>
+<span class="lineNum">      65 </span><span class="lineCov">         56 :         else if (inputStringRegister == &quot;$26&quot; || inputStringRegister == &quot;$k0&quot;)// for interrupt and exception handlers</span>
+<span class="lineNum">      66 </span><span class="lineCov">          7 :                 return &quot;$26&quot;;</span>
+<span class="lineNum">      67 </span><span class="lineCov">         49 :         else if (inputStringRegister == &quot;$27&quot; || inputStringRegister == &quot;$k1&quot;)</span>
+<span class="lineNum">      68 </span><span class="lineCov">          7 :                 return &quot;$27&quot;;</span>
+<span class="lineNum">      69 </span><span class="lineCov">         42 :         else if (inputStringRegister == &quot;$28&quot; || inputStringRegister == &quot;$gp&quot;)// the global pointer</span>
+<span class="lineNum">      70 </span><span class="lineCov">          7 :                 return &quot;$28&quot;;</span>
+<span class="lineNum">      71 </span><span class="lineCov">         35 :         else if (inputStringRegister == &quot;$29&quot; || inputStringRegister == &quot;$sp&quot;) // stack pointer</span>
+<span class="lineNum">      72 </span><span class="lineCov">          7 :                 return &quot;$29&quot;;</span>
+<span class="lineNum">      73 </span><span class="lineCov">         28 :         else if (inputStringRegister == &quot;$30&quot; || inputStringRegister == &quot;$fp&quot;) // frame pointer</span>
+<span class="lineNum">      74 </span><span class="lineCov">          7 :                 return &quot;$30&quot;;</span>
+<span class="lineNum">      75 </span><span class="lineCov">         21 :         else if (inputStringRegister == &quot;$31&quot; || inputStringRegister == &quot;$ra&quot;) // return address</span>
+<span class="lineNum">      76 </span><span class="lineCov">          7 :                 return &quot;$31&quot;;</span>
+<span class="lineNum">      77 </span><span class="lineCov">         14 :         else if (inputStringRegister == &quot;$pc&quot;) // program counter</span>
+<span class="lineNum">      78 </span><span class="lineNoCov">          0 :                 return &quot;$pc&quot;;</span>
+<span class="lineNum">      79 </span><span class="lineCov">         14 :         else if (inputStringRegister == &quot;$hi&quot;) // 2 registers used by ALU</span>
+<span class="lineNum">      80 </span><span class="lineCov">          7 :                 return &quot;$hi&quot;;</span>
+<span class="lineNum">      81 </span><span class="lineCov">          7 :         else if (inputStringRegister == &quot;$lo&quot;)</span>
+<span class="lineNum">      82 </span><span class="lineCov">          7 :                 return &quot;$lo&quot;;</span>
+<span class="lineNum">      83 </span>            :         else
+<span class="lineNum">      84 </span><span class="lineNoCov">          0 :                 return &quot;error&quot;; // If the input string which is supposed to represent a register does not match any of the naming protocals</span>
+<a name="85"><span class="lineNum">      85 </span>            : }</a>
+<span class="lineNum">      86 </span>            : 
+<span class="lineNum">      87 </span><span class="lineCov">    1680131 : void Simulator::runParallelProcess() // This function will be run on a seperate thread called &quot;thread1&quot;</span>
+<span class="lineNum">      88 </span>            : {
+<span class="lineNum">      89 </span>            :                 
+<span class="lineNum">      90 </span><span class="lineCov">    3360073 :         while (parallelHasNotQuit) {</span>
+<span class="lineNum">      91 </span>            :                 // have a while loop that steps through the simulator as long the file hasnt finished
+<span class="lineNum">      92 </span><span class="lineCov">    1679970 :                         while (!myMsgQueue.empty()) {</span>
+<span class="lineNum">      93 </span><span class="lineNoCov">          0 :                                 if (isErrorStatus == false &amp;&amp; isEndOfFile == false) {</span>
+<span class="lineNum">      94 </span><span class="lineNoCov">          0 :                                         update_simulation();</span>
+<span class="lineNum">      95 </span><span class="lineNoCov">          0 :                                         update_pcReg();</span>
+<span class="lineNum">      96 </span><span class="lineNoCov">          0 :                                         isEndOfFileCheck();</span>
+<span class="lineNum">      97 </span>            :                                 }
+<span class="lineNum">      98 </span>            :                         }
+<span class="lineNum">      99 </span>            :         }
+<span class="lineNum">     100 </span>            : 
+<span class="lineNum">     101 </span><span class="lineCov">        161 : }</span>
+<a name="102"><span class="lineNum">     102 </span>            : </a>
+<span class="lineNum">     103 </span>            : //***************************Simulator below******************************//
+<span class="lineNum">     104 </span><span class="lineCov">        189 : Simulator::Simulator(const unordered_map&lt;string, int32_t&gt; regMap, const vector&lt;string&gt; memory, const vector&lt;instructionType&gt; instructions, const unordered_map&lt;string, LabelInfo&gt; labelMap)</span>
+<span class="lineNum">     105 </span>            : {
+<span class="lineNum">     106 </span><span class="lineCov">        189 :         registersMap = regMap;</span>
+<span class="lineNum">     107 </span><span class="lineCov">        189 :         memoryLayout = memory;</span>
+<span class="lineNum">     108 </span><span class="lineCov">        189 :         programInstructions = instructions;</span>
+<span class="lineNum">     109 </span><span class="lineCov">        189 :         labelsMap = labelMap;</span>
+<span class="lineNum">     110 </span>            : 
+<span class="lineNum">     111 </span><span class="lineCov">        189 :         PcReg = registersMap.find(&quot;$pc&quot;);</span>
+<span class="lineNum">     112 </span>            : 
+<span class="lineNum">     113 </span><span class="lineCov">        189 :         systemState = WAIT_STATE;</span>
+<span class="lineNum">     114 </span><span class="lineCov">        189 :         isErrorStatus = false;</span>
+<span class="lineNum">     115 </span><span class="lineCov">        189 :         isEndOfFile = false;</span>
+<span class="lineNum">     116 </span><span class="lineCov">        189 :         isControlInstr = false;</span>
+<span class="lineNum">     117 </span>            : 
+<span class="lineNum">     118 </span><span class="lineCov">     191037 :         while (memoryLayout.size() &lt; 512)</span>
+<span class="lineNum">     119 </span><span class="lineCov">      95424 :                 memoryLayout.push_back(&quot;00&quot;);</span>
+<span class="lineNum">     120 </span>            : 
+<span class="lineNum">     121 </span><span class="lineCov">        189 :         parallelHasNotQuit = true;</span>
+<span class="lineNum">     122 </span>            :         // uses the std::thread class move assignment operator to assign the RHS created thread to be the thread i created in my private: section of my class
+<span class="lineNum">     123 </span><span class="lineCov">        189 :         thread1 = std::thread(&amp;Simulator::runParallelProcess,this); //this-&gt;runAndBreakParallelProcess(string command) function is put in a new thread</span>
+<a name="124"><span class="lineNum">     124 </span><span class="lineCov">        189 : }</span></a>
+<span class="lineNum">     125 </span>            : 
+<span class="lineNum">     126 </span><span class="lineCov">        322 : Simulator::~Simulator()</span>
+<span class="lineNum">     127 </span>            : {
+<span class="lineNum">     128 </span>            :         // Not necessary to clear iterator
+<span class="lineNum">     129 </span>            : 
+<span class="lineNum">     130 </span><span class="lineCov">        161 :         parallelHasNotQuit = false; // This is so that the function that is running parallel can finish and reach the end of the functions scope</span>
+<span class="lineNum">     131 </span><span class="lineCov">        161 :         thread1.join(); //thread excecution complete</span>
+<a name="132"><span class="lineNum">     132 </span><span class="lineCov">        161 : }</span></a>
+<span class="lineNum">     133 </span>            : 
+<span class="lineNum">     134 </span><span class="lineCov">          7 : void Simulator::clearDataStruct()</span>
+<span class="lineNum">     135 </span>            : {
+<span class="lineNum">     136 </span>            :         // Clears all data structures contents and gives the size 0
+<span class="lineNum">     137 </span><span class="lineCov">          7 :         registersMap.clear();</span>
+<span class="lineNum">     138 </span><span class="lineCov">          7 :         memoryLayout.clear();</span>
+<span class="lineNum">     139 </span><span class="lineCov">          7 :         programInstructions.clear();</span>
+<span class="lineNum">     140 </span><span class="lineCov">          7 :         labelsMap.clear();</span>
+<a name="141"><span class="lineNum">     141 </span><span class="lineCov">          7 : }</span></a>
+<span class="lineNum">     142 </span>            : 
+<span class="lineNum">     143 </span><span class="lineNoCov">          0 : void Simulator::runOrBreak_public(string command)</span>
+<span class="lineNum">     144 </span>            : {
+<span class="lineNum">     145 </span><span class="lineNoCov">          0 :         if (command == &quot;break&quot;) {</span>
+<span class="lineNum">     146 </span><span class="lineNoCov">          0 :                 if (!myMsgQueue.empty()) { // Does nothing if the simulation is not running</span>
+<span class="lineNum">     147 </span><span class="lineNoCov">          0 :                         string temp;</span>
+<span class="lineNum">     148 </span><span class="lineNoCov">          0 :                         myMsgQueue.wait_and_pop(temp); // This pops the value from the msgQueue allowing the runParallelProcess() function to stop running</span>
+<span class="lineNum">     149 </span>            :                         //cout &lt;&lt; &quot;Should be [run] : &quot; &lt;&lt; temp &lt;&lt; endl;
+<span class="lineNum">     150 </span>            :                 }
+<span class="lineNum">     151 </span>            :         }
+<span class="lineNum">     152 </span><span class="lineNoCov">          0 :         else if (command == &quot;run&quot;) {</span>
+<span class="lineNum">     153 </span><span class="lineNoCov">          0 :                 if (isErrorStatus == false &amp;&amp; isEndOfFile == false &amp;&amp; myMsgQueue.empty()) // does nothing if the simulation is running</span>
+<span class="lineNum">     154 </span><span class="lineNoCov">          0 :                         myMsgQueue.push(&quot;run&quot;);</span>
+<span class="lineNum">     155 </span>            :         }
+<span class="lineNum">     156 </span><span class="lineNoCov">          0 : }</span>
+<a name="157"><span class="lineNum">     157 </span>            : </a>
+<span class="lineNum">     158 </span>            : 
+<span class="lineNum">     159 </span><span class="lineCov">         28 : void Simulator::setStartInstrIndex()</span>
+<span class="lineNum">     160 </span>            : {
+<span class="lineNum">     161 </span><span class="lineCov">         28 :         unordered_map&lt;string, LabelInfo&gt;::iterator findLabel = labelsMap.find(&quot;main&quot;); // The program counter starts at the main label, so want to find the label name &quot;main&quot;</span>
+<span class="lineNum">     162 </span>            : 
+<span class="lineNum">     163 </span><span class="lineCov">         28 :         int32_t mainIndex = findLabel-&gt;second.instructionIndexOrFirstMemAddress; // This contains the index where the label main is located. SHould be located at index 0 for these test files</span>
+<span class="lineNum">     164 </span><span class="lineCov">         28 :         PcReg-&gt;second = mainIndex; // Finds the program counter register and assigns the index(in programInstructions) of where the main is located in</span>
+<a name="165"><span class="lineNum">     165 </span><span class="lineCov">         28 : }</span></a>
+<span class="lineNum">     166 </span>            : 
+<span class="lineNum">     167 </span><span class="lineCov">       1358 : void Simulator::update_simulation_public() { update_simulation(); } // Helper function which will be used by the VirtualMachineGUI class to &quot;step&quot;</span>
+<a name="168"><span class="lineNum">     168 </span>            : </a>
+<span class="lineNum">     169 </span>            : 
+<a name="170"><span class="lineNum">     170 </span><span class="lineCov">          7 : bool Simulator::getErrorStatus() { return isErrorStatus; }</span></a>
+<span class="lineNum">     171 </span>            : 
+<span class="lineNum">     172 </span><span class="lineCov">        154 : int32_t Simulator::getPcValue()</span>
+<span class="lineNum">     173 </span>            : {
+<span class="lineNum">     174 </span><span class="lineCov">        154 :         int32_t pc = (PcReg-&gt;second);</span>
+<span class="lineNum">     175 </span><span class="lineCov">        154 :         return pc;</span>
+<a name="176"><span class="lineNum">     176 </span>            : }</a>
+<span class="lineNum">     177 </span>            : 
+<a name="178"><span class="lineNum">     178 </span><span class="lineCov">         56 : vector&lt;string&gt; Simulator::getMemoryLayout() { return memoryLayout; }</span></a>
+<span class="lineNum">     179 </span>            : 
+<a name="180"><span class="lineNum">     180 </span><span class="lineCov">         56 : unordered_map&lt;string, int32_t&gt; Simulator::getRegisterMap() { return registersMap; }</span></a>
+<span class="lineNum">     181 </span>            : 
+<span class="lineNum">     182 </span><span class="lineCov">       1358 : void Simulator::update_pcReg()</span>
+<span class="lineNum">     183 </span>            : {
+<span class="lineNum">     184 </span>            :         int32_t printPc;
+<span class="lineNum">     185 </span><span class="lineCov">       1358 :         printPc = (PcReg-&gt;second);</span>
+<span class="lineNum">     186 </span><span class="lineCov">       1358 :         if (isErrorStatus == false &amp;&amp; isControlInstr == false &amp;&amp; isEndOfFile == false) {</span>
+<span class="lineNum">     187 </span><span class="lineCov">       1246 :                 printPc = (PcReg-&gt;second) + 1;</span>
+<span class="lineNum">     188 </span><span class="lineCov">       1246 :                 (PcReg-&gt;second) = printPc; // Increment program counter and move on to next program instruction</span>
+<span class="lineNum">     189 </span>            :         }
+<a name="190"><span class="lineNum">     190 </span><span class="lineCov">       1358 : }</span></a>
+<span class="lineNum">     191 </span>            : 
+<span class="lineNum">     192 </span><span class="lineCov">        175 : bool Simulator::isEndOfFileCheck()</span>
+<span class="lineNum">     193 </span>            : {
+<span class="lineNum">     194 </span><span class="lineCov">        175 :         if ((PcReg-&gt;second) &gt;= (int32_t)programInstructions.size()) // check to see if the progam counter index moved past the instructions available</span>
+<span class="lineNum">     195 </span><span class="lineCov">        119 :                 return (isEndOfFile = true);</span>
+<span class="lineNum">     196 </span>            :         else
+<span class="lineNum">     197 </span><span class="lineCov">         56 :                 return false;</span>
+<a name="198"><span class="lineNum">     198 </span>            : }</a>
+<span class="lineNum">     199 </span>            : 
+<span class="lineNum">     200 </span><span class="lineNoCov">          0 : void Simulator::simulate()</span>
+<span class="lineNum">     201 </span>            : {
+<span class="lineNum">     202 </span><span class="lineNoCov">          0 :                 string userInput;</span>
+<span class="lineNum">     203 </span><span class="lineNoCov">          0 :                 do {</span>
+<span class="lineNum">     204 </span>            :                         int32_t fprintPc;
+<span class="lineNum">     205 </span><span class="lineNoCov">          0 :                         switch (systemState) {</span>
+<span class="lineNum">     206 </span>            :                         case WAIT_STATE:                                                        // The WAIT_STATE can also be considered the INTERFACE_STATE
+<span class="lineNum">     207 </span><span class="lineNoCov">          0 :                                 update_simulatorInterface(userInput);</span>
+<span class="lineNum">     208 </span><span class="lineNoCov">          0 :                                 break;</span>
+<span class="lineNum">     209 </span>            : 
+<span class="lineNum">     210 </span>            :                         case SIMULATING_STATE:
+<span class="lineNum">     211 </span><span class="lineNoCov">          0 :                                 update_simulation();</span>
+<span class="lineNum">     212 </span><span class="lineNoCov">          0 :                                 update_pcReg();</span>
+<span class="lineNum">     213 </span>            : 
+<span class="lineNum">     214 </span><span class="lineNoCov">          0 :                                 fprintPc = PcReg-&gt;second;</span>
+<span class="lineNum">     215 </span><span class="lineNoCov">          0 :                                 printf(&quot;0x%08x\n&quot;, fprintPc); // Prints the program counter in 32 bit hex</span>
+<span class="lineNum">     216 </span>            : 
+<span class="lineNum">     217 </span><span class="lineNoCov">          0 :                                 isEndOfFileCheck();</span>
+<span class="lineNum">     218 </span><span class="lineNoCov">          0 :                                 systemState = WAIT_STATE;</span>
+<span class="lineNum">     219 </span><span class="lineNoCov">          0 :                                 break;</span>
+<span class="lineNum">     220 </span>            : 
+<span class="lineNum">     221 </span>            :                         case QUIT_STATE:
+<span class="lineNum">     222 </span>            :                                 //Dummy state because once the systemState is set to QUIT_STATE the simulator stops
+<span class="lineNum">     223 </span><span class="lineNoCov">          0 :                                 break;</span>
+<span class="lineNum">     224 </span>            :                         };
+<span class="lineNum">     225 </span>            : 
+<span class="lineNum">     226 </span><span class="lineNoCov">          0 :                 } while (systemState != QUIT_STATE);</span>
+<span class="lineNum">     227 </span><span class="lineNoCov">          0 : }</span>
+<a name="228"><span class="lineNum">     228 </span>            : </a>
+<span class="lineNum">     229 </span>            : 
+<span class="lineNum">     230 </span><span class="lineNoCov">          0 : void Simulator::update_simulatorInterface(string userInput)</span>
+<span class="lineNum">     231 </span>            : {
+<span class="lineNum">     232 </span>            :         //cout &lt;&lt; &quot;is empty if value=1 : &quot; &lt;&lt; myMsgQueue.empty() &lt;&lt; endl;
+<span class="lineNum">     233 </span>            : 
+<span class="lineNum">     234 </span><span class="lineNoCov">          0 :         cout &lt;&lt; &quot;simmips&gt; &quot;;</span>
+<span class="lineNum">     235 </span>            :         // Here wait for the user to enter a command(print, status, step, quit)
+<span class="lineNum">     236 </span><span class="lineNoCov">          0 :         getline(cin, userInput); // This gets the the command the user just entered and stores it into string userInput</span>
+<span class="lineNum">     237 </span>            : 
+<span class="lineNum">     238 </span><span class="lineNoCov">          0 :         if (userInput.substr(0, 7) == &quot;print $&quot;) { // prints the register contents, either a register number, alias, or one of pc, hi, or lo in hex format</span>
+<span class="lineNum">     239 </span>            :                 
+<span class="lineNum">     240 </span><span class="lineNoCov">          0 :                 if (myMsgQueue.empty()) {</span>
+<span class="lineNum">     241 </span><span class="lineNoCov">          0 :                         string reg;</span>
+<span class="lineNum">     242 </span><span class="lineNoCov">          0 :                         for (size_t i = 6; i &lt; userInput.size(); i++) // Start at 6 to include the $ sign</span>
+<span class="lineNum">     243 </span><span class="lineNoCov">          0 :                                 reg.push_back(userInput[i]);</span>
+<span class="lineNum">     244 </span>            : 
+<span class="lineNum">     245 </span><span class="lineNoCov">          0 :                         reg = determineRegister(reg); // If the string is &quot;error&quot; then means input was not valid</span>
+<span class="lineNum">     246 </span><span class="lineNoCov">          0 :                         if (reg == &quot;error&quot;)</span>
+<span class="lineNum">     247 </span><span class="lineNoCov">          0 :                                 cerr &lt;&lt; &quot;Error : not a valid register. Either enter $0 - $31 or the registers alias(ex.$t0 for $8).&quot; &lt;&lt; endl;</span>
+<span class="lineNum">     248 </span>            :                         else {
+<span class="lineNum">     249 </span><span class="lineNoCov">          0 :                                 auto findReg = registersMap.find(reg);</span>
+<span class="lineNum">     250 </span>            :                                 int32_t printRegContents;
+<span class="lineNum">     251 </span><span class="lineNoCov">          0 :                                 printRegContents = findReg-&gt;second;</span>
+<span class="lineNum">     252 </span><span class="lineNoCov">          0 :                                 printf(&quot;0x%08x\n&quot;, printRegContents);</span>
+<span class="lineNum">     253 </span>            :                         }
+<span class="lineNum">     254 </span>            :                 }
+<span class="lineNum">     255 </span>            :                 else
+<span class="lineNum">     256 </span><span class="lineNoCov">          0 :                         cerr &lt;&lt; &quot;Error: simulation running. Type break to halt.&quot; &lt;&lt; endl;</span>
+<span class="lineNum">     257 </span>            : 
+<span class="lineNum">     258 </span><span class="lineNoCov">          0 :                 systemState = WAIT_STATE;</span>
+<span class="lineNum">     259 </span>            : 
+<span class="lineNum">     260 </span>            :         }
+<span class="lineNum">     261 </span><span class="lineNoCov">          0 :         else if (userInput.substr(0, 7) == &quot;print &amp;&quot;) { // prints the byte at memory address a, in hex format</span>
+<span class="lineNum">     262 </span>            :                 
+<span class="lineNum">     263 </span><span class="lineNoCov">          0 :                 if (myMsgQueue.empty()) {</span>
+<span class="lineNum">     264 </span><span class="lineNoCov">          0 :                         string memReference;</span>
+<span class="lineNum">     265 </span><span class="lineNoCov">          0 :                         for (size_t i = 7; i &lt; userInput.size(); i++) // ASSUMING THE USER HAS INPUTED A MEMREF OF 32 BITS (0x0000000)</span>
+<span class="lineNum">     266 </span><span class="lineNoCov">          0 :                                 memReference.push_back(userInput[i]);</span>
+<span class="lineNum">     267 </span>            : 
+<span class="lineNum">     268 </span><span class="lineNoCov">          0 :                         size_t memAddress = stol(memReference, nullptr, 16); // converts the string which is in hex format to an integer</span>
+<span class="lineNum">     269 </span>            : 
+<span class="lineNum">     270 </span><span class="lineNoCov">          0 :                         if (memAddress &gt;= memoryLayout.size())</span>
+<span class="lineNum">     271 </span><span class="lineNoCov">          0 :                                 cerr &lt;&lt; &quot;Error : Memory reference Out of Bounds!&quot; &lt;&lt; endl;</span>
+<span class="lineNum">     272 </span>            :                         else {
+<span class="lineNum">     273 </span><span class="lineNoCov">          0 :                                 int32_t i = (int32_t)stol(memoryLayout[memAddress], nullptr, 16); // converts the string(hex format) to an integer before it is displayed as hex(0x00) using printf</span>
+<span class="lineNum">     274 </span><span class="lineNoCov">          0 :                                 printf(&quot;0x%02x\n&quot;, i);</span>
+<span class="lineNum">     275 </span>            :                         }
+<span class="lineNum">     276 </span>            :                 }
+<span class="lineNum">     277 </span>            :                 else
+<span class="lineNum">     278 </span><span class="lineNoCov">          0 :                         cerr &lt;&lt; &quot;Error: simulation running. Type break to halt.&quot; &lt;&lt; endl;</span>
+<span class="lineNum">     279 </span>            : 
+<span class="lineNum">     280 </span><span class="lineNoCov">          0 :                 systemState = WAIT_STATE;</span>
+<span class="lineNum">     281 </span>            : 
+<span class="lineNum">     282 </span>            :         }
+<span class="lineNum">     283 </span><span class="lineNoCov">          0 :         else if (userInput == &quot;step&quot;) { // executes the current instruction and print the new program counter, or if an error has occurred the error message</span>
+<span class="lineNum">     284 </span>            :                 
+<span class="lineNum">     285 </span><span class="lineNoCov">          0 :                 if (isErrorStatus == false &amp;&amp; isEndOfFile == false &amp;&amp; myMsgQueue.empty()) {</span>
+<span class="lineNum">     286 </span><span class="lineNoCov">          0 :                         systemState = SIMULATING_STATE;</span>
+<span class="lineNum">     287 </span>            :                 }
+<span class="lineNum">     288 </span>            :                 else {
+<span class="lineNum">     289 </span><span class="lineNoCov">          0 :                         if(!myMsgQueue.empty())</span>
+<span class="lineNum">     290 </span><span class="lineNoCov">          0 :                                 cerr &lt;&lt; &quot;Error: simulation running. Type break to halt.&quot; &lt;&lt; endl;</span>
+<span class="lineNum">     291 </span>            : 
+<span class="lineNum">     292 </span><span class="lineNoCov">          0 :                         systemState = WAIT_STATE; // incrementing virtual machine at the end of the .asm file should do nothing</span>
+<span class="lineNum">     293 </span>            :                         //cerr &lt;&lt; &quot;Error : can not proceed through simulation b/c of previous instruction simulated. Or reached the end of the file, enter &lt;quit&gt;.&quot; &lt;&lt; endl;
+<span class="lineNum">     294 </span>            :                 }
+<span class="lineNum">     295 </span>            :                 
+<span class="lineNum">     296 </span>            :         }
+<span class="lineNum">     297 </span><span class="lineNoCov">          0 :         else if (userInput == &quot;status&quot;) { // prints the error status as a message, print nothing if no error has been encountered</span>
+<span class="lineNum">     298 </span><span class="lineNoCov">          0 :                 if (isErrorStatus == true)</span>
+<span class="lineNum">     299 </span><span class="lineNoCov">          0 :                         cerr &lt;&lt; &quot;Error : on previous Instruction simulated. &lt;print $pc&gt; to see where the error occured.&quot; &lt;&lt; endl;</span>
+<span class="lineNum">     300 </span><span class="lineNoCov">          0 :                 systemState = WAIT_STATE;</span>
+<span class="lineNum">     301 </span>            :         }
+<span class="lineNum">     302 </span><span class="lineNoCov">          0 :         else if (userInput == &quot;run&quot;) {</span>
+<span class="lineNum">     303 </span><span class="lineNoCov">          0 :                 runOrBreak_public(&quot;run&quot;);</span>
+<span class="lineNum">     304 </span><span class="lineNoCov">          0 :                 systemState = WAIT_STATE; </span>
+<span class="lineNum">     305 </span>            : 
+<span class="lineNum">     306 </span>            :         }
+<span class="lineNum">     307 </span><span class="lineNoCov">          0 :         else if (userInput == &quot;break&quot;) {</span>
+<span class="lineNum">     308 </span><span class="lineNoCov">          0 :                 runOrBreak_public(&quot;break&quot;);</span>
+<span class="lineNum">     309 </span><span class="lineNoCov">          0 :                 systemState = WAIT_STATE;</span>
+<span class="lineNum">     310 </span>            : 
+<span class="lineNum">     311 </span>            :         }
+<span class="lineNum">     312 </span><span class="lineNoCov">          0 :         else if (userInput == &quot;quit&quot;) {</span>
+<span class="lineNum">     313 </span><span class="lineNoCov">          0 :                 parallelHasNotQuit = false;</span>
+<span class="lineNum">     314 </span><span class="lineNoCov">          0 :                 systemState = QUIT_STATE;</span>
+<span class="lineNum">     315 </span>            :         }
+<span class="lineNum">     316 </span>            :         else {
+<span class="lineNum">     317 </span><span class="lineNoCov">          0 :                 cerr &lt;&lt; &quot;Error : unknown command.&quot; &lt;&lt; endl;</span>
+<span class="lineNum">     318 </span><span class="lineNoCov">          0 :                 systemState = WAIT_STATE;</span>
+<span class="lineNum">     319 </span>            :         }
+<a name="320"><span class="lineNum">     320 </span><span class="lineNoCov">          0 : }</span></a>
+<span class="lineNum">     321 </span>            : 
+<span class="lineNum">     322 </span><span class="lineCov">       1358 : void Simulator::update_simulation()</span>
+<span class="lineNum">     323 </span>            : {
+<span class="lineNum">     324 </span><span class="lineCov">       2716 :         instructionType curInstruction; </span>
+<span class="lineNum">     325 </span><span class="lineCov">       1358 :         size_t curInstructionIndex = PcReg-&gt;second; // This is the index where we are performing the current instruction</span>
+<span class="lineNum">     326 </span><span class="lineCov">       1358 :         curInstruction = programInstructions[curInstructionIndex]; // assigning an instructionType to the instructionType located at the current index</span>
+<span class="lineNum">     327 </span><span class="lineCov">       1358 :         size_t numOfArgs = curInstruction.instructionArgs.size(); // number of arguments in the current instruction</span>
+<span class="lineNum">     328 </span><span class="lineCov">       2716 :         string curOpcode = curInstruction.opcode; // the current opcode</span>
+<span class="lineNum">     329 </span><span class="lineCov">       2716 :         vector&lt;argument&gt; curArgs = curInstruction.instructionArgs; // This is a vector of the actual arguments(registers, immediates, constants, etc.) and its inputValue(ex. REGISTER_IN)</span>
+<span class="lineNum">     330 </span><span class="lineCov">       1358 :         isControlInstr = false;</span>
+<span class="lineNum">     331 </span>            : 
+<span class="lineNum">     332 </span>            : 
+<span class="lineNum">     333 </span><span class="lineCov">       1358 :         if ((numOfArgs == 1) &amp;&amp; (curOpcode == &quot;j&quot; || curOpcode == &quot;nop&quot; || curOpcode == &quot;mfhi&quot; || curOpcode == &quot;mflo&quot;)) {</span>
+<span class="lineNum">     334 </span>            :                 
+<span class="lineNum">     335 </span><span class="lineCov">        588 :                 argument arg1 = curArgs[0];</span>
+<span class="lineNum">     336 </span><span class="lineCov">        294 :                 if (curOpcode == &quot;j&quot;) {</span>
+<span class="lineNum">     337 </span><span class="lineCov">         70 :                         unordered_map&lt;string, LabelInfo&gt;::iterator itLabel = labelsMap.find(arg1.inString); // iterator finds the label it is supposed to jump too</span>
+<span class="lineNum">     338 </span><span class="lineCov">         70 :                         LabelInfo labelInfor = itLabel-&gt;second;</span>
+<span class="lineNum">     339 </span>            : 
+<span class="lineNum">     340 </span><span class="lineCov">         70 :                         if ((itLabel == labelsMap.end()) || ((int32_t)(labelInfor.instructionIndexOrFirstMemAddress) &gt;= (int32_t)programInstructions.size()) )</span>
+<span class="lineNum">     341 </span><span class="lineNoCov">          0 :                                 isErrorStatus = true; // error if any label is unknown or the program counter becomes out-of-bounds</span>
+<span class="lineNum">     342 </span>            :                         else {
+<span class="lineNum">     343 </span><span class="lineCov">         70 :                                 isControlInstr = true;</span>
+<span class="lineNum">     344 </span><span class="lineCov">         70 :                                 PcReg-&gt;second = labelInfor.instructionIndexOrFirstMemAddress;</span>
+<span class="lineNum">     345 </span>            :                         }       
+<span class="lineNum">     346 </span>            :                 }
+<span class="lineNum">     347 </span><span class="lineCov">        224 :                 else if (curOpcode == &quot;nop&quot;) {}// Do nothing because after the update_simulation() I automatically increment the counter</span>
+<span class="lineNum">     348 </span><span class="lineCov">        175 :                 else if (curOpcode == &quot;mfhi&quot; || curOpcode == &quot;mflo&quot;) {</span>
+<span class="lineNum">     349 </span><span class="lineCov">        350 :                         string realReg = determineRegister(arg1.inString);</span>
+<span class="lineNum">     350 </span><span class="lineCov">        175 :                         unordered_map&lt;string, int32_t&gt;::iterator findReg = registersMap.find(realReg);</span>
+<span class="lineNum">     351 </span><span class="lineCov">        350 :                         string tempStr;</span>
+<span class="lineNum">     352 </span><span class="lineCov">        175 :                         if (curOpcode == &quot;mfhi&quot;)</span>
+<span class="lineNum">     353 </span><span class="lineCov">         84 :                                 tempStr = &quot;$hi&quot;;</span>
+<span class="lineNum">     354 </span>            :                         else
+<span class="lineNum">     355 </span><span class="lineCov">         91 :                                 tempStr = &quot;$lo&quot;;</span>
+<span class="lineNum">     356 </span>            : 
+<span class="lineNum">     357 </span><span class="lineCov">        175 :                         unordered_map&lt;string, int32_t&gt;::iterator findhiOrLo = registersMap.find(tempStr);</span>
+<span class="lineNum">     358 </span><span class="lineCov">        175 :                         findReg-&gt;second = findhiOrLo-&gt;second;</span>
+<span class="lineNum">     359 </span>            :                 }
+<span class="lineNum">     360 </span>            : 
+<span class="lineNum">     361 </span>            :         }
+<span class="lineNum">     362 </span><span class="lineCov">       1064 :         else if ((numOfArgs == 2 || numOfArgs == 3) &amp;&amp; (curOpcode == &quot;lw&quot; || curOpcode == &quot;la&quot; || curOpcode == &quot;sw&quot;) ) {</span>
+<span class="lineNum">     363 </span>            : 
+<span class="lineNum">     364 </span><span class="lineCov">        756 :                 string realReg = determineRegister(curArgs[0].inString); // arg1</span>
+<span class="lineNum">     365 </span><span class="lineCov">        756 :                 argument memArg;</span>
+<span class="lineNum">     366 </span><span class="lineCov">        756 :                 argument offsetArg;</span>
+<span class="lineNum">     367 </span><span class="lineCov">        378 :                 if (numOfArgs == 2)</span>
+<span class="lineNum">     368 </span><span class="lineCov">        336 :                         memArg = curArgs[1];</span>
+<span class="lineNum">     369 </span>            :                 else {
+<span class="lineNum">     370 </span><span class="lineCov">         42 :                         offsetArg = curArgs[1];</span>
+<span class="lineNum">     371 </span><span class="lineCov">         42 :                         memArg = curArgs[2];</span>
+<span class="lineNum">     372 </span>            :                 }
+<span class="lineNum">     373 </span><span class="lineCov">        378 :                 unordered_map&lt;string, int32_t&gt;::iterator findReg = registersMap.find(realReg);</span>
+<span class="lineNum">     374 </span>            : 
+<span class="lineNum">     375 </span><span class="lineCov">        378 :                 if (curOpcode == &quot;lw&quot; || curOpcode == &quot;la&quot;) {</span>
+<span class="lineNum">     376 </span><span class="lineCov">        343 :                         if (memArg.inValue == CONSTANT_FIRST_PART_IN) { // Label</span>
+<span class="lineNum">     377 </span><span class="lineCov">        294 :                                 unordered_map&lt;string, LabelInfo&gt;::iterator itLabel = labelsMap.find(memArg.inString);</span>
+<span class="lineNum">     378 </span><span class="lineCov">        294 :                                 LabelInfo labelInfor = itLabel-&gt;second;</span>
+<span class="lineNum">     379 </span><span class="lineCov">        294 :                                 size_t memOrindex = labelInfor.instructionIndexOrFirstMemAddress; // This is either the first memory address for &quot;lw&quot; or the instruction index for &quot;la&quot;</span>
+<span class="lineNum">     380 </span>            : 
+<span class="lineNum">     381 </span><span class="lineCov">        294 :                                 if (numOfArgs == 2) {</span>
+<span class="lineNum">     382 </span><span class="lineCov">        287 :                                         if ((itLabel == labelsMap.end()) || (memOrindex + 3 &gt;= memoryLayout.size()))</span>
+<span class="lineNum">     383 </span><span class="lineNoCov">          0 :                                                 isErrorStatus = true; // error if any label is unknown or the program counter becomes out-of-bounds</span>
+<span class="lineNum">     384 </span>            :                                         else { // Depending on opcode stores in either the memory address or value in the address
+<span class="lineNum">     385 </span><span class="lineCov">        287 :                                                 if (curOpcode == &quot;lw&quot;) {</span>
+<span class="lineNum">     386 </span><span class="lineCov">        546 :                                                         string data32Bits = memoryLayout[memOrindex + 3] + memoryLayout[memOrindex + 2] + memoryLayout[memOrindex + 1] + memoryLayout[memOrindex]; // This wil be used for &quot;lw&quot; storing the 32 bit value in a register</span>
+<span class="lineNum">     387 </span><span class="lineCov">        273 :                                                         findReg-&gt;second = (int32_t)stoll(data32Bits, nullptr, 16);</span>
+<span class="lineNum">     388 </span>            :                                                 }
+<span class="lineNum">     389 </span><span class="lineCov">         14 :                                                 else if(curOpcode == &quot;la&quot;)</span>
+<span class="lineNum">     390 </span><span class="lineCov">         14 :                                                         findReg-&gt;second = (int32_t)memOrindex;</span>
+<span class="lineNum">     391 </span>            :                                         }       
+<span class="lineNum">     392 </span>            :                                 }
+<span class="lineNum">     393 </span>            :                                 else { // In the case below is similar to above except we have an offset which makes the number of arguments 3
+<span class="lineNum">     394 </span><span class="lineCov">          7 :                                         if ((itLabel == labelsMap.end()) || (memOrindex + (int32_t)stoll(offsetArg.inString) + 3 &gt;= memoryLayout.size()) )</span>
+<span class="lineNum">     395 </span><span class="lineNoCov">          0 :                                                 isErrorStatus = true; // error if any label is unknown or the program counter becomes out-of-bounds</span>
+<span class="lineNum">     396 </span>            :                                         else {
+<span class="lineNum">     397 </span><span class="lineCov">          7 :                                                 if (curOpcode == &quot;lw&quot;) {</span>
+<span class="lineNum">     398 </span><span class="lineCov">          7 :                                                         memOrindex += (int32_t)stoll(offsetArg.inString); // Account for the offset in the starting location</span>
+<span class="lineNum">     399 </span><span class="lineCov">         14 :                                                         string data32Bits = memoryLayout[memOrindex + 3] + memoryLayout[memOrindex + 2] + memoryLayout[memOrindex + 1] + memoryLayout[memOrindex]; // This wil be used for &quot;lw&quot; storing the offset  32 bit value in a register</span>
+<span class="lineNum">     400 </span><span class="lineCov">          7 :                                                         findReg-&gt;second = (int32_t)stoll(data32Bits, nullptr, 16);</span>
+<span class="lineNum">     401 </span>            :                                                 }
+<span class="lineNum">     402 </span><span class="lineNoCov">          0 :                                                 else if (curOpcode == &quot;la&quot;)</span>
+<span class="lineNum">     403 </span><span class="lineNoCov">          0 :                                                         findReg-&gt;second = (int32_t)memOrindex + (int32_t)stoll(offsetArg.inString);</span>
+<span class="lineNum">     404 </span>            :                                         }
+<span class="lineNum">     405 </span>            :                                 }
+<span class="lineNum">     406 </span>            :                         }
+<span class="lineNum">     407 </span><span class="lineCov">         49 :                         else if (memArg.inValue == INITALIZED_CONSTANT_IN || memArg.inValue == INTEGER_IN) { // Immediate(constant or integer)</span>
+<span class="lineNum">     408 </span><span class="lineCov">         42 :                                 if (numOfArgs == 2) // &quot;lw&quot; and &quot;la&quot; act the same if they have an immediate, similar to &quot;li&quot;</span>
+<span class="lineNum">     409 </span><span class="lineCov">         14 :                                         findReg-&gt;second = (int32_t)stoll(memArg.inString);</span>
+<span class="lineNum">     410 </span>            :                                 else
+<span class="lineNum">     411 </span><span class="lineCov">          7 :                                         findReg-&gt;second = (int32_t)stoll(memArg.inString) + (int32_t)stoll(offsetArg.inString);</span>
+<span class="lineNum">     412 </span>            :                         }
+<span class="lineNum">     413 </span><span class="lineCov">         28 :                         else if (memArg.inValue == REGISTER_IN) { // Register</span>
+<span class="lineNum">     414 </span><span class="lineCov">         56 :                                 string realReg2 = determineRegister(memArg.inString);</span>
+<span class="lineNum">     415 </span><span class="lineCov">         28 :                                 unordered_map&lt;string, int32_t&gt;::iterator findReg2 = registersMap.find(realReg2);</span>
+<span class="lineNum">     416 </span><span class="lineCov">         28 :                                 int32_t memOrindex = findReg2-&gt;second;</span>
+<span class="lineNum">     417 </span>            :                                 
+<span class="lineNum">     418 </span><span class="lineCov">         28 :                                 if (numOfArgs == 2) {</span>
+<span class="lineNum">     419 </span><span class="lineCov">         14 :                                         if(memOrindex + 3 &gt;= (int32_t)memoryLayout.size())</span>
+<span class="lineNum">     420 </span><span class="lineNoCov">          0 :                                                 isErrorStatus = true; // error program counter becomes out-of-bounds</span>
+<span class="lineNum">     421 </span>            :                                         else {
+<span class="lineNum">     422 </span><span class="lineCov">         14 :                                                 if (curOpcode == &quot;lw&quot;) {</span>
+<span class="lineNum">     423 </span><span class="lineCov">         14 :                                                         string data32Bits = memoryLayout[memOrindex + 3] + memoryLayout[memOrindex + 2] + memoryLayout[memOrindex + 1] + memoryLayout[memOrindex];</span>
+<span class="lineNum">     424 </span><span class="lineCov">          7 :                                                         findReg-&gt;second = (int32_t)stoll(data32Bits, nullptr, 16);</span>
+<span class="lineNum">     425 </span>            :                                                 }
+<span class="lineNum">     426 </span><span class="lineCov">          7 :                                                 else if(curOpcode == &quot;la&quot;)</span>
+<span class="lineNum">     427 </span><span class="lineCov">          7 :                                                         findReg-&gt;second = memOrindex;</span>
+<span class="lineNum">     428 </span>            :                                         }
+<span class="lineNum">     429 </span>            :                                 }
+<span class="lineNum">     430 </span>            :                                 else { // Arguments here is 3 that includes an offset
+<span class="lineNum">     431 </span><span class="lineCov">         14 :                                         int32_t offSet = (int32_t)stoll(offsetArg.inString);</span>
+<span class="lineNum">     432 </span><span class="lineCov">         14 :                                         if ((memOrindex + offSet + 3) &gt;= (int32_t)memoryLayout.size())</span>
+<span class="lineNum">     433 </span><span class="lineNoCov">          0 :                                                 isErrorStatus = true; // error program counter becomes out-of-bounds </span>
+<span class="lineNum">     434 </span>            :                                         else {
+<span class="lineNum">     435 </span><span class="lineCov">         14 :                                                 if (curOpcode == &quot;lw&quot;) {</span>
+<span class="lineNum">     436 </span><span class="lineCov">          7 :                                                         memOrindex += offSet; // Account for the offset in the starting location</span>
+<span class="lineNum">     437 </span><span class="lineCov">         14 :                                                         const string data32Bits = memoryLayout[memOrindex + 3] + memoryLayout[memOrindex + 2] + memoryLayout[memOrindex + 1] + memoryLayout[memOrindex];</span>
+<span class="lineNum">     438 </span><span class="lineCov">          7 :                                                         findReg-&gt;second = (int32_t)stoll(data32Bits, nullptr, 16);</span>
+<span class="lineNum">     439 </span>            :                                                 }
+<span class="lineNum">     440 </span><span class="lineCov">          7 :                                                 else if (curOpcode == &quot;la&quot;)</span>
+<span class="lineNum">     441 </span><span class="lineCov">          7 :                                                         findReg-&gt;second = memOrindex + offSet;</span>
+<span class="lineNum">     442 </span>            :                                         }
+<span class="lineNum">     443 </span>            :                                 }
+<span class="lineNum">     444 </span>            :                         }
+<span class="lineNum">     445 </span>            :                 }
+<span class="lineNum">     446 </span><span class="lineCov">         35 :                 else if (curOpcode == &quot;sw&quot;) {</span>
+<span class="lineNum">     447 </span><span class="lineCov">         70 :                         std::stringstream hexStream; // going to be using a stringstream object that will represent our integer in a string hex format</span>
+<span class="lineNum">     448 </span>            : 
+<span class="lineNum">     449 </span><span class="lineCov">         35 :                         if (memArg.inValue == CONSTANT_FIRST_PART_IN || memArg.inValue == INITALIZED_CONSTANT_IN || memArg.inValue == INTEGER_IN || memArg.inValue == REGISTER_IN) { // Label, Immediate or register</span>
+<span class="lineNum">     450 </span>            :                                 size_t memref; // This is the first memory address to start storing in bytes
+<span class="lineNum">     451 </span><span class="lineCov">         35 :                                 unordered_map&lt;string, LabelInfo&gt;::iterator itLabel; //-&gt; If the input is a label</span>
+<span class="lineNum">     452 </span>            :                                 LabelInfo labelInfor;
+<span class="lineNum">     453 </span><span class="lineCov">         70 :                                 string realReg2; //-&gt; If the input is a register</span>
+<span class="lineNum">     454 </span><span class="lineCov">         35 :                                 unordered_map&lt;string, int32_t&gt;::iterator findReg2;</span>
+<span class="lineNum">     455 </span>            : 
+<span class="lineNum">     456 </span>            : 
+<span class="lineNum">     457 </span><span class="lineCov">         35 :                                 hexStream &lt;&lt; setfill('0') &lt;&lt; setw(8) &lt;&lt; std::hex &lt;&lt; findReg-&gt;second; // This converts the integer into a 8 character long(each 4 bits) hex value in a string stream</span>
+<span class="lineNum">     458 </span><span class="lineCov">         70 :                                 string regValue = hexStream.str(); // converts the stream into an actual string</span>
+<span class="lineNum">     459 </span>            : 
+<span class="lineNum">     460 </span><span class="lineCov">         35 :                                 if (memArg.inValue == CONSTANT_FIRST_PART_IN) {</span>
+<span class="lineNum">     461 </span><span class="lineCov">         14 :                                         itLabel = labelsMap.find(memArg.inString);</span>
+<span class="lineNum">     462 </span><span class="lineCov">         14 :                                         labelInfor = itLabel-&gt;second;</span>
+<span class="lineNum">     463 </span><span class="lineCov">         14 :                                         memref = labelInfor.instructionIndexOrFirstMemAddress; </span>
+<span class="lineNum">     464 </span>            :                                 }
+<span class="lineNum">     465 </span><span class="lineCov">         21 :                                 else if (memArg.inValue == REGISTER_IN) {</span>
+<span class="lineNum">     466 </span><span class="lineCov">         14 :                                         realReg2 = determineRegister(memArg.inString);</span>
+<span class="lineNum">     467 </span><span class="lineCov">         14 :                                         findReg2 = registersMap.find(realReg2);</span>
+<span class="lineNum">     468 </span><span class="lineCov">         14 :                                         memref = findReg2-&gt;second;</span>
+<span class="lineNum">     469 </span>            :                                 }
+<span class="lineNum">     470 </span>            :                                 else // Else the input is an immediate (constant or integer)
+<span class="lineNum">     471 </span><span class="lineCov">          7 :                                         memref = (int32_t)stoll(memArg.inString);</span>
+<span class="lineNum">     472 </span>            : 
+<span class="lineNum">     473 </span>            : 
+<span class="lineNum">     474 </span><span class="lineCov">         35 :                                 if (numOfArgs == 2) {</span>
+<span class="lineNum">     475 </span><span class="lineCov">         21 :                                         if ((memArg.inValue == CONSTANT_FIRST_PART_IN &amp;&amp; itLabel == labelsMap.end()) || (memref + 3 &gt;= memoryLayout.size()) )</span>
+<span class="lineNum">     476 </span><span class="lineNoCov">          0 :                                                 isErrorStatus = true; // error if any label is unknown or the program counter becomes out-of-bounds</span>
+<span class="lineNum">     477 </span>            :                                         else {
+<span class="lineNum">     478 </span><span class="lineCov">         21 :                                                 memoryLayout[memref + 3] = regValue.substr(0, 2); // Storing the value in LSB</span>
+<span class="lineNum">     479 </span><span class="lineCov">         21 :                                                 memoryLayout[memref + 2] = regValue.substr(2, 2);</span>
+<span class="lineNum">     480 </span><span class="lineCov">         21 :                                                 memoryLayout[memref + 1] = regValue.substr(4, 2);</span>
+<span class="lineNum">     481 </span><span class="lineCov">         21 :                                                 memoryLayout[memref] = regValue.substr(6, 2);</span>
+<span class="lineNum">     482 </span>            :                                         }
+<span class="lineNum">     483 </span>            :                                 }
+<span class="lineNum">     484 </span>            :                                 else { // In the case below is similar to above except we have an offset which makes the number of arguments 3
+<span class="lineNum">     485 </span><span class="lineCov">         14 :                                         if ((memArg.inValue == CONSTANT_FIRST_PART_IN &amp;&amp; itLabel == labelsMap.end()) || (memref + (int32_t)stol(offsetArg.inString) + 3 &gt;= memoryLayout.size()) )</span>
+<span class="lineNum">     486 </span><span class="lineNoCov">          0 :                                                 isErrorStatus = true; // error if any label is unknown or the program counter becomes out-of-bounds</span>
+<span class="lineNum">     487 </span>            :                                         else {
+<span class="lineNum">     488 </span><span class="lineCov">         14 :                                                 memref += (int32_t)stoll(offsetArg.inString);</span>
+<span class="lineNum">     489 </span><span class="lineCov">         14 :                                                 memoryLayout[memref + 3] = regValue.substr(0, 2); // Storing the value in LSB</span>
+<span class="lineNum">     490 </span><span class="lineCov">         14 :                                                 memoryLayout[memref + 2] = regValue.substr(2, 2);</span>
+<span class="lineNum">     491 </span><span class="lineCov">         14 :                                                 memoryLayout[memref + 1] = regValue.substr(4, 2);</span>
+<span class="lineNum">     492 </span><span class="lineCov">         14 :                                                 memoryLayout[memref] = regValue.substr(6, 2);</span>
+<span class="lineNum">     493 </span>            :                                         }
+<span class="lineNum">     494 </span>            :                                 }
+<span class="lineNum">     495 </span>            :                         }
+<span class="lineNum">     496 </span>            :                 }
+<span class="lineNum">     497 </span>            : 
+<span class="lineNum">     498 </span>            :         }
+<span class="lineNum">     499 </span><span class="lineCov">       1218 :         else if ((numOfArgs == 2) &amp;&amp; (curOpcode == &quot;li&quot; || curOpcode == &quot;move&quot; || curOpcode == &quot;not&quot; || curOpcode == &quot;mult&quot; ||</span>
+<span class="lineNum">     500 </span><span class="lineCov">        133 :                                                                   curOpcode == &quot;multu&quot; || curOpcode == &quot;div&quot; || curOpcode == &quot;divu&quot;) ) {</span>
+<span class="lineNum">     501 </span>            : 
+<span class="lineNum">     502 </span><span class="lineCov">        924 :                 string realReg = determineRegister(curArgs[0].inString); // arg1</span>
+<span class="lineNum">     503 </span><span class="lineCov">        924 :                 argument arg2 = curArgs[1];</span>
+<span class="lineNum">     504 </span><span class="lineCov">        462 :                 unordered_map&lt;string, int32_t&gt;::iterator findReg = registersMap.find(realReg);</span>
+<span class="lineNum">     505 </span>            : 
+<span class="lineNum">     506 </span><span class="lineCov">        462 :                 if (curOpcode == &quot;li&quot;) {</span>
+<span class="lineNum">     507 </span><span class="lineCov">        315 :                         findReg-&gt;second = (int32_t)(stoll(arg2.inString));</span>
+<span class="lineNum">     508 </span>            :                 }
+<span class="lineNum">     509 </span><span class="lineCov">        147 :                 else if (curOpcode == &quot;move&quot;) {</span>
+<span class="lineNum">     510 </span><span class="lineCov">         14 :                         string realReg2 = determineRegister(arg2.inString);</span>
+<span class="lineNum">     511 </span><span class="lineCov">          7 :                         unordered_map&lt;string, int32_t&gt;::iterator findReg2 = registersMap.find(realReg2);</span>
+<span class="lineNum">     512 </span>            : 
+<span class="lineNum">     513 </span><span class="lineCov">          7 :                         int32_t temp = findReg-&gt;second;</span>
+<span class="lineNum">     514 </span><span class="lineCov">          7 :                         findReg-&gt;second = findReg2-&gt;second;</span>
+<span class="lineNum">     515 </span><span class="lineCov">          7 :                         findReg2-&gt;second = temp;</span>
+<span class="lineNum">     516 </span>            :                 }
+<span class="lineNum">     517 </span><span class="lineCov">        140 :                 else if (curOpcode == &quot;mult&quot; || curOpcode == &quot;multu&quot; || curOpcode == &quot;div&quot; || curOpcode == &quot;divu&quot;) {</span>
+<span class="lineNum">     518 </span><span class="lineCov">        238 :                         string realReg2 = determineRegister(arg2.inString);</span>
+<span class="lineNum">     519 </span><span class="lineCov">        119 :                         unordered_map&lt;string, int32_t&gt;::iterator findReg2 = registersMap.find(realReg2); // locate the real register for arg2</span>
+<span class="lineNum">     520 </span>            : 
+<span class="lineNum">     521 </span><span class="lineCov">        119 :                         unordered_map&lt;string, int32_t&gt;::iterator findhi = registersMap.find(&quot;$hi&quot;); // locate the the hi and lo registers</span>
+<span class="lineNum">     522 </span><span class="lineCov">        119 :                         unordered_map&lt;string, int32_t&gt;::iterator findlo = registersMap.find(&quot;$lo&quot;);</span>
+<span class="lineNum">     523 </span>            : 
+<span class="lineNum">     524 </span><span class="lineCov">        119 :                         if (curOpcode == &quot;mult&quot;) {</span>
+<span class="lineNum">     525 </span>            :                                 uint32_t reg1, reg2;
+<span class="lineNum">     526 </span><span class="lineCov">         49 :                                 bitset&lt;32&gt; reg1BitSet(findReg-&gt;second);</span>
+<span class="lineNum">     527 </span><span class="lineCov">         49 :                                 bitset&lt;32&gt; reg2BitSet(findReg2-&gt;second);</span>
+<span class="lineNum">     528 </span><span class="lineCov">         49 :                                 if (reg1BitSet[31] == 1) // 2s complement</span>
+<span class="lineNum">     529 </span><span class="lineCov">          7 :                                         reg1 = (uint32_t)(~(findReg-&gt;second)) + 1;</span>
+<span class="lineNum">     530 </span>            :                                 else 
+<span class="lineNum">     531 </span><span class="lineCov">         42 :                                         reg1 = (uint32_t)(findReg-&gt;second);</span>
+<span class="lineNum">     532 </span>            : 
+<span class="lineNum">     533 </span><span class="lineCov">         49 :                                 if (reg2BitSet[31] == 1) // 2s complement</span>
+<span class="lineNum">     534 </span><span class="lineCov">          7 :                                         reg2 = (uint32_t)(~(findReg2-&gt;second)) + 1;</span>
+<span class="lineNum">     535 </span>            :                                 else
+<span class="lineNum">     536 </span><span class="lineCov">         42 :                                         reg2 = (uint32_t)(findReg2-&gt;second);</span>
+<span class="lineNum">     537 </span>            : 
+<span class="lineNum">     538 </span>            : 
+<span class="lineNum">     539 </span><span class="lineCov">         49 :                                 uint64_t multipliedValue = (uint64_t)(reg1)*(uint64_t)(reg2);</span>
+<span class="lineNum">     540 </span>            :                                 uint32_t lo, hi;
+<span class="lineNum">     541 </span><span class="lineCov">         49 :                                 if (reg1BitSet[31] != reg2BitSet[31])</span>
+<span class="lineNum">     542 </span><span class="lineCov">         14 :                                         multipliedValue = (uint64_t)(~(multipliedValue)) + 1;</span>
+<span class="lineNum">     543 </span>            : 
+<span class="lineNum">     544 </span>            :                                         
+<span class="lineNum">     545 </span><span class="lineCov">         49 :                                 hi = (uint32_t)((multipliedValue &amp; 0xffffffff00000000) &gt;&gt; 32);</span>
+<span class="lineNum">     546 </span><span class="lineCov">         49 :                                 lo = (uint32_t)(multipliedValue &amp; 0x00000000ffffffff);</span>
+<span class="lineNum">     547 </span><span class="lineCov">         49 :                                 findlo-&gt;second = lo;</span>
+<span class="lineNum">     548 </span><span class="lineCov">         49 :                                 findhi-&gt;second = hi;</span>
+<span class="lineNum">     549 </span>            :                         }
+<span class="lineNum">     550 </span><span class="lineCov">         70 :                         else if (curOpcode == &quot;multu&quot;) {</span>
+<span class="lineNum">     551 </span><span class="lineCov">          7 :                                 uint64_t multipliedValue = (uint64_t)(findReg-&gt;second)*(uint64_t)(findReg2-&gt;second);</span>
+<span class="lineNum">     552 </span>            :                                 uint32_t hi, lo;
+<span class="lineNum">     553 </span>            : 
+<span class="lineNum">     554 </span><span class="lineCov">          7 :                                 hi = (uint32_t)((multipliedValue &amp; 0xffffffff00000000) &gt;&gt; 32);</span>
+<span class="lineNum">     555 </span><span class="lineCov">          7 :                                 lo = (uint32_t)(multipliedValue &amp; 0x00000000ffffffff);</span>
+<span class="lineNum">     556 </span>            : 
+<span class="lineNum">     557 </span><span class="lineCov">          7 :                                 findlo-&gt;second = lo;</span>
+<span class="lineNum">     558 </span><span class="lineCov">          7 :                                 findhi-&gt;second = hi;</span>
+<span class="lineNum">     559 </span>            :                         }
+<span class="lineNum">     560 </span><span class="lineCov">         63 :                         else if (curOpcode == &quot;div&quot;) {</span>
+<span class="lineNum">     561 </span><span class="lineCov">         56 :                                 if (findReg2-&gt;second != 0) { // Undefined when attempting to divide by zero</span>
+<span class="lineNum">     562 </span>            :                                         uint32_t reg1, reg2;
+<span class="lineNum">     563 </span><span class="lineCov">         42 :                                         bitset&lt;32&gt; reg1BitSet(findReg-&gt;second);</span>
+<span class="lineNum">     564 </span><span class="lineCov">         42 :                                         bitset&lt;32&gt; reg2BitSet(findReg2-&gt;second);</span>
+<span class="lineNum">     565 </span><span class="lineCov">         42 :                                         if (reg1BitSet[31] == 1) // 2s complement</span>
+<span class="lineNum">     566 </span><span class="lineCov">          7 :                                                 reg1 = (uint32_t)(~(findReg-&gt;second)) + 1;</span>
+<span class="lineNum">     567 </span>            :                                         else
+<span class="lineNum">     568 </span><span class="lineCov">         35 :                                                 reg1 = (uint32_t)(findReg-&gt;second);</span>
+<span class="lineNum">     569 </span>            : 
+<span class="lineNum">     570 </span><span class="lineCov">         42 :                                         if (reg2BitSet[31] == 1) // 2s complement</span>
+<span class="lineNum">     571 </span><span class="lineCov">          7 :                                                 reg2 = (uint32_t)(~(findReg2-&gt;second)) + 1;</span>
+<span class="lineNum">     572 </span>            :                                         else
+<span class="lineNum">     573 </span><span class="lineCov">         35 :                                                 reg2 = (uint32_t)(findReg2-&gt;second);</span>
+<span class="lineNum">     574 </span>            : 
+<span class="lineNum">     575 </span><span class="lineCov">         42 :                                         uint32_t divideValue = (uint32_t)(reg1)/(uint32_t)(reg2);</span>
+<span class="lineNum">     576 </span><span class="lineCov">         42 :                                         if (reg1BitSet[31] != reg2BitSet[31])</span>
+<span class="lineNum">     577 </span><span class="lineCov">         14 :                                                 divideValue = (uint32_t)(~(divideValue)) + 1;</span>
+<span class="lineNum">     578 </span>            : 
+<span class="lineNum">     579 </span><span class="lineCov">         42 :                                         int32_t divRem = (findReg-&gt;second) % (findReg2-&gt;second);</span>
+<span class="lineNum">     580 </span><span class="lineCov">         42 :                                         if (divRem &lt; 0)</span>
+<span class="lineNum">     581 </span><span class="lineNoCov">          0 :                                                 divRem *= -1;</span>
+<span class="lineNum">     582 </span>            : 
+<span class="lineNum">     583 </span><span class="lineCov">         42 :                                         findlo-&gt;second = divideValue;</span>
+<span class="lineNum">     584 </span><span class="lineCov">         42 :                                         findhi-&gt;second = divRem;</span>
+<span class="lineNum">     585 </span>            :                                 }
+<span class="lineNum">     586 </span>            :                         }
+<span class="lineNum">     587 </span><span class="lineCov">          7 :                         else if (curOpcode == &quot;divu&quot;) {</span>
+<span class="lineNum">     588 </span><span class="lineCov">          7 :                                 if (findReg2-&gt;second != 0) { // Undefined when attempting to divide by zero</span>
+<span class="lineNum">     589 </span><span class="lineCov">          7 :                                         uint32_t divideValue = (uint32_t)(findReg-&gt;second) / (uint32_t)(findReg2-&gt;second);</span>
+<span class="lineNum">     590 </span><span class="lineCov">          7 :                                         uint32_t divRem = (uint32_t)(findReg-&gt;second) % (uint32_t)(findReg2-&gt;second);</span>
+<span class="lineNum">     591 </span>            : 
+<span class="lineNum">     592 </span><span class="lineCov">          7 :                                         findlo-&gt;second = divideValue;</span>
+<span class="lineNum">     593 </span><span class="lineCov">          7 :                                         findhi-&gt;second = divRem;</span>
+<span class="lineNum">     594 </span>            :                                 }
+<span class="lineNum">     595 </span>            :                         }
+<span class="lineNum">     596 </span>            :                 }
+<span class="lineNum">     597 </span><span class="lineCov">         21 :                 else if (curOpcode == &quot;not&quot;) {</span>
+<span class="lineNum">     598 </span><span class="lineCov">         21 :                         if (arg2.inValue == REGISTER_IN) {</span>
+<span class="lineNum">     599 </span><span class="lineCov">         28 :                                 string realReg2 = determineRegister(arg2.inString);</span>
+<span class="lineNum">     600 </span><span class="lineCov">         14 :                                 unordered_map&lt;string, int32_t&gt;::iterator findReg2 = registersMap.find(realReg2); // locate the real register for arg2</span>
+<span class="lineNum">     601 </span>            :                                 
+<span class="lineNum">     602 </span><span class="lineCov">         14 :                                 findReg-&gt;second = ~(findReg2-&gt;second);</span>
+<span class="lineNum">     603 </span>            :                         }
+<span class="lineNum">     604 </span><span class="lineCov">          7 :                         else if (arg2.inValue == INITALIZED_CONSTANT_IN || arg2.inValue == INTEGER_IN)</span>
+<span class="lineNum">     605 </span><span class="lineCov">          7 :                                 findReg-&gt;second = ~((int32_t)stoll(arg2.inString));</span>
+<span class="lineNum">     606 </span>            :                 }
+<span class="lineNum">     607 </span>            : 
+<span class="lineNum">     608 </span>            :         }                                                        // lw, la, sw are technically 2 argument opcodes but is 3 when there is an offset
+<span class="lineNum">     609 </span><span class="lineCov">        616 :         else if ((numOfArgs == 3) &amp;&amp; (curOpcode == &quot;and&quot; || curOpcode == &quot;nor&quot; || curOpcode == &quot;or&quot; || curOpcode == &quot;xor&quot; || </span>
+<span class="lineNum">     610 </span><span class="lineCov">        392 :                                                                   curOpcode == &quot;add&quot; || curOpcode == &quot;addu&quot; || curOpcode == &quot;sub&quot; || curOpcode == &quot;subu&quot; || </span>
+<span class="lineNum">     611 </span><span class="lineCov">        196 :                                                                   curOpcode == &quot;beq&quot; || curOpcode == &quot;bne&quot; || curOpcode == &quot;blt&quot; ||</span>
+<span class="lineNum">     612 </span><span class="lineCov">         70 :                                                                   curOpcode == &quot;ble&quot; || curOpcode == &quot;bgt&quot; || curOpcode == &quot;bge&quot;) ) {</span>
+<span class="lineNum">     613 </span>            : 
+<span class="lineNum">     614 </span><span class="lineCov">        448 :                 string realReg = determineRegister(curArgs[0].inString); // arg1</span>
+<span class="lineNum">     615 </span><span class="lineCov">        448 :                 argument arg2 = curArgs[1];</span>
+<span class="lineNum">     616 </span><span class="lineCov">        448 :                 argument arg3 = curArgs[2];</span>
+<span class="lineNum">     617 </span><span class="lineCov">        224 :                 unordered_map&lt;string, int32_t&gt;::iterator findReg = registersMap.find(realReg);</span>
+<span class="lineNum">     618 </span>            : 
+<span class="lineNum">     619 </span><span class="lineCov">        826 :                 if (curOpcode == &quot;and&quot; || curOpcode == &quot;nor&quot; || curOpcode == &quot;or&quot; || curOpcode == &quot;xor&quot; ||</span>
+<span class="lineNum">     620 </span><span class="lineCov">        532 :                                  curOpcode == &quot;add&quot; || curOpcode == &quot;addu&quot; || curOpcode == &quot;sub&quot; || curOpcode == &quot;subu&quot;) {</span>
+<span class="lineNum">     621 </span>            : 
+<span class="lineNum">     622 </span><span class="lineCov">        280 :                         string realReg2 = determineRegister(arg2.inString);</span>
+<span class="lineNum">     623 </span><span class="lineCov">        140 :                         unordered_map&lt;string, int32_t&gt;::iterator findReg2 = registersMap.find(realReg2); // locate the real register for arg2</span>
+<span class="lineNum">     624 </span>            :                         int32_t argument3;
+<span class="lineNum">     625 </span><span class="lineCov">        140 :                         if (arg3.inValue == REGISTER_IN) {</span>
+<span class="lineNum">     626 </span><span class="lineCov">        126 :                                 string realReg3 = determineRegister(arg3.inString);</span>
+<span class="lineNum">     627 </span><span class="lineCov">         63 :                                 unordered_map&lt;string, int32_t&gt;::iterator findReg3 = registersMap.find(realReg3); // locate the real register for arg3</span>
+<span class="lineNum">     628 </span><span class="lineCov">         63 :                                 argument3 = findReg3-&gt;second;</span>
+<span class="lineNum">     629 </span>            :                         }
+<span class="lineNum">     630 </span><span class="lineCov">         77 :                         else if (arg3.inValue == INITALIZED_CONSTANT_IN || arg3.inValue == INTEGER_IN) {</span>
+<span class="lineNum">     631 </span><span class="lineCov">         77 :                                 argument3 = (int32_t)stoll(arg3.inString);</span>
+<span class="lineNum">     632 </span>            :                         }
+<span class="lineNum">     633 </span><span class="lineCov">        140 :                         int32_t i32min = numeric_limits&lt;int32_t&gt;::min();</span>
+<span class="lineNum">     634 </span><span class="lineCov">        140 :                         int32_t i32max = numeric_limits&lt;int32_t&gt;::max();</span>
+<span class="lineNum">     635 </span>            : 
+<span class="lineNum">     636 </span>            : 
+<span class="lineNum">     637 </span><span class="lineCov">        140 :                         if (curOpcode == &quot;and&quot;)</span>
+<span class="lineNum">     638 </span><span class="lineCov">         14 :                                 findReg-&gt;second = (findReg2-&gt;second) &amp; argument3;</span>
+<span class="lineNum">     639 </span><span class="lineCov">        126 :                         else if (curOpcode == &quot;nor&quot;)</span>
+<span class="lineNum">     640 </span><span class="lineCov">         14 :                                 findReg-&gt;second = ~((findReg2-&gt;second) | argument3);</span>
+<span class="lineNum">     641 </span><span class="lineCov">        112 :                         else if (curOpcode == &quot;or&quot;)</span>
+<span class="lineNum">     642 </span><span class="lineCov">         14 :                                 findReg-&gt;second = (findReg2-&gt;second) | argument3;</span>
+<span class="lineNum">     643 </span><span class="lineCov">         98 :                         else if (curOpcode == &quot;xor&quot;)</span>
+<span class="lineNum">     644 </span><span class="lineCov">         14 :                                 findReg-&gt;second = (findReg2-&gt;second) ^ argument3;</span>
+<span class="lineNum">     645 </span><span class="lineCov">         84 :                         else if (curOpcode == &quot;add&quot;) {</span>
+<span class="lineNum">     646 </span><span class="lineCov">         28 :                                 if ((findReg2-&gt;second + argument3 &lt; i32min) || (findReg2-&gt;second + argument3 &gt; i32max) )//arithmetic error occurs on 2-s complement overflow with no change to the registers.</span>
+<span class="lineNum">     647 </span><span class="lineNoCov">          0 :                                         isErrorStatus = true;</span>
+<span class="lineNum">     648 </span>            :                                 else
+<span class="lineNum">     649 </span><span class="lineCov">         28 :                                         findReg-&gt;second = findReg2-&gt;second + argument3;</span>
+<span class="lineNum">     650 </span>            :                         }
+<span class="lineNum">     651 </span><span class="lineCov">         56 :                         else if (curOpcode == &quot;addu&quot;) </span>
+<span class="lineNum">     652 </span><span class="lineCov">         14 :                                 findReg-&gt;second = (uint32_t)(findReg2-&gt;second + argument3);</span>
+<span class="lineNum">     653 </span><span class="lineCov">         42 :                         else if (curOpcode == &quot;sub&quot;) {</span>
+<span class="lineNum">     654 </span><span class="lineCov">         21 :                                 if ((findReg2-&gt;second - argument3 &lt; i32min) || (findReg2-&gt;second - argument3 &gt; i32max) )//arithmetic error occurs on 2-s complement overflow with no change to the registers.</span>
+<span class="lineNum">     655 </span><span class="lineNoCov">          0 :                                         isErrorStatus = true;</span>
+<span class="lineNum">     656 </span>            :                                 else
+<span class="lineNum">     657 </span><span class="lineCov">         21 :                                         findReg-&gt;second = findReg2-&gt;second - argument3;</span>
+<span class="lineNum">     658 </span>            :                         }
+<span class="lineNum">     659 </span><span class="lineCov">         21 :                         else if (curOpcode == &quot;subu&quot;) </span>
+<span class="lineNum">     660 </span><span class="lineCov">         21 :                                 findReg-&gt;second = (uint32_t)(findReg2-&gt;second - argument3);</span>
+<span class="lineNum">     661 </span>            :                 }
+<span class="lineNum">     662 </span><span class="lineCov">         84 :                 else if (curOpcode == &quot;beq&quot; || curOpcode == &quot;bne&quot; || curOpcode == &quot;blt&quot; || curOpcode == &quot;ble&quot; || curOpcode == &quot;bgt&quot; || curOpcode == &quot;bge&quot;) {</span>
+<span class="lineNum">     663 </span><span class="lineCov">         84 :                         unordered_map&lt;string, LabelInfo&gt;::iterator itLabel = labelsMap.find(arg3.inString); // iterator finds the label it is supposed to branch to</span>
+<span class="lineNum">     664 </span><span class="lineCov">         84 :                         LabelInfo labelInfor = itLabel-&gt;second;</span>
+<span class="lineNum">     665 </span>            :                         int32_t argument2;
+<span class="lineNum">     666 </span><span class="lineCov">         84 :                         if (arg2.inValue == REGISTER_IN) {</span>
+<span class="lineNum">     667 </span><span class="lineCov">        168 :                                 string realReg2 = determineRegister(arg2.inString);</span>
+<span class="lineNum">     668 </span><span class="lineCov">         84 :                                 unordered_map&lt;string, int32_t&gt;::iterator findReg2 = registersMap.find(realReg2); // locate the real register for arg2</span>
+<span class="lineNum">     669 </span><span class="lineCov">         84 :                                 argument2 = findReg2-&gt;second;</span>
+<span class="lineNum">     670 </span>            :                         }
+<span class="lineNum">     671 </span><span class="lineNoCov">          0 :                         else if (arg2.inValue == INITALIZED_CONSTANT_IN || arg2.inValue == INTEGER_IN) {</span>
+<span class="lineNum">     672 </span><span class="lineNoCov">          0 :                                 argument2 = (int32_t)stoll(arg2.inString);</span>
+<span class="lineNum">     673 </span>            :                         }
+<span class="lineNum">     674 </span>            :                         
+<span class="lineNum">     675 </span>            : 
+<span class="lineNum">     676 </span><span class="lineCov">         84 :                         if ((itLabel == labelsMap.end()) || ((int32_t)(labelInfor.instructionIndexOrFirstMemAddress) &gt;= (int32_t)programInstructions.size()))</span>
+<span class="lineNum">     677 </span><span class="lineNoCov">          0 :                                 isErrorStatus = true; // error if any label is unknown or the program counter becomes out-of-bounds</span>
+<span class="lineNum">     678 </span>            :                         else {
+<span class="lineNum">     679 </span><span class="lineCov">         84 :                                 isControlInstr = true;</span>
+<span class="lineNum">     680 </span><span class="lineCov">        252 :                                 if ((curOpcode == &quot;beq&quot; &amp;&amp; argument2 == findReg-&gt;second) || (curOpcode == &quot;bne&quot; &amp;&amp; argument2 != findReg-&gt;second) ||</span>
+<span class="lineNum">     681 </span><span class="lineCov">        140 :                                         (curOpcode == &quot;blt&quot; &amp;&amp; findReg-&gt;second &lt; argument2) || (curOpcode == &quot;ble&quot; &amp;&amp; findReg-&gt;second &lt;= argument2) ||</span>
+<span class="lineNum">     682 </span><span class="lineCov">        154 :                                         (curOpcode == &quot;bgt&quot; &amp;&amp; findReg-&gt;second &gt; argument2) || (curOpcode == &quot;bge&quot; &amp;&amp; findReg-&gt;second &gt;= argument2)) {</span>
+<span class="lineNum">     683 </span>            : 
+<span class="lineNum">     684 </span><span class="lineCov">         42 :                                         PcReg-&gt;second = labelInfor.instructionIndexOrFirstMemAddress;</span>
+<span class="lineNum">     685 </span>            :                                 }
+<span class="lineNum">     686 </span>            :                                 else
+<span class="lineNum">     687 </span><span class="lineCov">         42 :                                         isControlInstr = false;</span>
+<span class="lineNum">     688 </span>            :                         }
+<span class="lineNum">     689 </span>            :                 }
+<span class="lineNum">     690 </span>            :                 
+<span class="lineNum">     691 </span>            :         }
+<span class="lineNum">     692 </span>            :         else // not a valid opcode with the specifed arguments for the simulator
+<span class="lineNum">     693 </span><span class="lineNoCov">          0 :                 isErrorStatus = true;</span>
+<a name="694"><span class="lineNum">     694 </span>            : </a>
+<span class="lineNum">     695 </span>            : 
+<span class="lineNum">     696 </span><span class="lineCov">       1400 : }</span>
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.12</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>
